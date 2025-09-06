@@ -6,18 +6,23 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Clock, Users, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import { useCreateSinglePlan } from "@/hooks/use-api";
+import { format } from "date-fns";
 
 const SingleDestination = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { mutate: createPlan, isPending } = useCreateSinglePlan();
   
   // 基础规划信息
   const [commonData, setCommonData] = useState<CommonPlanningData>({
     planTitle: "",
     departureDate: undefined,
     returnDate: undefined,
-    primaryTransport: "",
+    primaryTransport: "自驾",
   });
 
   // 单一目的地特有信息
@@ -30,22 +35,65 @@ const SingleDestination = () => {
     accommodationLevel: 3,
     activityTypes: [],
     scenicTypes: [],
-    travelStyle: "",
-    budgetType: "",
+    travelStyle: "平衡型",
+    budgetType: "性价比优先",
     budgetRange: "",
     dietaryRestrictions: "",
-    travelType: "",
+    travelType: "独行",
     specialRequirements: "",
   });
 
   const handlePlanGenerate = () => {
-    const planData = {
-      type: "single-destination",
-      common: commonData,
-      specific: { destination, startPoint },
-      preferences
+    // 验证必填字段
+    if (!destination || !startPoint || !commonData.departureDate || !commonData.returnDate) {
+      toast({
+        title: "信息不完整",
+        description: "请填写所有必填字段。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 构造请求数据
+    const requestData = {
+      title: commonData.planTitle || `前往${destination}的旅行计划`,
+      source: startPoint,
+      target: destination,
+      departure_date: commonData.departureDate ? format(commonData.departureDate, "yyyy-MM-dd") : "",
+      return_date: commonData.returnDate ? format(commonData.returnDate, "yyyy-MM-dd") : "",
+      group_size: preferences.travelType === "家庭" ? 4 : 
+                  preferences.travelType === "朋友" ? 3 : 
+                  preferences.travelType === "情侣" ? 2 : 1,
+      transport_mode: commonData.primaryTransport,
+      preferred_transport_modes: preferences.transportMethods,
+      accommodation_level: preferences.accommodationLevel,
+      activity_preferences: preferences.activityTypes,
+      attraction_categories: preferences.scenicTypes,
+      travel_style: preferences.travelStyle,
+      budget_flexibility: preferences.budgetType,
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      group_travel_preference: preferences.travelType,
+      custom_preferences: preferences.specialRequirements,
     };
-    console.log("生成单一目的地规划:", planData);
+
+    // 调用API创建规划任务
+    createPlan(requestData, {
+      onSuccess: (taskId) => {
+        toast({
+          title: "规划任务已提交",
+          description: "正在生成您的旅行计划，请稍候查看结果。",
+        });
+        // 跳转到结果页面
+        navigate(`/plan-result/single/${taskId}`);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "提交失败",
+          description: error.message || "无法提交规划请求，请稍后重试。",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   return (
@@ -90,7 +138,7 @@ const SingleDestination = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="startPoint">出发地</Label>
+                  <Label htmlFor="startPoint">出发地 *</Label>
                   <Input
                     id="startPoint"
                     placeholder="输入出发城市"
@@ -101,7 +149,7 @@ const SingleDestination = () => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="destination">目的地</Label>
+                  <Label htmlFor="destination">目的地 *</Label>
                   <Input
                     id="destination"
                     placeholder="输入你想去的城市或景点"
@@ -124,10 +172,10 @@ const SingleDestination = () => {
               className="w-full" 
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!destination || !startPoint || !commonData.departureDate}
+              disabled={!destination || !startPoint || !commonData.departureDate || !commonData.returnDate || isPending}
             >
               <Send className="w-4 h-4 mr-2" />
-              生成专属旅游方案
+              {isPending ? "生成中..." : "生成专属旅游方案"}
             </Button>
           </div>
 

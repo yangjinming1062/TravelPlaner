@@ -15,25 +15,32 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Route, MapPin, Clock, Send, Navigation } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import { useCreateRoutePlan } from "@/hooks/use-api";
+import { format } from "date-fns";
 
 const RoutePlanning = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { mutate: createPlan, isPending } = useCreateRoutePlan();
   
   // 基础规划信息
   const [commonData, setCommonData] = useState<CommonPlanningData>({
     planTitle: "",
     departureDate: undefined,
     returnDate: undefined,
-    primaryTransport: "",
+    primaryTransport: "自驾",
   });
 
   // 沿途游玩特有信息
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
-  const [routePreference, setRoutePreference] = useState("");
-  const [maxDetourDistance, setMaxDetourDistance] = useState([50]);
+  const [maxStopovers, setMaxStopovers] = useState(3);
+  const [maxStopoverDuration, setMaxStopoverDuration] = useState(2);
+  const [routePreference, setRoutePreference] = useState("平衡");
+  const [maxDetourDistance, setMaxDetourDistance] = useState(100);
   const [preferredStopTypes, setPreferredStopTypes] = useState<string[]>([]);
 
   // 偏好设置
@@ -42,23 +49,23 @@ const RoutePlanning = () => {
     accommodationLevel: 3,
     activityTypes: [],
     scenicTypes: [],
-    travelStyle: "",
-    budgetType: "",
+    travelStyle: "平衡型",
+    budgetType: "性价比优先",
     budgetRange: "",
     dietaryRestrictions: "",
-    travelType: "",
+    travelType: "独行",
     specialRequirements: "",
   });
 
   const stopTypeOptions = [
-    { id: "historical", label: "历史古迹" },
-    { id: "natural", label: "自然景观" },
-    { id: "food", label: "美食体验" },
-    { id: "cultural", label: "文化场所" },
-    { id: "shopping", label: "购物中心" },
-    { id: "entertainment", label: "娱乐设施" },
-    { id: "spa", label: "温泉度假" },
-    { id: "outdoor", label: "户外活动" },
+    { id: "历史古迹", label: "历史古迹" },
+    { id: "自然景观", label: "自然景观" },
+    { id: "美食体验", label: "美食体验" },
+    { id: "文化场所", label: "文化场所" },
+    { id: "购物中心", label: "购物中心" },
+    { id: "娱乐设施", label: "娱乐设施" },
+    { id: "温泉度假", label: "温泉度假" },
+    { id: "户外活动", label: "户外活动" },
   ];
 
   const toggleStopType = (type: string) => {
@@ -70,19 +77,61 @@ const RoutePlanning = () => {
   };
 
   const handlePlanGenerate = () => {
-    const planData = {
-      type: "route-planning",
-      common: commonData,
-      specific: { 
-        startPoint, 
-        endPoint, 
-        routePreference, 
-        maxDetourDistance: maxDetourDistance[0],
-        preferredStopTypes 
-      },
-      preferences
+    // 验证必填字段
+    if (!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate) {
+      toast({
+        title: "信息不完整",
+        description: "请填写所有必填字段。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 构造请求数据
+    const requestData = {
+      title: commonData.planTitle || `从${startPoint}到${endPoint}的沿途游玩计划`,
+      source: startPoint,
+      target: endPoint,
+      departure_date: commonData.departureDate ? format(commonData.departureDate, "yyyy-MM-dd") : "",
+      return_date: commonData.returnDate ? format(commonData.returnDate, "yyyy-MM-dd") : "",
+      group_size: preferences.travelType === "家庭" ? 4 : 
+                  preferences.travelType === "朋友" ? 3 : 
+                  preferences.travelType === "情侣" ? 2 : 1,
+      transport_mode: commonData.primaryTransport,
+      max_stopovers: maxStopovers,
+      max_stopover_duration: maxStopoverDuration,
+      route_preference: routePreference,
+      max_detour_distance: maxDetourDistance,
+      preferred_stop_types: preferredStopTypes,
+      preferred_transport_modes: preferences.transportMethods,
+      accommodation_level: preferences.accommodationLevel,
+      activity_preferences: preferences.activityTypes,
+      attraction_categories: preferences.scenicTypes,
+      travel_style: preferences.travelStyle,
+      budget_flexibility: preferences.budgetType,
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      group_travel_preference: preferences.travelType,
+      custom_preferences: preferences.specialRequirements,
     };
-    console.log("生成沿途游玩规划:", planData);
+
+    // 调用API创建规划任务
+    createPlan(requestData, {
+      onSuccess: (taskId) => {
+        toast({
+          title: "规划任务已提交",
+          description: "正在生成您的旅行计划，请稍候查看结果。",
+        });
+        // 跳转到结果页面
+        navigate(`/plan-result/route/${taskId}`);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "提交失败",
+          description: error.message || "无法提交规划请求，请稍后重试。",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   return (
@@ -125,62 +174,97 @@ const RoutePlanning = () => {
                   路线信息
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="startPoint">出发地</Label>
-                  <Input
-                    id="startPoint"
-                    placeholder="输入出发城市"
-                    value={startPoint}
-                    onChange={(e) => setStartPoint(e.target.value)}
-                    className="mt-2"
-                  />
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="startPoint">出发地 *</Label>
+                    <Input
+                      id="startPoint"
+                      placeholder="输入出发城市"
+                      value={startPoint}
+                      onChange={(e) => setStartPoint(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="endPoint">目的地 *</Label>
+                    <Input
+                      id="endPoint"
+                      placeholder="输入目的地城市"
+                      value={endPoint}
+                      onChange={(e) => setEndPoint(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="endPoint">目的地</Label>
-                  <Input
-                    id="endPoint"
-                    placeholder="输入目的地城市"
-                    value={endPoint}
-                    onChange={(e) => setEndPoint(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="route-preference">路线偏好</Label>
-                  <Select value={routePreference} onValueChange={setRoutePreference}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="选择路线偏好" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="speed">速度优先</SelectItem>
-                      <SelectItem value="scenery">风景优先</SelectItem>
-                      <SelectItem value="economy">经济优先</SelectItem>
-                      <SelectItem value="balanced">平衡</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-base font-medium">最大绕行距离</Label>
-                  <div className="mt-3">
-                    <div className="flex items-center gap-4 mb-2">
-                      <span className="text-sm text-muted-foreground">10km</span>
-                      <div className="flex-1">
-                        <Slider
-                          value={maxDetourDistance}
-                          onValueChange={setMaxDetourDistance}
-                          max={200}
-                          min={10}
-                          step={10}
-                        />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="max-stopovers">最多停留次数</Label>
+                    <div className="mt-2">
+                      <Slider
+                        id="max-stopovers"
+                        value={[maxStopovers]}
+                        onValueChange={(value) => setMaxStopovers(value[0])}
+                        max={10}
+                        min={0}
+                        step={1}
+                      />
+                      <div className="text-center mt-1">
+                        <span className="text-sm font-medium">{maxStopovers} 次</span>
                       </div>
-                      <span className="text-sm text-muted-foreground">200km</span>
                     </div>
-                    <div className="text-center">
-                      <span className="text-sm font-medium">{maxDetourDistance[0]}km</span>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="max-stopover-duration">计划停留时长 (小时)</Label>
+                    <div className="mt-2">
+                      <Slider
+                        id="max-stopover-duration"
+                        value={[maxStopoverDuration]}
+                        onValueChange={(value) => setMaxStopoverDuration(value[0])}
+                        max={24}
+                        min={1}
+                        step={1}
+                      />
+                      <div className="text-center mt-1">
+                        <span className="text-sm font-medium">{maxStopoverDuration} 小时</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="route-preference">路线偏好</Label>
+                    <Select value={routePreference} onValueChange={setRoutePreference}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="选择路线偏好" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="速度优先">速度优先</SelectItem>
+                        <SelectItem value="风景优先">风景优先</SelectItem>
+                        <SelectItem value="经济优先">经济优先</SelectItem>
+                        <SelectItem value="平衡">平衡</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="max-detour-distance">最大绕行距离 (km)</Label>
+                    <div className="mt-2">
+                      <Slider
+                        id="max-detour-distance"
+                        value={[maxDetourDistance]}
+                        onValueChange={(value) => setMaxDetourDistance(value[0])}
+                        max={500}
+                        min={10}
+                        step={10}
+                      />
+                      <div className="text-center mt-1">
+                        <span className="text-sm font-medium">{maxDetourDistance} km</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -216,10 +300,10 @@ const RoutePlanning = () => {
               className="w-full" 
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!startPoint || !endPoint || !commonData.departureDate}
+              disabled={!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate || isPending}
             >
               <Send className="w-4 h-4 mr-2" />
-              规划沿途路线
+              {isPending ? "生成中..." : "规划沿途路线"}
             </Button>
           </div>
 

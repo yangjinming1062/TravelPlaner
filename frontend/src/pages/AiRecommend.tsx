@@ -16,22 +16,27 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Brain, Sparkles, TrendingUp, Send, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import { useCreateSmartPlan } from "@/hooks/use-api";
+import { format } from "date-fns";
 
 const AiRecommend = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { mutate: createPlan, isPending } = useCreateSmartPlan();
   
   // 基础规划信息
   const [commonData, setCommonData] = useState<CommonPlanningData>({
     planTitle: "",
     departureDate: undefined,
     returnDate: undefined,
-    primaryTransport: "",
+    primaryTransport: "自驾",
   });
 
   // AI推荐特有信息
-  const [maxTravelDistance, setMaxTravelDistance] = useState([1000]);
+  const [maxTravelDistance, setMaxTravelDistance] = useState(1000);
   const [environmentPreference, setEnvironmentPreference] = useState("");
   const [avoidedRegions, setAvoidedRegions] = useState<string[]>([]);
 
@@ -41,34 +46,34 @@ const AiRecommend = () => {
     accommodationLevel: 3,
     activityTypes: [],
     scenicTypes: [],
-    travelStyle: "",
-    budgetType: "",
+    travelStyle: "平衡型",
+    budgetType: "性价比优先",
     budgetRange: "",
     dietaryRestrictions: "",
-    travelType: "",
+    travelType: "独行",
     specialRequirements: "",
   });
 
   const environmentOptions = [
-    { value: "seaside", label: "海边海岸" },
-    { value: "mountain", label: "高山山脉" },
-    { value: "grassland", label: "草原牧场" },
-    { value: "desert", label: "沙漠戈壁" },
-    { value: "forest", label: "森林丛林" },
-    { value: "lake", label: "湖泊河流" },
-    { value: "city", label: "城市都市" },
-    { value: "countryside", label: "乡村田园" },
+    { value: "海边海岸", label: "海边海岸" },
+    { value: "高山山脉", label: "高山山脉" },
+    { value: "草原牧场", label: "草原牧场" },
+    { value: "沙漠戈壁", label: "沙漠戈壁" },
+    { value: "森林丛林", label: "森林丛林" },
+    { value: "湖泊河流", label: "湖泊河流" },
+    { value: "城市都市", label: "城市都市" },
+    { value: "乡村田园", label: "乡村田园" },
   ];
 
   const avoidRegionOptions = [
-    { id: "plateau", label: "高原地区" },
-    { id: "desert", label: "沙漠地区" },
-    { id: "cold", label: "极寒地区" },
-    { id: "island", label: "海岛地区" },
-    { id: "remote", label: "偏远山区" },
-    { id: "political", label: "政治敏感区" },
-    { id: "disaster", label: "自然灾害区" },
-    { id: "traffic", label: "交通不便区" },
+    { id: "高原地区", label: "高原地区" },
+    { id: "沙漠地区", label: "沙漠地区" },
+    { id: "极寒地区", label: "极寒地区" },
+    { id: "海岛地区", label: "海岛地区" },
+    { id: "偏远山区", label: "偏远山区" },
+    { id: "政治敏感区", label: "政治敏感区" },
+    { id: "自然灾害区", label: "自然灾害区" },
+    { id: "交通不便区", label: "交通不便区" },
   ];
 
   const toggleAvoidRegion = (region: string) => {
@@ -80,17 +85,58 @@ const AiRecommend = () => {
   };
 
   const handleRecommendation = () => {
-    const planData = {
-      type: "ai-recommend",
-      common: commonData,
-      specific: {
-        maxTravelDistance: maxTravelDistance[0],
-        environmentPreference,
-        avoidedRegions
-      },
-      preferences
+    // 验证必填字段
+    if (!commonData.departureDate || !commonData.returnDate || !environmentPreference) {
+      toast({
+        title: "信息不完整",
+        description: "请填写所有必填字段。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 构造请求数据
+    const requestData = {
+      title: commonData.planTitle || "AI智能推荐旅行计划",
+      source: "当前位置", // 智能推荐模式不需要明确的出发地
+      departure_date: commonData.departureDate ? format(commonData.departureDate, "yyyy-MM-dd") : "",
+      return_date: commonData.returnDate ? format(commonData.returnDate, "yyyy-MM-dd") : "",
+      group_size: preferences.travelType === "家庭" ? 4 : 
+                  preferences.travelType === "朋友" ? 3 : 
+                  preferences.travelType === "情侣" ? 2 : 1,
+      transport_mode: commonData.primaryTransport,
+      max_travel_distance: maxTravelDistance,
+      preferred_environment: environmentPreference,
+      avoid_regions: avoidedRegions,
+      preferred_transport_modes: preferences.transportMethods,
+      accommodation_level: preferences.accommodationLevel,
+      activity_preferences: preferences.activityTypes,
+      attraction_categories: preferences.scenicTypes,
+      travel_style: preferences.travelStyle,
+      budget_flexibility: preferences.budgetType,
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      group_travel_preference: preferences.travelType,
+      custom_preferences: preferences.specialRequirements,
     };
-    console.log("生成AI推荐:", planData);
+
+    // 调用API创建规划任务
+    createPlan(requestData, {
+      onSuccess: (taskId) => {
+        toast({
+          title: "规划任务已提交",
+          description: "正在生成您的旅行计划，请稍候查看结果。",
+        });
+        // 跳转到结果页面
+        navigate(`/plan-result/smart/${taskId}`);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "提交失败",
+          description: error.message || "无法提交规划请求，请稍后重试。",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   return (
@@ -123,7 +169,7 @@ const AiRecommend = () => {
             <CommonPlanningFields 
               data={commonData}
               onDataChange={setCommonData}
-              showTransport={false}
+              showTransport={true}
             />
 
             {/* AI智能推荐信息 */}
@@ -136,14 +182,14 @@ const AiRecommend = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <Label className="text-base font-medium">最大出行距离</Label>
+                  <Label className="text-base font-medium">最大出行距离 (km)</Label>
                   <div className="mt-3">
                     <div className="flex items-center gap-4 mb-2">
                       <span className="text-sm text-muted-foreground">100km</span>
                       <div className="flex-1">
                         <Slider
-                          value={maxTravelDistance}
-                          onValueChange={setMaxTravelDistance}
+                          value={[maxTravelDistance]}
+                          onValueChange={(value) => setMaxTravelDistance(value[0])}
                           max={3000}
                           min={100}
                           step={100}
@@ -152,13 +198,13 @@ const AiRecommend = () => {
                       <span className="text-sm text-muted-foreground">3000km</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-sm font-medium">{maxTravelDistance[0]}km</span>
+                      <span className="text-sm font-medium">{maxTravelDistance}km</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="environment-preference">环境偏好</Label>
+                  <Label htmlFor="environment-preference">环境偏好 *</Label>
                   <Select value={environmentPreference} onValueChange={setEnvironmentPreference}>
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="选择您偏好的环境类型" />
@@ -214,10 +260,10 @@ const AiRecommend = () => {
               className="w-full" 
               size="lg"
               onClick={handleRecommendation}
-              disabled={!commonData.departureDate || !environmentPreference}
+              disabled={!commonData.departureDate || !commonData.returnDate || !environmentPreference || isPending}
             >
               <Send className="w-4 h-4 mr-2" />
-              获取AI推荐方案
+              {isPending ? "生成中..." : "获取AI推荐方案"}
             </Button>
           </div>
 

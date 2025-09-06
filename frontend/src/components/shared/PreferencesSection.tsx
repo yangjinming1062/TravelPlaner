@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Settings2, Star } from "lucide-react";
-import { useState } from "react";
 
 interface PreferencesSectionProps {
   preferences: TravelPreferences;
@@ -32,30 +31,30 @@ export interface TravelPreferences {
 }
 
 const transportOptions = [
-  { id: "self-drive-gas", label: "自驾（油车）" },
-  { id: "self-drive-electric", label: "自驾（纯电）" },
-  { id: "self-drive-hybrid", label: "自驾（混动）" },
-  { id: "train", label: "火车" },
-  { id: "flight", label: "飞机" },
-  { id: "bus", label: "客车" },
+  { id: "自驾（油车）", label: "自驾（油车）" },
+  { id: "自驾（纯电）", label: "自驾（纯电）" },
+  { id: "自驾（混动）", label: "自驾（混动）" },
+  { id: "火车", label: "火车" },
+  { id: "飞机", label: "飞机" },
+  { id: "客车", label: "客车" },
 ];
 
 const activityOptions = [
-  { id: "shopping", label: "购物" },
-  { id: "sightseeing", label: "观光" },
-  { id: "food", label: "美食" },
-  { id: "culture", label: "文化体验" },
-  { id: "nature", label: "自然探索" },
-  { id: "adventure", label: "户外冒险" },
+  { id: "购物", label: "购物" },
+  { id: "观光", label: "观光" },
+  { id: "美食", label: "美食" },
+  { id: "文化体验", label: "文化体验" },
+  { id: "自然探索", label: "自然探索" },
+  { id: "户外冒险", label: "户外冒险" },
 ];
 
 const scenicOptions = [
-  { id: "cultural", label: "文化古迹" },
-  { id: "natural", label: "自然风光" },
-  { id: "modern", label: "现代都市" },
-  { id: "historical", label: "历史遗迹" },
-  { id: "religious", label: "宗教场所" },
-  { id: "entertainment", label: "娱乐休闲" },
+  { id: "文化古迹", label: "文化古迹" },
+  { id: "自然风光", label: "自然风光" },
+  { id: "现代都市", label: "现代都市" },
+  { id: "历史遗迹", label: "历史遗迹" },
+  { id: "宗教场所", label: "宗教场所" },
+  { id: "娱乐休闲", label: "娱乐休闲" },
 ];
 
 export default function PreferencesSection({ preferences, onPreferencesChange }: PreferencesSectionProps) {
@@ -197,9 +196,9 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
                 <SelectValue placeholder="选择旅游风格" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="leisure">休闲型</SelectItem>
-                <SelectItem value="balanced">平衡型</SelectItem>
-                <SelectItem value="intensive">紧凑型</SelectItem>
+                <SelectItem value="休闲型">休闲型</SelectItem>
+                <SelectItem value="平衡型">平衡型</SelectItem>
+                <SelectItem value="紧凑型">紧凑型</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -212,9 +211,9 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
                 <SelectValue placeholder="选择预算偏好" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="budget">节俭为主</SelectItem>
-                <SelectItem value="value">性价比优先</SelectItem>
-                <SelectItem value="comfort">舒适为主</SelectItem>
+                <SelectItem value="节俭为主">节俭为主</SelectItem>
+                <SelectItem value="性价比优先">性价比优先</SelectItem>
+                <SelectItem value="舒适为主">舒适为主</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -228,10 +227,10 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
               <SelectValue placeholder="选择出行类型" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="solo">独行</SelectItem>
-              <SelectItem value="couple">情侣</SelectItem>
-              <SelectItem value="family">家庭</SelectItem>
-              <SelectItem value="friends">朋友</SelectItem>
+              <SelectItem value="独行">独行</SelectItem>
+              <SelectItem value="情侣">情侣</SelectItem>
+              <SelectItem value="家庭">家庭</SelectItem>
+              <SelectItem value="朋友">朋友</SelectItem>
             </SelectContent>
           </Select>
         </div>

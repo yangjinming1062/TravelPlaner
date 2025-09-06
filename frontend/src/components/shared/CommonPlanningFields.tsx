@@ -57,9 +57,10 @@ export default function CommonPlanningFields({
         {/* 日期选择 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>出发日期</Label>
+            <Label htmlFor="departure-date">出发日期 *</Label>
             <div className="mt-2">
               <DatePicker
+                id="departure-date"
                 date={data.departureDate}
                 onDateChange={(date) => updateData("departureDate", date)}
                 placeholder="选择出发日期"
@@ -68,9 +69,10 @@ export default function CommonPlanningFields({
             </div>
           </div>
           <div>
-            <Label>返程日期</Label>
+            <Label htmlFor="return-date">返程日期 *</Label>
             <div className="mt-2">
               <DatePicker
+                id="return-date"
                 date={data.returnDate}
                 onDateChange={(date) => updateData("returnDate", date)}
                 placeholder="选择返程日期"
@@ -90,11 +92,11 @@ export default function CommonPlanningFields({
                 <SelectValue placeholder="选择主要交通方式" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="self-drive">自驾</SelectItem>
-                <SelectItem value="train">火车</SelectItem>
-                <SelectItem value="flight">飞机</SelectItem>
-                <SelectItem value="bus">客车</SelectItem>
-                <SelectItem value="mixed">混合交通</SelectItem>
+                <SelectItem value="自驾">自驾</SelectItem>
+                <SelectItem value="火车">火车</SelectItem>
+                <SelectItem value="飞机">飞机</SelectItem>
+                <SelectItem value="客车">客车</SelectItem>
+                <SelectItem value="混合交通">混合交通</SelectItem>
               </SelectContent>
             </Select>
           </div>

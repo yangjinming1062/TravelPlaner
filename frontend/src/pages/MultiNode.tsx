@@ -13,9 +13,12 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Network, MapPin, Calendar, Plus, Trash2, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { DatePicker } from "@/components/ui/date-picker";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import { useCreateMultiPlan } from "@/hooks/use-api";
+import { format } from "date-fns";
 
 interface NodeInfo {
   id: string;
@@ -27,19 +30,21 @@ interface NodeInfo {
 
 const MultiNode = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { mutate: createPlan, isPending } = useCreateMultiPlan();
   
   // 基础规划信息
   const [commonData, setCommonData] = useState<CommonPlanningData>({
     planTitle: "",
     departureDate: undefined,
     returnDate: undefined,
-    primaryTransport: "",
+    primaryTransport: "自驾",
   });
 
   // 多节点特有信息
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
-  const [routeOptimization, setRouteOptimization] = useState("");
+  const [routeOptimization, setRouteOptimization] = useState("平衡");
   
   const [nodes, setNodes] = useState<NodeInfo[]>([
     { id: "1", city: "", arrivalDate: undefined, departureDate: undefined, order: 1 }
@@ -51,11 +56,11 @@ const MultiNode = () => {
     accommodationLevel: 3,
     activityTypes: [],
     scenicTypes: [],
-    travelStyle: "",
-    budgetType: "",
+    travelStyle: "平衡型",
+    budgetType: "性价比优先",
     budgetRange: "",
     dietaryRestrictions: "",
-    travelType: "",
+    travelType: "独行",
     specialRequirements: "",
   });
 
@@ -88,18 +93,92 @@ const MultiNode = () => {
   };
 
   const handlePlanGenerate = () => {
-    const planData = {
-      type: "multi-node",
-      common: commonData,
-      specific: { 
-        startPoint, 
-        endPoint, 
-        routeOptimization,
-        nodes: nodes.filter(node => node.city.trim() !== "")
-      },
-      preferences
+    // 验证必填字段
+    if (!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate) {
+      toast({
+        title: "信息不完整",
+        description: "请填写所有必填字段。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 验证节点信息
+    const validNodes = nodes.filter(node => node.city.trim() !== "");
+    if (validNodes.length === 0) {
+      toast({
+        title: "节点信息缺失",
+        description: "请至少添加一个有效的中转节点。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 检查节点日期是否完整
+    for (const node of validNodes) {
+      if (!node.arrivalDate || !node.departureDate) {
+        toast({
+          title: "节点日期不完整",
+          description: `节点 ${node.order} 的到达日期和离开日期必须填写。`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (node.arrivalDate >= node.departureDate) {
+        toast({
+          title: "节点日期错误",
+          description: `节点 ${node.order} 的离开日期必须晚于到达日期。`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // 构造请求数据
+    const requestData = {
+      title: commonData.planTitle || `多节点旅行计划`,
+      source: startPoint,
+      departure_date: commonData.departureDate ? format(commonData.departureDate, "yyyy-MM-dd") : "",
+      return_date: commonData.returnDate ? format(commonData.returnDate, "yyyy-MM-dd") : "",
+      group_size: preferences.travelType === "家庭" ? 4 : 
+                  preferences.travelType === "朋友" ? 3 : 
+                  preferences.travelType === "情侣" ? 2 : 1,
+      transport_mode: commonData.primaryTransport,
+      nodes_schedule: validNodes.map(node => ({
+        location: node.city,
+        arrival_date: node.arrivalDate ? format(node.arrivalDate, "yyyy-MM-dd") : "",
+        departure_date: node.departureDate ? format(node.departureDate, "yyyy-MM-dd") : "",
+      })),
+      preferred_transport_modes: preferences.transportMethods,
+      accommodation_level: preferences.accommodationLevel,
+      activity_preferences: preferences.activityTypes,
+      attraction_categories: preferences.scenicTypes,
+      travel_style: preferences.travelStyle,
+      budget_flexibility: preferences.budgetType,
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      group_travel_preference: preferences.travelType,
+      custom_preferences: preferences.specialRequirements,
     };
-    console.log("生成多节点规划:", planData);
+
+    // 调用API创建规划任务
+    createPlan(requestData, {
+      onSuccess: (taskId) => {
+        toast({
+          title: "规划任务已提交",
+          description: "正在生成您的旅行计划，请稍候查看结果。",
+        });
+        // 跳转到结果页面
+        navigate(`/plan-result/multi/${taskId}`);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "提交失败",
+          description: error.message || "无法提交规划请求，请稍后重试。",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   return (
@@ -145,7 +224,7 @@ const MultiNode = () => {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="startPoint">起点城市</Label>
+                    <Label htmlFor="startPoint">起点城市 *</Label>
                     <Input
                       id="startPoint"
                       placeholder="输入起点城市"
@@ -155,7 +234,7 @@ const MultiNode = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="endPoint">终点城市</Label>
+                    <Label htmlFor="endPoint">终点城市 *</Label>
                     <Input
                       id="endPoint"
                       placeholder="输入终点城市"
@@ -173,10 +252,10 @@ const MultiNode = () => {
                       <SelectValue placeholder="选择路线优化偏好" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="speed">速度优先</SelectItem>
-                      <SelectItem value="scenery">风景优先</SelectItem>
-                      <SelectItem value="economy">经济优先</SelectItem>
-                      <SelectItem value="balanced">平衡</SelectItem>
+                      <SelectItem value="速度优先">速度优先</SelectItem>
+                      <SelectItem value="风景优先">风景优先</SelectItem>
+                      <SelectItem value="经济优先">经济优先</SelectItem>
+                      <SelectItem value="平衡">平衡</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -184,7 +263,7 @@ const MultiNode = () => {
                 {/* 节点信息 */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <Label className="text-base font-medium">中转节点安排</Label>
+                    <Label className="text-base font-medium">中转节点安排 *</Label>
                     <Button
                       type="button"
                       variant="outline"
@@ -217,7 +296,7 @@ const MultiNode = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <Label htmlFor={`city-${node.id}`}>城市名称</Label>
+                            <Label htmlFor={`city-${node.id}`}>城市名称 *</Label>
                             <Input
                               id={`city-${node.id}`}
                               placeholder="输入城市名称"
@@ -227,7 +306,7 @@ const MultiNode = () => {
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`arrival-${node.id}`}>到达日期</Label>
+                            <Label htmlFor={`arrival-${node.id}`}>到达日期 *</Label>
                             <div className="mt-1">
                               <DatePicker
                                 date={node.arrivalDate}
@@ -238,7 +317,7 @@ const MultiNode = () => {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor={`departure-${node.id}`}>离开日期</Label>
+                            <Label htmlFor={`departure-${node.id}`}>离开日期 *</Label>
                             <div className="mt-1">
                               <DatePicker
                                 date={node.departureDate}
@@ -268,10 +347,11 @@ const MultiNode = () => {
               className="w-full" 
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!startPoint || !endPoint || !commonData.departureDate || nodes.every(node => !node.city.trim())}
+              disabled={!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate || 
+                         nodes.every(node => !node.city.trim()) || isPending}
             >
               <Send className="w-4 h-4 mr-2" />
-              生成多节点行程
+              {isPending ? "生成中..." : "生成多节点行程"}
             </Button>
           </div>
 
