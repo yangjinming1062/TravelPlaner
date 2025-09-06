@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        args: [ --line-length=120 ]
+        exclude: ^tests/
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-json
+        types: [ file ]
+        files: \.(json|myext)$
+      - id: check-yaml
+        types: [ file ]
+        files: \.(yaml|yml)$
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-merge-conflict
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.14.0
+    hooks:
+      - id: reorder-python-imports
+        exclude: ^tests/verified_.*$
