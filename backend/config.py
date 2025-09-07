@@ -24,7 +24,7 @@ def get_env(name, default=None):
             with open(file_path, "r") as file:
                 for line in file:
                     if line.strip() and not line.startswith("#"):
-                        key, value = line.strip().split("=")
+                        key, value = line.strip().split("=", 1)
                         tmp[key.strip()] = value.strip()
         return tmp
 
@@ -36,7 +36,13 @@ def get_env(name, default=None):
         return tmp
 
     def _get_env():
-        return os.getenv(name) or _ENV_FILE_CONFIG.get(name) or _YAML_FILE_CONFIG.get(name) or default
+        return (
+            os.getenv(name)
+            or _ENV_FILE_CONFIG.get(name)
+            or _YAML_FILE_CONFIG.get(name)
+            or _YAML_FILE_CONFIG.get(name.lower())
+            or default
+        )
 
     _ENV_FILE_CONFIG = {}
     _YAML_FILE_CONFIG = {}
@@ -81,21 +87,6 @@ class Config(BaseModel):
     )
     # endregion
 
-    # region REDIS
-    redis_host: str = Field(
-        default=get_env("REDIS_HOST", "redis"),
-        description="Redis主机",
-    )
-    redis_port: int = Field(
-        default=get_env("REDIS_PORT", 6379),
-        description="Redis端口",
-    )
-    redis_password: str = Field(
-        default=get_env("REDIS_PASSWORD", ""),
-        description="Redis密码",
-    )
-    # endregion
-
     # region 其他参数
     jwt_token_expire_days: int = Field(
         default=int(get_env("JWT_TOKEN_EXPIRE_DAYS", 7)),
@@ -106,8 +97,7 @@ class Config(BaseModel):
         description="JWT密钥",
     )
     # Secret ※注意：请不要在生产环境中使用默认的随机密钥
-    secret_key: bytes = bytes(get_env("SECRET_KEY", "").encode()) or Fernet.generate_key()
-    program: str = get_env("PROGRAM_NAME", "")
+    secret_key: bytes = get_env("SECRET_KEY").encode() if get_env("SECRET_KEY") else Fernet.generate_key()
     # endregion
 
 

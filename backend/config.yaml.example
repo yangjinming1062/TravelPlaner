@@ -1,0 +1,30 @@
+# Configuration example for TravelPlanner backend
+# Copy this file to config.yaml and adjust values as needed
+
+# Debug mode
+debug: false
+
+# Logging configuration
+log_dir: "logs"
+log_level: "INFO"
+log_info_name: "info.log"
+log_error_name: "error.log"
+log_stdout: false
+# Log format follows Python's logging format specification
+log_format: "%(asctime)s|%(levelname)-8s|%(funcName)s:%(lineno)d - %(message)s"
+log_date_format: "%Y-%m-%d %H:%M:%S.%f"
+
+# Database configuration
+db_pool_size: 150
+db_pool_recycle: 60
+db_echo: false
+# Database URI format: postgresql+psycopg://user:password@host:port/database
+db_uri: "postgresql+psycopg://admin:password@db:5432/app"
+
+# JWT configuration
+jwt_token_expire_days: 30
+jwt_secret: "TravelPlanner-Secret-Key"
+
+# Secret key for encryption (base64 encoded)
+# Generate a new key with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+secret_key: "YcHywfpqbIOLJlTIzanUTzaLhUqYxX-6q2FZ8JqTPPs="

@@ -25,7 +25,7 @@ class SecretManager:
         """
         if data:
             if isinstance(data, str):
-                data = str_to_bytes(data)
+                data = data.encode("utf-8")  # 直接编码为bytes，而不是假设它是base64
             return bytes_to_str(_SECRET.encrypt(data))
 
     @staticmethod
@@ -40,4 +40,8 @@ class SecretManager:
             str: 解码后的字符串。
         """
         if data:
-            return bytes_to_str(_SECRET.decrypt(data))
+            # 如果data是字符串，需要先转换为bytes（假设是base64编码的）
+            if isinstance(data, str):
+                data = str_to_bytes(data)
+            # 解密后直接解码为UTF-8字符串，而不是转换为base64
+            return _SECRET.decrypt(data).decode("utf-8")
