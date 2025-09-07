@@ -2,13 +2,13 @@
 
 ## 项目概述
 
-这是一个基于 React + TypeScript + Vite 构建的现代化旅游规划网页应用。该应用采用前后端分离架构，支持多种不同的旅游规划模式，为用户提供个性化的出行建议和完整的旅游方案。
+这是一个基于 React + TypeScript + Vite 构建的现代化旅游规划网页应用。该应用采用前后端分离架构，支持四种不同的旅游规划模式：
+1. 单一目的地模式
+2. 沿途游玩模式
+3. 多节点模式
+4. 智能推荐模式
 
-核心特性：
-- 🎯 **智能化**: 集成大模型AI，提供智能化的旅游规划建议
-- 🌍 **多模式**: 支持单一目的地、沿途游玩、多节点、智能推荐四种规划模式
-- 💻 **现代化**: 使用 React 18 + TypeScript + TailwindCSS + ShadCN UI 构建
-- 🔧 **可扩展**: 建立了可扩展的系统架构，支持未来功能迭代
+该系统集成了大模型AI能力，为用户提供个性化的出行建议和完整的旅游方案。
 
 ## 技术栈
 
@@ -16,99 +16,104 @@
 - **构建工具**: Vite
 - **状态管理**: React Query (@tanstack/react-query)
 - **路由**: React Router v6
-- **UI库**: ShadCN UI (基于 Radix UI 和 TailwindCSS)
-- **样式**: TailwindCSS
+- **UI库**: TailwindCSS + shadcn/ui 组件库
 - **表单处理**: React Hook Form + Zod 验证
-- **图标**: Lucide React
+- **HTTP客户端**: Axios
+- **图标库**: Lucide React
 
 ## 项目结构
 
 ```
-frontend/
-├── public/                 # 静态资源文件
-├── src/
-│   ├── assets/             # 图片资源
-│   ├── components/         # 可复用组件
-│   │   ├── shared/         # 共享组件（如偏好设置）
-│   │   └── ui/             # UI组件（ShadCN UI组件）
-│   ├── hooks/              # 自定义Hooks
-│   ├── lib/                # 工具函数
-│   ├── pages/              # 页面组件
-│   ├── App.tsx             # 应用根组件
-│   ├── main.tsx            # 应用入口
-│   └── vite-env.d.ts       # Vite环境声明
-├── package.json            # 依赖和脚本配置
-├── tsconfig.json           # TypeScript配置
-├── vite.config.ts          # Vite配置
-├── tailwind.config.ts      # Tailwind配置
-└── components.json         # ShadCN UI配置
+src/
+├── api/                 # API 请求封装
+├── assets/              # 静态资源文件
+├── components/          # 可复用组件
+│   ├── auth/            # 认证相关组件
+│   ├── shared/          # 规划模块共享组件
+│   └── ui/              # UI 组件 (shadcn/ui)
+├── hooks/               # 自定义 Hooks
+├── lib/                 # 工具函数
+├── pages/               # 页面组件
+│   ├── multi/           # 多节点模式页面
+│   ├── route/           # 沿途游玩模式页面
+│   ├── single/          # 单一目的地模式页面
+│   └── smart/           # 智能推荐模式页面
+└── types/               # TypeScript 类型定义
 ```
 
-## 规划模式
+## 核心功能模块
 
-### 1. 单一目的地模式 (`/single-destination`)
+### 1. 用户认证系统
+- 登录/注册页面
+- 用户偏好设置
+- 用户中心页面
+- 规划历史记录
+
+### 2. 四种规划模式
+
+#### 单一目的地模式 (`/single/*`)
 专注于单个目的地的深度游玩，提供目的地内部景点推荐。
 
-### 2. 沿途游玩模式 (`/route-planning`)
+#### 沿途游玩模式 (`/route/*`)
 侧重在目的地的游玩和推荐，同时发现并推荐沿途有价值的景点。
 
-### 3. 多节点模式 (`/multi-node`)
+#### 多节点模式 (`/multi/*`)
 规划多个目的地，针对每个目的地的抵达和离开时间推荐游玩内容。
 
-### 4. 智能推荐模式 (`/ai-recommend`)
+#### 智能推荐模式 (`/smart/*`)
 基于预算、时间、出行方式等参数由AI分析用户需求，推荐最适合的旅游目的地。
+
+### 3. 共享组件
+- `CommonPlanningFields`: 规划基本信息输入组件
+- `PreferencesSection`: 用户偏好设置组件
+- `DailyPlan`: 日程计划展示组件
+- `PlanSummary`: 规划结果摘要展示组件
 
 ## 开发约定
 
-### 组件规范
-- 使用 TypeScript 进行类型安全检查
-- 使用 ShadCN UI 组件作为基础UI组件
-- 共享组件放在 `src/components/shared/` 目录下
+### 命名规范
+- 组件文件使用 PascalCase 命名（如 `UserProfile.tsx`）
 - 页面组件放在 `src/pages/` 目录下
+- 可复用组件放在 `src/components/` 目录下
+- 类型定义文件放在 `src/types/` 目录下
 
-### 样式规范
+### 路由约定
+- 所有页面通过 `src/App.tsx` 中的 `Routes` 进行统一管理
+- 受保护页面需要通过 `ProtectedRoute` 组件包装
+
+### 样式约定
 - 使用 TailwindCSS 进行样式开发
-- 颜色变量定义在 `src/index.css` 中
-- 响应式设计遵循移动优先原则
+- 使用 shadcn/ui 提供的组件库
+- 颜色主题遵循系统默认配置
 
-### 路由规范
-- 使用 React Router v6 进行路由管理
-- 所有页面路由在 `src/App.tsx` 中统一配置
+## 构建和运行命令
 
-## 构建与运行
-
-### 安装依赖
 ```bash
+# 安装依赖
 npm install
-```
 
-### 启动开发服务器
-```bash
+# 启动开发服务器
 npm run dev
-```
 
-### 构建生产版本
-```bash
+# 构建生产版本
 npm run build
-```
 
-### 预览生产构建
-```bash
+# 预览生产构建
 npm run preview
-```
 
-### 代码检查
-```bash
+# 代码检查
 npm run lint
 ```
 
-## 环境配置
+## 环境变量
 
-开发服务器运行在 `http://localhost:8000` 端口。
+项目使用 `.env` 文件来管理环境变量：
+- `VITE_API_BASE_URL`: 后端API基础地址
 
-Vite 配置文件位于 `vite.config.ts`，其中包含了路径别名配置：
-```typescript
-"@": path.resolve(__dirname, "./src")
-```
+## 类型定义
 
-这意味着可以从 `@/components/ui/button` 这样导入组件。
+项目在 `src/types/` 目录下维护了完整的 TypeScript 类型定义，包括：
+- 用户相关类型 (`user.ts`)
+- 规划任务和结果类型 (`planning.ts`)
+
+这些类型定义确保了整个项目的类型安全。
