@@ -50,7 +50,7 @@ class PlanningPreferencesSchema(SchemaBase):
     """
 
     preferred_transport_modes: Optional[list[str]] = Field(None, description="偏好交通方式")
-    accommodation_level: Optional[int] = Field(None, ge=1, le=5, description="住宿标准 1-5星")
+    accommodation_level: Optional[list[int]] = Field(None, ge=2, le=5, description="住宿标准")
     activity_preferences: Optional[list[str]] = Field(None, description="活动类型偏好")
     attraction_categories: Optional[list[str]] = Field(None, description="景点类型偏好")
     travel_style: Optional[str] = Field(None, description="旅游风格")

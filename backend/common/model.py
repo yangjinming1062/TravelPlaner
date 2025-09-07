@@ -58,7 +58,7 @@ class PlanningPreferenceColumns:
 
     # 交通和住宿偏好
     preferred_transport_modes: Mapped[list] = mapped_column(JSON, default=[], comment="偏好交通方式")
-    accommodation_level: Mapped[int] = mapped_column(default=3, comment="住宿标准 1-5星")
+    accommodation_level: Mapped[list] = mapped_column(JSON, default=[], comment="住宿标准")
 
     # 活动和景点偏好
     activity_preferences: Mapped[list] = mapped_column(JSON, default=[], comment="活动类型偏好")
