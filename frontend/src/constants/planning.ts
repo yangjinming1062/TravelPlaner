@@ -12,11 +12,10 @@ export const TRANSPORT_MODES = [
 
 // 住宿标准
 export const ACCOMMODATION_LEVELS = [
-  { value: 1, label: '1星' },
-  { value: 2, label: '2星' },
-  { value: 3, label: '3星' },
-  { value: 4, label: '4星' },
-  { value: 5, label: '5星' },
+  { value: 2, label: '2星/经济' },
+  { value: 3, label: '3星/舒适' },
+  { value: 4, label: '4星/高档' },
+  { value: 5, label: '5星/豪华' },
 ] as const;
 
 // 活动类型偏好
@@ -143,7 +142,7 @@ export const DEFAULT_PREFERENCES = {
 // 前端偏好设置默认值
 export const DEFAULT_TRAVEL_PREFERENCES = {
   transportMethods: [] as TransportMode[],
-  accommodationLevel: 3,
+  accommodationLevels: [4] as AccommodationLevel[],
   activityTypes: [] as ActivityPreference[],
   scenicTypes: [] as AttractionCategory[],
   travelStyle: '平衡型' as TravelStyle,

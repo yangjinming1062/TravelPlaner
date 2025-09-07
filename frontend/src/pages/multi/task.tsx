@@ -55,7 +55,7 @@ const MultiTaskPage: React.FC = () => {
       transport_mode: commonData.primaryTransport,
       nodes_schedule: nodesSchedule,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
+      accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,

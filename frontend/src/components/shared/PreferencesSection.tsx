@@ -13,6 +13,7 @@ import {
 import { Settings2, Star } from "lucide-react";
 import {
   TRANSPORT_MODES,
+  ACCOMMODATION_LEVELS,
   ACTIVITY_PREFERENCES,
   ATTRACTION_CATEGORIES,
   TRAVEL_STYLES,
@@ -22,6 +23,7 @@ import {
 } from "@/constants/planning";
 import type {
   TransportMode,
+  AccommodationLevel,
   ActivityPreference,
   AttractionCategory,
   TravelStyle,
@@ -36,7 +38,7 @@ interface PreferencesSectionProps {
 
 export interface TravelPreferences {
   transportMethods: TransportMode[];
-  accommodationLevel: number;
+  accommodationLevels: AccommodationLevel[];
   activityTypes: ActivityPreference[];
   scenicTypes: AttractionCategory[];
   travelStyle: TravelStyle;
@@ -96,34 +98,26 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
 
         {/* 住宿标准 */}
         <div>
-          <Label className="text-base font-medium">住宿标准</Label>
-          <div className="mt-3">
-            <div className="flex items-center gap-4 mb-2">
-              <span className="text-sm text-muted-foreground">1星</span>
-              <div className="flex-1">
-                <Slider
-                  value={[preferences.accommodationLevel]}
-                  onValueChange={(values) => updatePreferences("accommodationLevel", values[0])}
-                  max={5}
-                  min={1}
-                  step={1}
+          <Label className="text-base font-medium">住宿标准（多选）</Label>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {ACCOMMODATION_LEVELS.map((level) => (
+              <div key={level.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`accommodation-${level.value}`}
+                  checked={preferences.accommodationLevels.includes(level.value)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      updatePreferences("accommodationLevels", [...preferences.accommodationLevels, level.value]);
+                    } else {
+                      updatePreferences("accommodationLevels", preferences.accommodationLevels.filter(l => l !== level.value));
+                    }
+                  }}
                 />
+                <Label htmlFor={`accommodation-${level.value}`} className="text-sm">
+                  {level.label}
+                </Label>
               </div>
-              <span className="text-sm text-muted-foreground">5星</span>
-            </div>
-            <div className="flex items-center gap-1 justify-center">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < preferences.accommodationLevel
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-sm font-medium">{preferences.accommodationLevel}星标准</span>
-            </div>
+            ))}
           </div>
         </div>
 

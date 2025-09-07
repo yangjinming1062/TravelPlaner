@@ -80,7 +80,7 @@ const RouteTaskPage: React.FC = () => {
       max_detour_distance: maxDetourDistance,
       preferred_stop_types: preferredStopTypes,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
+      accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
@@ -100,7 +100,7 @@ const RouteTaskPage: React.FC = () => {
         // 跳转到结果页面
         navigate(`/route/result/${taskId}`);
       },
-      onError: (error: any) => {
+      onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         toast({
           title: "提交失败",
           description: error.message || "无法提交规划请求，请稍后重试。",

@@ -74,7 +74,7 @@ const SmartTaskPage: React.FC = () => {
       preferred_environment: preferredEnvironment || "海边",
       avoid_regions: avoidRegions,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
+      accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
@@ -93,7 +93,7 @@ const SmartTaskPage: React.FC = () => {
         });
         navigate(`/smart/result/${taskId}`);
       },
-      onError: (error: any) => {
+      onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
         toast({
           title: "提交失败",
           description: error.message || "无法提交规划请求，请稍后重试。",

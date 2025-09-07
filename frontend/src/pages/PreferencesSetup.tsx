@@ -15,7 +15,7 @@ const PreferencesSetupPage: React.FC = () => {
   
   const [preferences, setPreferences] = useState<TravelPreferences>({
     transportMethods: [],
-    accommodationLevel: 3,
+    accommodationLevels: [4],
     activityTypes: [],
     scenicTypes: [],
     travelStyle: "平衡型",
@@ -31,7 +31,7 @@ const PreferencesSetupPage: React.FC = () => {
     if (existingPreferences) {
       setPreferences({
         transportMethods: existingPreferences.preferred_transport_modes || [],
-        accommodationLevel: existingPreferences.accommodation_level || 3,
+        accommodationLevels: existingPreferences.accommodation_level || [4],
         activityTypes: existingPreferences.activity_preferences || [],
         scenicTypes: existingPreferences.attraction_categories || [],
         travelStyle: existingPreferences.travel_style || "平衡型",
@@ -50,7 +50,7 @@ const PreferencesSetupPage: React.FC = () => {
     // 转换为后端 schema 格式
     const backendPreferences = {
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel,
+      accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
