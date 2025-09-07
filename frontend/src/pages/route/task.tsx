@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,11 @@ const RouteTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateRoutePlan();
+  
+  // 确保页面加载时滚动到顶部
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // 基础规划信息
   const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
