@@ -13,11 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Route, MapPin, Clock, Send, Navigation } from "lucide-react";
+import { Route, MapPin, Clock, Send, Navigation } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import NavigationHeader from "@/components/shared/NavigationHeader";
 import { useCreateRoutePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 import { ROUTE_PREFERENCES, PREFERRED_STOP_TYPES, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
@@ -114,23 +115,11 @@ const RouteTaskPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-6">
-        <div className="container mx-auto px-4 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="text-white hover:bg-white/20"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">沿途游玩规划</h1>
-            <p className="text-white/90">发现旅途中的每一处美景</p>
-          </div>
-        </div>
-      </header>
+      <NavigationHeader 
+        title="沿途游玩规划"
+        description="发现旅途中的每一处美景"
+        className="bg-gradient-to-r from-orange-500 to-red-500"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">

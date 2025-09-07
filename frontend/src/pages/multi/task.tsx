@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Send, MapPin } from "lucide-react";
+import { Send, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import NavigationHeader from "@/components/shared/NavigationHeader";
 import { NodeScheduleInput } from "@/components/shared/NodeSchedule";
 import { NodeScheduleSchema } from "@/types/planning";
 import { useCreateMultiPlan } from "@/hooks/use-api";
@@ -89,23 +90,11 @@ const MultiTaskPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-6">
-        <div className="container mx-auto px-4 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="text-white hover:bg-white/20"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">多节点规划</h1>
-            <p className="text-white/90">精心安排多个目的地的完美旅程</p>
-          </div>
-        </div>
-      </header>
+      <NavigationHeader 
+        title="多节点规划"
+        description="精心安排多个目的地的完美旅程"
+        className="bg-gradient-to-r from-purple-500 to-indigo-500"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">

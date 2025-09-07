@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Send } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
+import NavigationHeader from "@/components/shared/NavigationHeader";
 import { useCreateSinglePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 import type { AccommodationLevel } from "@/constants/planning";
@@ -87,23 +88,11 @@ const SingleTaskPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-6">
-        <div className="container mx-auto px-4 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="text-white hover:bg-white/20"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">单一目的地规划</h1>
-            <p className="text-white/90">专注于单个目的地的深度游玩体验</p>
-          </div>
-        </div>
-      </header>
+      <NavigationHeader 
+        title="单一目的地规划"
+        description="专注于单个目的地的深度游玩体验"
+        className="bg-gradient-to-r from-blue-500 to-blue-600"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
