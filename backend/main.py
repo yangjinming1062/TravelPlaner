@@ -5,6 +5,7 @@ from api import *
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from utils import *
 
@@ -83,6 +84,24 @@ def create_app():
         version="main",
         generate_unique_id_function=generate_id,
         openapi_url="/openapi.json" if CONFIG.debug else None,
+    )
+
+    # 添加CORS中间件
+    _app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",  # Vite开发服务器
+            "http://localhost:5173",  # Vite开发服务器（新版本）
+            "http://localhost",  # Docker前端
+            "http://localhost:80",  # Docker前端
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1",
+            "http://127.0.0.1:80",
+        ],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_headers=["*"],
     )
 
     for router in ROUTERS:
