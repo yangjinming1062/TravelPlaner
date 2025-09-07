@@ -16,12 +16,13 @@ const SmartResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: planResult, isLoading, isError, error } = useSmartPlanResult(taskId || "");
+  const taskIdNumber = parseInt(taskId || "0", 10);
+  const { data: planResult, isLoading, isError, error } = useSmartPlanResult(taskIdNumber);
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
     updateFavorite(
-      { taskType: "smart", taskId: planId, data: { is_favorite: isFavorite } },
+      { taskType: "smart", taskId: parseInt(planId, 10), data: { is_favorite: isFavorite } },
       {
         onSuccess: () => {
           toast({

@@ -21,12 +21,13 @@ const SingleResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: planResult, isLoading, isError, error } = useSinglePlanResult(taskId || "");
+  const taskIdNumber = parseInt(taskId || "0", 10);
+  const { data: planResult, isLoading, isError, error } = useSinglePlanResult(taskIdNumber);
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
     updateFavorite(
-      { taskType: "single", taskId: planId, data: { is_favorite: isFavorite } },
+      { taskType: "single", taskId: parseInt(planId, 10), data: { is_favorite: isFavorite } },
       {
         onSuccess: () => {
           toast({

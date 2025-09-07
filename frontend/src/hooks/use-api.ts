@@ -111,7 +111,7 @@ export const useSinglePlans = (params: PlanningSingleListRequest) => {
   return useSinglePlansList(params);
 };
 
-export const useSinglePlanResult = (taskId: string) => {
+export const useSinglePlanResult = (taskId: number) => {
   return useQuery({
     queryKey: ['single-plan-result', taskId],
     queryFn: () => planningApi.getSinglePlanResult(taskId),
@@ -138,7 +138,7 @@ export const useRoutePlans = (params: PlanningRouteListRequest) => {
   return useRoutePlansList(params);
 };
 
-export const useRoutePlanResult = (taskId: string) => {
+export const useRoutePlanResult = (taskId: number) => {
   return useQuery({
     queryKey: ['route-plan-result', taskId],
     queryFn: () => planningApi.getRoutePlanResult(taskId),
@@ -165,7 +165,7 @@ export const useMultiPlans = (params: PlanningMultiListRequest) => {
   return useMultiPlansList(params);
 };
 
-export const useMultiPlanResult = (taskId: string) => {
+export const useMultiPlanResult = (taskId: number) => {
   return useQuery({
     queryKey: ['multi-plan-result', taskId],
     queryFn: () => planningApi.getMultiPlanResult(taskId),
@@ -192,7 +192,7 @@ export const useSmartPlans = (params: PlanningSmartListRequest) => {
   return useSmartPlansList(params);
 };
 
-export const useSmartPlanResult = (taskId: string) => {
+export const useSmartPlanResult = (taskId: number) => {
   return useQuery({
     queryKey: ['smart-plan-result', taskId],
     queryFn: () => planningApi.getSmartPlanResult(taskId),
@@ -206,7 +206,7 @@ export const useUpdatePlanFavorite = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ taskType, taskId, data }: { taskType: string; taskId: string; data: PlanningResultFavoriteRequest }) => 
+    mutationFn: ({ taskType, taskId, data }: { taskType: string; taskId: number; data: PlanningResultFavoriteRequest }) => 
       planningApi.updatePlanFavorite(taskType, taskId, data),
     onSuccess: () => {
       // 失效相关查询以触发重新获取

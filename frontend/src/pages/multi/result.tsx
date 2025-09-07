@@ -15,12 +15,13 @@ const MultiResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: planResult, isLoading, isError, error } = useMultiPlanResult(taskId || "");
+  const taskIdNumber = parseInt(taskId || "0", 10);
+  const { data: planResult, isLoading, isError, error } = useMultiPlanResult(taskIdNumber);
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
     updateFavorite(
-      { taskType: "multi", taskId: planId, data: { is_favorite: isFavorite } },
+      { taskType: "multi", taskId: parseInt(planId, 10), data: { is_favorite: isFavorite } },
       {
         onSuccess: () => {
           toast({

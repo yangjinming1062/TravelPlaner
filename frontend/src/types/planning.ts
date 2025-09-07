@@ -62,13 +62,13 @@ export interface PlanningTaskBase {
 }
 
 export interface PlanningTaskItemBase extends PlanningTaskBase {
-  id: string;
+  id: number;
   status: PlanningStatus;
   created_at: string;
 }
 
 export interface PlanningResultBase {
-  id: string;
+  id: number;
   plan_title: string;
   plan_description: string;
   total_days: number;
@@ -129,7 +129,7 @@ export interface PlanningSingleTaskSchema extends PlanningTaskBase, PlanningPref
 
 export interface PlanningSingleListRequest extends PaginateRequest {
   query?: {
-    id?: string;
+    id?: number;
     title?: string;
     source?: string;
     target?: string;
@@ -171,7 +171,7 @@ export interface PlanningRouteTaskSchema extends PlanningTaskBase, PlanningPrefe
 
 export interface PlanningRouteListRequest extends PaginateRequest {
   query?: {
-    id?: string;
+    id?: number;
     title?: string;
     source?: string;
     target?: string;
@@ -234,7 +234,7 @@ export interface PlanningSmartTaskSchema extends PlanningTaskBase, PlanningPrefe
 
 export interface PlanningSmartListRequest extends PaginateRequest {
   query?: {
-    id?: string;
+    id?: number;
     title?: string;
     destination?: string;
     created_at?: DateFilterSchema;

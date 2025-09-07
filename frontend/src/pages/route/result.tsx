@@ -19,12 +19,13 @@ const RouteResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: planResult, isLoading, isError, error } = useRoutePlanResult(taskId || "");
+  const taskIdNumber = parseInt(taskId || "0", 10);
+  const { data: planResult, isLoading, isError, error } = useRoutePlanResult(taskIdNumber);
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
     updateFavorite(
-      { taskType: "route", taskId: planId, data: { is_favorite: isFavorite } },
+      { taskType: "route", taskId: parseInt(planId, 10), data: { is_favorite: isFavorite } },
       {
         onSuccess: () => {
           toast({
