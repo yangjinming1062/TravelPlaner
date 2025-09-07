@@ -11,6 +11,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Settings2, Star } from "lucide-react";
+import {
+  TRANSPORT_MODES,
+  ACTIVITY_PREFERENCES,
+  ATTRACTION_CATEGORIES,
+  TRAVEL_STYLES,
+  BUDGET_PREFERENCES,
+  GROUP_TRAVEL_PREFERENCES,
+  DIETARY_RESTRICTIONS,
+} from "@/constants/planning";
+import type {
+  TransportMode,
+  ActivityPreference,
+  AttractionCategory,
+  TravelStyle,
+  BudgetPreference,
+  GroupTravelPreference,
+} from "@/constants/planning";
 
 interface PreferencesSectionProps {
   preferences: TravelPreferences;
@@ -18,47 +35,20 @@ interface PreferencesSectionProps {
 }
 
 export interface TravelPreferences {
-  transportMethods: string[];
+  transportMethods: TransportMode[];
   accommodationLevel: number;
-  activityTypes: string[];
-  scenicTypes: string[];
-  travelStyle: string;
-  budgetType: string;
+  activityTypes: ActivityPreference[];
+  scenicTypes: AttractionCategory[];
+  travelStyle: TravelStyle;
+  budgetType: BudgetPreference;
   budgetRange?: string;
   dietaryRestrictions: string;
-  travelType: string;
+  travelType: GroupTravelPreference;
   specialRequirements: string;
 }
 
-const transportOptions = [
-  { id: "自驾（油车）", label: "自驾（油车）" },
-  { id: "自驾（纯电）", label: "自驾（纯电）" },
-  { id: "自驾（混动）", label: "自驾（混动）" },
-  { id: "火车", label: "火车" },
-  { id: "飞机", label: "飞机" },
-  { id: "客车", label: "客车" },
-];
-
-const activityOptions = [
-  { id: "购物", label: "购物" },
-  { id: "观光", label: "观光" },
-  { id: "美食", label: "美食" },
-  { id: "文化体验", label: "文化体验" },
-  { id: "自然探索", label: "自然探索" },
-  { id: "户外冒险", label: "户外冒险" },
-];
-
-const scenicOptions = [
-  { id: "文化古迹", label: "文化古迹" },
-  { id: "自然风光", label: "自然风光" },
-  { id: "现代都市", label: "现代都市" },
-  { id: "历史遗迹", label: "历史遗迹" },
-  { id: "宗教场所", label: "宗教场所" },
-  { id: "娱乐休闲", label: "娱乐休闲" },
-];
-
 export default function PreferencesSection({ preferences, onPreferencesChange }: PreferencesSectionProps) {
-  const updatePreferences = (key: keyof TravelPreferences, value: any) => {
+  const updatePreferences = (key: keyof TravelPreferences, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     onPreferencesChange({ ...preferences, [key]: value });
   };
 
@@ -83,20 +73,20 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
         <div>
           <Label className="text-base font-medium">偏好交通方式（多选）</Label>
           <div className="grid grid-cols-2 gap-3 mt-3">
-            {transportOptions.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
+            {TRANSPORT_MODES.map((option) => (
+              <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
-                  id={option.id}
-                  checked={preferences.transportMethods.includes(option.id)}
+                  id={option.value}
+                  checked={preferences.transportMethods.includes(option.value)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      updatePreferences("transportMethods", [...preferences.transportMethods, option.id]);
+                      updatePreferences("transportMethods", [...preferences.transportMethods, option.value]);
                     } else {
-                      updatePreferences("transportMethods", preferences.transportMethods.filter(t => t !== option.id));
+                      updatePreferences("transportMethods", preferences.transportMethods.filter(t => t !== option.value));
                     }
                   }}
                 />
-                <Label htmlFor={option.id} className="text-sm">
+                <Label htmlFor={option.value} className="text-sm">
                   {option.label}
                 </Label>
               </div>
@@ -141,20 +131,20 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
         <div>
           <Label className="text-base font-medium">活动类型偏好（多选）</Label>
           <div className="grid grid-cols-2 gap-3 mt-3">
-            {activityOptions.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
+            {ACTIVITY_PREFERENCES.map((option) => (
+              <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`activity-${option.id}`}
-                  checked={preferences.activityTypes.includes(option.id)}
+                  id={`activity-${option.value}`}
+                  checked={preferences.activityTypes.includes(option.value)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      updatePreferences("activityTypes", [...preferences.activityTypes, option.id]);
+                      updatePreferences("activityTypes", [...preferences.activityTypes, option.value]);
                     } else {
-                      updatePreferences("activityTypes", preferences.activityTypes.filter(t => t !== option.id));
+                      updatePreferences("activityTypes", preferences.activityTypes.filter(t => t !== option.value));
                     }
                   }}
                 />
-                <Label htmlFor={`activity-${option.id}`} className="text-sm">
+                <Label htmlFor={`activity-${option.value}`} className="text-sm">
                   {option.label}
                 </Label>
               </div>
@@ -166,20 +156,20 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
         <div>
           <Label className="text-base font-medium">景点类型偏好（多选）</Label>
           <div className="grid grid-cols-2 gap-3 mt-3">
-            {scenicOptions.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
+            {ATTRACTION_CATEGORIES.map((option) => (
+              <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`scenic-${option.id}`}
-                  checked={preferences.scenicTypes.includes(option.id)}
+                  id={`scenic-${option.value}`}
+                  checked={preferences.scenicTypes.includes(option.value)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      updatePreferences("scenicTypes", [...preferences.scenicTypes, option.id]);
+                      updatePreferences("scenicTypes", [...preferences.scenicTypes, option.value]);
                     } else {
-                      updatePreferences("scenicTypes", preferences.scenicTypes.filter(t => t !== option.id));
+                      updatePreferences("scenicTypes", preferences.scenicTypes.filter(t => t !== option.value));
                     }
                   }}
                 />
-                <Label htmlFor={`scenic-${option.id}`} className="text-sm">
+                <Label htmlFor={`scenic-${option.value}`} className="text-sm">
                   {option.label}
                 </Label>
               </div>
@@ -196,9 +186,11 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
                 <SelectValue placeholder="选择旅游风格" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="休闲型">休闲型</SelectItem>
-                <SelectItem value="平衡型">平衡型</SelectItem>
-                <SelectItem value="紧凑型">紧凑型</SelectItem>
+                {TRAVEL_STYLES.map((style) => (
+                  <SelectItem key={style.value} value={style.value}>
+                    {style.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -211,9 +203,11 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
                 <SelectValue placeholder="选择预算偏好" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="节俭为主">节俭为主</SelectItem>
-                <SelectItem value="性价比优先">性价比优先</SelectItem>
-                <SelectItem value="舒适为主">舒适为主</SelectItem>
+                {BUDGET_PREFERENCES.map((budget) => (
+                  <SelectItem key={budget.value} value={budget.value}>
+                    {budget.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -227,10 +221,11 @@ export default function PreferencesSection({ preferences, onPreferencesChange }:
               <SelectValue placeholder="选择出行类型" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="独行">独行</SelectItem>
-              <SelectItem value="情侣">情侣</SelectItem>
-              <SelectItem value="家庭">家庭</SelectItem>
-              <SelectItem value="朋友">朋友</SelectItem>
+              {GROUP_TRAVEL_PREFERENCES.map((group) => (
+                <SelectItem key={group.value} value={group.value}>
+                  {group.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

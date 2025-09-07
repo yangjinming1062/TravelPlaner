@@ -11,6 +11,8 @@ import PreferencesSection, { type TravelPreferences } from "@/components/shared/
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
 import { useCreateSinglePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
+import type { AccommodationLevel } from "@/constants/planning";
+import { DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
 
 const SingleTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,30 +20,14 @@ const SingleTaskPage: React.FC = () => {
   const { mutate: createPlan, isPending } = useCreateSinglePlan();
   
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>({
-    planTitle: "",
-    departureDate: undefined,
-    returnDate: undefined,
-    primaryTransport: "自驾",
-  });
+  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
 
   // 单一目的地特有信息
   const [destination, setDestination] = useState("");
   const [startPoint, setStartPoint] = useState("");
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>({
-    transportMethods: [],
-    accommodationLevel: 3,
-    activityTypes: [],
-    scenicTypes: [],
-    travelStyle: "平衡型",
-    budgetType: "性价比优先",
-    budgetRange: "",
-    dietaryRestrictions: "",
-    travelType: "独行",
-    specialRequirements: "",
-  });
+  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
 
   const handlePlanGenerate = () => {
     // 验证必填字段
@@ -66,12 +52,12 @@ const SingleTaskPage: React.FC = () => {
                   preferences.travelType === "情侣" ? 2 : 1,
       transport_mode: commonData.primaryTransport,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel,
+      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };

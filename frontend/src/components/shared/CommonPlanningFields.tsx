@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Calendar, MapPin } from "lucide-react";
+import { TRANSPORT_MODES } from "@/constants/planning";
+import type { TransportMode } from "@/constants/planning";
 
 export interface CommonPlanningData {
   planTitle: string;
   departureDate?: Date;
   returnDate?: Date;
-  primaryTransport: string;
+  primaryTransport: TransportMode;
 }
 
 interface CommonPlanningFieldsProps {
@@ -92,11 +94,11 @@ export default function CommonPlanningFields({
                 <SelectValue placeholder="选择主要交通方式" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="自驾">自驾</SelectItem>
-                <SelectItem value="火车">火车</SelectItem>
-                <SelectItem value="飞机">飞机</SelectItem>
-                <SelectItem value="客车">客车</SelectItem>
-                <SelectItem value="混合交通">混合交通</SelectItem>
+                {TRANSPORT_MODES.map((transport) => (
+                  <SelectItem key={transport.value} value={transport.value}>
+                    {transport.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

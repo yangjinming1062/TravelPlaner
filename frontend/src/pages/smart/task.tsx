@@ -6,6 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, Send, Sparkles, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +20,8 @@ import PreferencesSection, { type TravelPreferences } from "@/components/shared/
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
 import { useCreateSmartPlan } from "@/hooks/use-api";
 import { format } from "date-fns";
+import { ENVIRONMENT_PREFERENCES, AVOID_REGIONS, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
+import type { EnvironmentPreference, AvoidRegion, AccommodationLevel } from "@/constants/planning";
 
 const SmartTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,39 +29,19 @@ const SmartTaskPage: React.FC = () => {
   const { mutate: createPlan, isPending } = useCreateSmartPlan();
   
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>({
-    planTitle: "",
-    departureDate: undefined,
-    returnDate: undefined,
-    primaryTransport: "自驾",
-  });
+  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
 
   // 智能推荐特有信息
   const [startPoint, setStartPoint] = useState("");
   const [maxTravelDistance, setMaxTravelDistance] = useState(1000);
-  const [preferredEnvironment, setPreferredEnvironment] = useState("");
-  const [avoidRegions, setAvoidRegions] = useState<string[]>([]);
+  const [preferredEnvironment, setPreferredEnvironment] = useState<EnvironmentPreference | "">("");
+  const [avoidRegions, setAvoidRegions] = useState<AvoidRegion[]>([]);
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>({
-    transportMethods: [],
-    accommodationLevel: 3,
-    activityTypes: [],
-    scenicTypes: [],
-    travelStyle: "平衡型",
-    budgetType: "性价比优先",
-    budgetRange: "",
-    dietaryRestrictions: "",
-    travelType: "独行",
-    specialRequirements: "",
-  });
+  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
 
-  const avoidRegionOptions = [
-    "高原地区", "沙漠地区", "极寒地区", "海岛地区", 
-    "偏远山区", "政治敏感区", "自然灾害区", "交通不便区"
-  ];
 
-  const toggleAvoidRegion = (region: string) => {
+  const toggleAvoidRegion = (region: AvoidRegion) => {
     if (avoidRegions.includes(region)) {
       setAvoidRegions(avoidRegions.filter(r => r !== region));
     } else {
@@ -82,15 +71,15 @@ const SmartTaskPage: React.FC = () => {
                   preferences.travelType === "情侣" ? 2 : 1,
       transport_mode: commonData.primaryTransport,
       max_travel_distance: maxTravelDistance,
-      preferred_environment: preferredEnvironment,
+      preferred_environment: preferredEnvironment || "海边",
       avoid_regions: avoidRegions,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel,
+      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -185,27 +174,32 @@ const SmartTaskPage: React.FC = () => {
 
                 <div>
                   <Label htmlFor="preferred-environment">环境偏好</Label>
-                  <Input
-                    id="preferred-environment"
-                    placeholder="如：海边、草原、森林、古城等"
-                    value={preferredEnvironment}
-                    onChange={(e) => setPreferredEnvironment(e.target.value)}
-                    className="mt-2"
-                  />
+                  <Select value={preferredEnvironment} onValueChange={(value) => setPreferredEnvironment(value as EnvironmentPreference)}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="选择环境偏好" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ENVIRONMENT_PREFERENCES.map((env) => (
+                        <SelectItem key={env.value} value={env.value}>
+                          {env.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
                   <Label className="text-base font-medium">避免的地区类型（多选）</Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    {avoidRegionOptions.map((region) => (
-                      <div key={region} className="flex items-center space-x-2">
+                    {AVOID_REGIONS.map((region) => (
+                      <div key={region.value} className="flex items-center space-x-2">
                         <Checkbox
-                          id={`avoid-${region}`}
-                          checked={avoidRegions.includes(region)}
-                          onCheckedChange={() => toggleAvoidRegion(region)}
+                          id={`avoid-${region.value}`}
+                          checked={avoidRegions.includes(region.value)}
+                          onCheckedChange={() => toggleAvoidRegion(region.value)}
                         />
-                        <Label htmlFor={`avoid-${region}`} className="text-sm">
-                          {region}
+                        <Label htmlFor={`avoid-${region.value}`} className="text-sm">
+                          {region.label}
                         </Label>
                       </div>
                     ))}

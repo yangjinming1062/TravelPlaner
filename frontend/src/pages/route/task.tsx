@@ -20,6 +20,8 @@ import PreferencesSection, { type TravelPreferences } from "@/components/shared/
 import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
 import { useCreateRoutePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
+import { ROUTE_PREFERENCES, PREFERRED_STOP_TYPES, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
+import type { RoutePreference, PreferredStopType, AccommodationLevel } from "@/constants/planning";
 
 const RouteTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,48 +29,22 @@ const RouteTaskPage: React.FC = () => {
   const { mutate: createPlan, isPending } = useCreateRoutePlan();
   
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>({
-    planTitle: "",
-    departureDate: undefined,
-    returnDate: undefined,
-    primaryTransport: "自驾",
-  });
+  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
 
   // 沿途游玩特有信息
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
   const [maxStopovers, setMaxStopovers] = useState(3);
   const [maxStopoverDuration, setMaxStopoverDuration] = useState(2);
-  const [routePreference, setRoutePreference] = useState("平衡");
+  const [routePreference, setRoutePreference] = useState<RoutePreference>("平衡");
   const [maxDetourDistance, setMaxDetourDistance] = useState(100);
-  const [preferredStopTypes, setPreferredStopTypes] = useState<string[]>([]);
+  const [preferredStopTypes, setPreferredStopTypes] = useState<PreferredStopType[]>([]);
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>({
-    transportMethods: [],
-    accommodationLevel: 3,
-    activityTypes: [],
-    scenicTypes: [],
-    travelStyle: "平衡型",
-    budgetType: "性价比优先",
-    budgetRange: "",
-    dietaryRestrictions: "",
-    travelType: "独行",
-    specialRequirements: "",
-  });
+  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
 
-  const stopTypeOptions = [
-    { id: "历史古迹", label: "历史古迹" },
-    { id: "自然景观", label: "自然景观" },
-    { id: "美食体验", label: "美食体验" },
-    { id: "文化场所", label: "文化场所" },
-    { id: "购物中心", label: "购物中心" },
-    { id: "娱乐设施", label: "娱乐设施" },
-    { id: "温泉度假", label: "温泉度假" },
-    { id: "户外活动", label: "户外活动" },
-  ];
 
-  const toggleStopType = (type: string) => {
+  const toggleStopType = (type: PreferredStopType) => {
     if (preferredStopTypes.includes(type)) {
       setPreferredStopTypes(preferredStopTypes.filter(t => t !== type));
     } else {
@@ -104,12 +80,12 @@ const RouteTaskPage: React.FC = () => {
       max_detour_distance: maxDetourDistance,
       preferred_stop_types: preferredStopTypes,
       preferred_transport_modes: preferences.transportMethods,
-      accommodation_level: preferences.accommodationLevel,
+      accommodation_level: preferences.accommodationLevel as AccommodationLevel,
       activity_preferences: preferences.activityTypes,
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions] : [],
+      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -238,15 +214,16 @@ const RouteTaskPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="route-preference">路线偏好</Label>
-                    <Select value={routePreference} onValueChange={setRoutePreference}>
+                    <Select value={routePreference} onValueChange={(value) => setRoutePreference(value as RoutePreference)}>
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="选择路线偏好" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="速度优先">速度优先</SelectItem>
-                        <SelectItem value="风景优先">风景优先</SelectItem>
-                        <SelectItem value="经济优先">经济优先</SelectItem>
-                        <SelectItem value="平衡">平衡</SelectItem>
+                        {ROUTE_PREFERENCES.map((route) => (
+                          <SelectItem key={route.value} value={route.value}>
+                            {route.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -272,14 +249,14 @@ const RouteTaskPage: React.FC = () => {
                 <div>
                   <Label className="text-base font-medium">偏好停留类型（多选）</Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    {stopTypeOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2">
+                    {PREFERRED_STOP_TYPES.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-2">
                         <Checkbox
-                          id={`stop-${option.id}`}
-                          checked={preferredStopTypes.includes(option.id)}
-                          onCheckedChange={() => toggleStopType(option.id)}
+                          id={`stop-${option.value}`}
+                          checked={preferredStopTypes.includes(option.value)}
+                          onCheckedChange={() => toggleStopType(option.value)}
                         />
-                        <Label htmlFor={`stop-${option.id}`} className="text-sm">
+                        <Label htmlFor={`stop-${option.value}`} className="text-sm">
                           {option.label}
                         </Label>
                       </div>
