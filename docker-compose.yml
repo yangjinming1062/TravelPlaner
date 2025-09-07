@@ -4,12 +4,12 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://backend:8000/api/v1
     ports:
       - "80:80"
     depends_on:
       - backend
-    environment:
-      - REACT_APP_API_URL=http://backend:8000
     restart: unless-stopped
 
   # 后端API服务
@@ -21,10 +21,9 @@ services:
       - "8000:8000"
     # depends_on:
     #   - database
-    env_file:
-      - ./backend/.env
     volumes:
       - ./logs:/app/logs
+      - ./backend/config.yaml:/app/config.yaml
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -33,17 +32,17 @@ services:
       retries: 3
 
   # PostgreSQL 数据库
-  database:
-    image: postgres:17
-    environment:
-      - POSTGRES_DB=travel_planner
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-IDoNotKnow}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
+  # database:
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_DB=travel_planner
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-IDoNotKnow}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:
