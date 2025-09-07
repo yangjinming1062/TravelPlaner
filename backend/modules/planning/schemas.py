@@ -22,15 +22,15 @@ class PlanningTaskBase(SchemaBase):
 class PlanningTaskItemBase(PlanningTaskBase):
     """规划任务列表项基类"""
 
-    id: str = Field("", description="规划ID")
+    id: int = Field(description="规划ID")
     status: str = Field("", description="规划状态: pending, processing, completed, failed")
-    created_at: datetime = Field("", description="创建时间")
+    created_at: datetime = Field(description="创建时间")
 
 
 class PlanningResultBase(SchemaBase):
     """规划结果基类"""
 
-    id: str = Field(description="结果ID")
+    id: int = Field(description="结果ID")
     plan_title: str = Field(description="方案标题")
     plan_description: str = Field(default="", description="方案描述")
     total_days: int = Field(description="总天数")

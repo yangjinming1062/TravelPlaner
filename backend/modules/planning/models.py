@@ -55,7 +55,7 @@ class PlanningSingleResult(PlanningResultBase):
 
     __tablename__ = "planning_single_result"
 
-    task_id: Mapped[str] = mapped_column(ForeignKey("planning_single_task.id"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("planning_single_task.id"))
     daily_plan: Mapped[list] = mapped_column(JSON, default=[], comment="每日行程")
     highlights: Mapped[list] = mapped_column(JSON, default=[], comment="行程亮点")
     tips: Mapped[list] = mapped_column(JSON, default=[], comment="旅游贴士")
@@ -92,7 +92,7 @@ class PlanningRouteResult(PlanningResultBase):
 
     __tablename__ = "planning_route_result"
 
-    task_id: Mapped[str] = mapped_column(ForeignKey("planning_route_task.id"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("planning_route_task.id"))
     daily_plan: Mapped[list] = mapped_column(JSON, default=[], comment="每日行程")
     route_plan: Mapped[list] = mapped_column(JSON, default=[], comment="详细路线信息")
     waypoints: Mapped[list] = mapped_column(JSON, default=[], comment="途经点列表")
@@ -121,7 +121,7 @@ class PlanningMultiResult(PlanningResultBase):
     __tablename__ = "planning_multi_result"
 
     id: Mapped[str] = mapped_column(primary_key=True, default=generate_key)
-    task_id: Mapped[str] = mapped_column(ForeignKey("planning_multi_task.id"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("planning_multi_task.id"))
     nodes_details: Mapped[list] = mapped_column(JSON, default=[], comment="节点详细安排")
     route_plan: Mapped[list] = mapped_column(JSON, default=[], comment="节点间的交通安排")
     highlights: Mapped[list] = mapped_column(JSON, default=[], comment="行程亮点")
@@ -151,7 +151,7 @@ class PlanningSmartResult(PlanningResultBase):
 
     __tablename__ = "planning_smart_result"
 
-    task_id: Mapped[str] = mapped_column(ForeignKey("planning_smart_task.id"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("planning_smart_task.id"))
     destination: Mapped[str] = mapped_column(String(128), comment="推荐的目的地")
     recommendation_reasons: Mapped[str] = mapped_column(TEXT, comment="推荐理由")
     destination_highlights: Mapped[list] = mapped_column(JSON, default=[], comment="目的地亮点")

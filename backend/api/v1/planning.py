@@ -13,7 +13,7 @@ router = get_router()
 @router.post("/single-tasks", status_code=201, summary="新增单一目的地规划")
 async def create_single_plan(
     request: PlanningSingleTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
-) -> str:
+) -> int:
     with DatabaseManager() as db:
         item = PlanningSingleTask(**request.model_dump(), user_id=user.id)
         db.add(item)
@@ -24,7 +24,7 @@ async def create_single_plan(
 
 
 @router.delete("/single-tasks", status_code=204, summary="删除单一目的地规划")
-async def delete_single_plans(request: list[str] = Query(), _user: User = Depends(get_user)):
+async def delete_single_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
     with DatabaseManager() as db:
         db.query(PlanningSingleResult).filter(PlanningSingleResult.task_id.in_(request)).delete(
             synchronize_session=False
@@ -62,7 +62,7 @@ async def get_single_plans(
 
 
 @router.get("/single-tasks/{task_id}/result", summary="获取单一目的地规划结果")
-async def get_single_plan_result(task_id: str, _user: User = Depends(get_user)) -> PlanningSingleResultSchema:
+async def get_single_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSingleResultSchema:
     with DatabaseManager() as db:
         result = db.query(PlanningSingleResult).filter(PlanningSingleResult.task_id == task_id).first()
         if not result:
@@ -79,7 +79,7 @@ async def get_single_plan_result(task_id: str, _user: User = Depends(get_user)) 
 @router.post("/route-tasks", status_code=201, summary="新增沿途游玩规划")
 async def create_route_plan(
     request: PlanningRouteTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
-) -> str:
+) -> int:
     with DatabaseManager() as db:
         item = PlanningRouteTask(**request.model_dump(), user_id=user.id)
         db.add(item)
@@ -90,7 +90,7 @@ async def create_route_plan(
 
 
 @router.delete("/route-tasks", status_code=204, summary="删除沿途游玩规划")
-async def delete_route_plans(request: list[str] = Query(), _user: User = Depends(get_user)):
+async def delete_route_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
     with DatabaseManager() as db:
         db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id.in_(request)).delete(synchronize_session=False)
         db.query(PlanningRouteTask).filter(PlanningRouteTask.id.in_(request)).delete(synchronize_session=False)
@@ -126,7 +126,7 @@ async def get_route_plans(
 
 
 @router.get("/route-tasks/{task_id}/result", summary="获取沿途游玩规划结果")
-async def get_route_plan_result(task_id: str, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
+async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
     with DatabaseManager() as db:
         result = db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id == task_id).first()
         if not result:
@@ -143,7 +143,7 @@ async def get_route_plan_result(task_id: str, _user: User = Depends(get_user)) -
 @router.post("/multi-tasks", status_code=201, summary="新增多节点规划")
 async def create_multi_plan(
     request: PlanningMultiTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
-) -> str:
+) -> int:
     with DatabaseManager() as db:
         item = PlanningMultiTask(**request.model_dump(), user_id=user.id)
         db.add(item)
@@ -154,7 +154,7 @@ async def create_multi_plan(
 
 
 @router.delete("/multi-tasks", status_code=204, summary="删除多节点规划")
-async def delete_multi_node_plans(request: list[str] = Query(), _user: User = Depends(get_user)):
+async def delete_multi_node_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
     with DatabaseManager() as db:
         db.query(PlanningMultiResult).filter(PlanningMultiResult.task_id.in_(request)).delete(synchronize_session=False)
         db.query(PlanningMultiTask).filter(PlanningMultiTask.id.in_(request)).delete(synchronize_session=False)
@@ -188,7 +188,7 @@ async def get_multi_plans(
 
 
 @router.get("/multi-tasks/{task_id}/result", summary="获取多节点规划结果")
-async def get_multi_plan_result(task_id: str, _user: User = Depends(get_user)) -> PlanningMultiResultSchema:
+async def get_multi_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningMultiResultSchema:
     with DatabaseManager() as db:
         result = db.query(PlanningMultiResult).filter(PlanningMultiResult.task_id == task_id).first()
         if not result:
@@ -205,7 +205,7 @@ async def get_multi_plan_result(task_id: str, _user: User = Depends(get_user)) -
 @router.post("/smart-tasks", status_code=201, summary="新增智能推荐规划")
 async def create_smart_plan(
     request: PlanningSmartTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
-) -> str:
+) -> int:
     with DatabaseManager() as db:
         item = PlanningSmartTask(**request.model_dump(), user_id=user.id)
         db.add(item)
@@ -216,7 +216,7 @@ async def create_smart_plan(
 
 
 @router.delete("/smart-tasks", status_code=204, summary="删除智能推荐规划")
-async def delete_smart_plans(request: list[str] = Query(), _user: User = Depends(get_user)):
+async def delete_smart_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
     with DatabaseManager() as db:
         db.query(PlanningSmartResult).filter(PlanningSmartResult.task_id.in_(request)).delete(synchronize_session=False)
         db.query(PlanningSmartTask).filter(PlanningSmartTask.id.in_(request)).delete(synchronize_session=False)
@@ -250,7 +250,7 @@ async def get_smart_plans(
 
 
 @router.get("/smart-tasks/{task_id}/result", summary="获取智能推荐规划结果")
-async def get_smart_plan_result(task_id: str, _user: User = Depends(get_user)) -> PlanningSmartResultSchema:
+async def get_smart_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSmartResultSchema:
     with DatabaseManager() as db:
         result = db.query(PlanningSmartResult).filter(PlanningSmartResult.task_id == task_id).first()
         if not result:
@@ -267,7 +267,7 @@ async def get_smart_plan_result(task_id: str, _user: User = Depends(get_user)) -
 
 @router.patch("/tasks/{task_type}/{task_id}/favorite", status_code=204, summary="更新规划收藏状态")
 async def update_plan_favorite(
-    task_type: str, task_id: str, request: PlanningResultFavoriteRequest, _user: User = Depends(get_user)
+    task_type: str, task_id: int, request: PlanningResultFavoriteRequest, _user: User = Depends(get_user)
 ):
     # 定义任务类型与结果模型的映射关系
     result_model_map = {

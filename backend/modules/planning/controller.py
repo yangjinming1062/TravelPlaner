@@ -11,7 +11,7 @@ class PlanningController:
     """
 
     @staticmethod
-    def plan_single(task_id: str):
+    def plan_single(task_id: int):
         """
         执行单一目的地规划
         """
@@ -60,7 +60,7 @@ class PlanningController:
         #     print(f"规划 '{params.id}' 执行失败: {str(e)}")
 
     @staticmethod
-    def plan_route(task_id: str):
+    def plan_route(task_id: int):
         """
         执行沿途游玩规划
         """
@@ -106,7 +106,7 @@ class PlanningController:
         #     print(f"规划 '{params.id}' 执行失败: {str(e)}")
 
     @staticmethod
-    def plan_multi(task_id: str):
+    def plan_multi(task_id: int):
         """
         执行多节点规划
         """
@@ -153,7 +153,7 @@ class PlanningController:
         #     print(f"规划 '{params.id}' 执行失败: {str(e)}")
 
     @staticmethod
-    def plan_smart(task_id: str):
+    def plan_smart(task_id: int):
         """
         执行智能推荐规划
         """
@@ -201,7 +201,7 @@ class PlanningController:
         #     print(f"规划 '{params.id}' 执行失败: {str(e)}")
 
 
-def add_planning_tasks(background_tasks: BackgroundTasks, planning_type: PlanningTypeEnum, task_id: str):
+def add_planning_tasks(background_tasks: BackgroundTasks, planning_type: PlanningTypeEnum, task_id: int):
     """根据模型类型添加对应的后台规划任务"""
     task_map = {
         PlanningTypeEnum.SINGLE: PlanningController.plan_single,
