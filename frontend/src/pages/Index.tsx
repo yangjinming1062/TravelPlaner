@@ -149,11 +149,20 @@ const Index = () => {
           {planningModes.map((mode, index) => {
             const IconComponent = mode.icon;
             
+            const handleModeClick = () => {
+              if (!isLoggedIn) {
+                // 未登录用户点击后跳转到登录页面，并保存想要访问的页面
+                navigate("/login", { state: { from: mode.route } });
+              } else {
+                navigate(mode.route);
+              }
+            };
+
             return (
               <Card 
                 key={mode.id} 
-                className="group hover:shadow-travel transition-all duration-300 cursor-pointer border-0 overflow-hidden"
-                onClick={() => navigate(mode.route)}
+                className={`group hover:shadow-travel transition-all duration-300 cursor-pointer border-0 overflow-hidden ${!isLoggedIn ? 'relative' : ''}`}
+                onClick={handleModeClick}
               >
                 <div className={`h-48 ${mode.gradient} relative overflow-hidden`}>
                   <img 
@@ -164,6 +173,11 @@ const Index = () => {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <IconComponent className="w-16 h-16 text-white drop-shadow-lg" />
                   </div>
+                  {!isLoggedIn && (
+                    <div className="absolute top-3 right-3 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      需要登录
+                    </div>
+                  )}
                 </div>
                 
                 <CardHeader>
@@ -181,10 +195,10 @@ const Index = () => {
                     className="w-full group-hover:shadow-soft transition-all"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(mode.route);
+                      handleModeClick();
                     }}
                   >
-                    开始规划
+                    {isLoggedIn ? "开始规划" : "登录后开始规划"}
                   </Button>
                 </CardContent>
               </Card>

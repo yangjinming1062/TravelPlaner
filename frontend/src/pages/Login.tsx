@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,12 @@ import { useLogin } from "@/hooks/use-api";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { mutate: login, isPending } = useLogin();
+
+  // 获取用户原本想要访问的页面
+  const from = (location.state as any)?.from || "/";
   
   const [formData, setFormData] = useState({
     username: "",
@@ -38,7 +42,8 @@ const LoginPage: React.FC = () => {
           title: "登录成功",
           description: "欢迎回来！",
         });
-        navigate("/");
+        // 重定向到用户原本想要访问的页面
+        navigate(from, { replace: true });
       },
       onError: (error: any) => {
         toast({

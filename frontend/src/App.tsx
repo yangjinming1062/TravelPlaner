@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
+// 认证组件
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+
 // 用户认证和设置页面
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
@@ -34,31 +37,99 @@ const App = () => (
           <Route path="/" element={<Index />} />
           
           {/* 用户认证和设置路由 */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/preferences-setup" element={<PreferencesSetupPage />} />
-          <Route path="/user-center" element={<UserCenterPage />} />
-          <Route path="/planning-history" element={<PlanningHistoryPage />} />
+          <Route path="/login" element={
+            <ProtectedRoute requireAuth={false}>
+              <LoginPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/register" element={
+            <ProtectedRoute requireAuth={false}>
+              <RegisterPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/preferences-setup" element={
+            <ProtectedRoute>
+              <PreferencesSetupPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-center" element={
+            <ProtectedRoute>
+              <UserCenterPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/planning-history" element={
+            <ProtectedRoute>
+              <PlanningHistoryPage />
+            </ProtectedRoute>
+          } />
           
           {/* 单一目的地模式路由 */}
-          <Route path="/single/task" element={<SingleTaskPage />} />
-          <Route path="/single/list" element={<Navigate to="/planning-history?type=single" replace />} />
-          <Route path="/single/result/:taskId" element={<SingleResultPage />} />
+          <Route path="/single/task" element={
+            <ProtectedRoute>
+              <SingleTaskPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/single/list" element={
+            <ProtectedRoute>
+              <Navigate to="/planning-history?type=single" replace />
+            </ProtectedRoute>
+          } />
+          <Route path="/single/result/:taskId" element={
+            <ProtectedRoute>
+              <SingleResultPage />
+            </ProtectedRoute>
+          } />
           
           {/* 沿途游玩模式路由 */}
-          <Route path="/route/task" element={<RouteTaskPage />} />
-          <Route path="/route/list" element={<Navigate to="/planning-history?type=route" replace />} />
-          <Route path="/route/result/:taskId" element={<RouteResultPage />} />
+          <Route path="/route/task" element={
+            <ProtectedRoute>
+              <RouteTaskPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/route/list" element={
+            <ProtectedRoute>
+              <Navigate to="/planning-history?type=route" replace />
+            </ProtectedRoute>
+          } />
+          <Route path="/route/result/:taskId" element={
+            <ProtectedRoute>
+              <RouteResultPage />
+            </ProtectedRoute>
+          } />
           
           {/* 多节点模式路由 */}
-          <Route path="/multi/task" element={<MultiTaskPage />} />
-          <Route path="/multi/list" element={<Navigate to="/planning-history?type=multi" replace />} />
-          <Route path="/multi/result/:taskId" element={<MultiResultPage />} />
+          <Route path="/multi/task" element={
+            <ProtectedRoute>
+              <MultiTaskPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/multi/list" element={
+            <ProtectedRoute>
+              <Navigate to="/planning-history?type=multi" replace />
+            </ProtectedRoute>
+          } />
+          <Route path="/multi/result/:taskId" element={
+            <ProtectedRoute>
+              <MultiResultPage />
+            </ProtectedRoute>
+          } />
           
           {/* 智能推荐模式路由 */}
-          <Route path="/smart/task" element={<SmartTaskPage />} />
-          <Route path="/smart/list" element={<Navigate to="/planning-history?type=smart" replace />} />
-          <Route path="/smart/result/:taskId" element={<SmartResultPage />} />
+          <Route path="/smart/task" element={
+            <ProtectedRoute>
+              <SmartTaskPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/smart/list" element={
+            <ProtectedRoute>
+              <Navigate to="/planning-history?type=smart" replace />
+            </ProtectedRoute>
+          } />
+          <Route path="/smart/result/:taskId" element={
+            <ProtectedRoute>
+              <SmartResultPage />
+            </ProtectedRoute>
+          } />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
