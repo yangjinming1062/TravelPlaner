@@ -18,21 +18,28 @@ export interface CommonPlanningData {
   departureDate?: Date;
   returnDate?: Date;
   primaryTransport: TransportMode;
+  groupSize: number;
 }
 
 interface CommonPlanningFieldsProps {
   data: CommonPlanningData;
   onDataChange: (data: CommonPlanningData) => void;
   showTransport?: boolean;
+  onGroupSizeChange?: (newSize: number) => void;
 }
 
 export default function CommonPlanningFields({ 
   data, 
   onDataChange, 
-  showTransport = true 
+  showTransport = true,
+  onGroupSizeChange 
 }: CommonPlanningFieldsProps) {
-  const updateData = (key: keyof CommonPlanningData, value: any) => {
-    onDataChange({ ...data, [key]: value });
+  const updateData = (key: keyof CommonPlanningData, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (key === 'groupSize' && onGroupSizeChange) {
+      onGroupSizeChange(value);
+    } else {
+      onDataChange({ ...data, [key]: value });
+    }
   };
 
   return (
@@ -62,7 +69,6 @@ export default function CommonPlanningFields({
             <Label htmlFor="departure-date">出发日期 *</Label>
             <div className="mt-2">
               <DatePicker
-                id="departure-date"
                 date={data.departureDate}
                 onDateChange={(date) => updateData("departureDate", date)}
                 placeholder="选择出发日期"
@@ -74,7 +80,6 @@ export default function CommonPlanningFields({
             <Label htmlFor="return-date">返程日期 *</Label>
             <div className="mt-2">
               <DatePicker
-                id="return-date"
                 date={data.returnDate}
                 onDateChange={(date) => updateData("returnDate", date)}
                 placeholder="选择返程日期"
@@ -83,6 +88,21 @@ export default function CommonPlanningFields({
               />
             </div>
           </div>
+        </div>
+
+        {/* 出行人数 */}
+        <div>
+          <Label htmlFor="group-size">出行人数</Label>
+          <Input
+            id="group-size"
+            type="number"
+            min="1"
+            max="20"
+            placeholder="请输入出行人数"
+            value={data.groupSize}
+            onChange={(e) => updateData("groupSize", parseInt(e.target.value) || 1)}
+            className="mt-2"
+          />
         </div>
 
         {/* 主要交通方式 */}

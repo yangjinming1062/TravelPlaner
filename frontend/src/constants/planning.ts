@@ -159,6 +159,7 @@ export const DEFAULT_COMMON_PLANNING_DATA = {
   departureDate: undefined,
   returnDate: undefined,
   primaryTransport: '自驾（纯电）' as TransportMode,
+  groupSize: 2, // 默认2人（夫妻）
 };
 
 // 类型定义

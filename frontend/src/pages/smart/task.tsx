@@ -22,6 +22,7 @@ import { useCreateSmartPlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 import { ENVIRONMENT_PREFERENCES, AVOID_REGIONS, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
 import type { EnvironmentPreference, AvoidRegion, AccommodationLevel } from "@/constants/planning";
+import { useGroupSize } from "@/hooks/use-group-size";
 
 const SmartTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ const SmartTaskPage: React.FC = () => {
   // 偏好设置
   const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
 
+  // 使用自定义Hook管理出行人数
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
 
   const toggleAvoidRegion = (region: AvoidRegion) => {
     if (avoidRegions.includes(region)) {
@@ -66,9 +69,7 @@ const SmartTaskPage: React.FC = () => {
       source: startPoint,
       departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
       return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      group_size: preferences.travelType === "家庭" ? 4 : 
-                  preferences.travelType === "朋友" ? 3 : 
-                  preferences.travelType === "情侣" ? 2 : 1,
+      group_size: commonData.groupSize,
       transport_mode: commonData.primaryTransport,
       max_travel_distance: maxTravelDistance,
       preferred_environment: preferredEnvironment || "海边",
@@ -133,6 +134,7 @@ const SmartTaskPage: React.FC = () => {
             <CommonPlanningFields 
               data={commonData}
               onDataChange={setCommonData}
+              onGroupSizeChange={handleGroupSizeChange}
             />
 
             {/* 智能推荐配置 */}
@@ -212,6 +214,7 @@ const SmartTaskPage: React.FC = () => {
             <PreferencesSection 
               preferences={preferences}
               onPreferencesChange={setPreferences}
+              onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}

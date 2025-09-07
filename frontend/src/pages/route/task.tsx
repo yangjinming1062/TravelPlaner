@@ -22,6 +22,7 @@ import { useCreateRoutePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 import { ROUTE_PREFERENCES, PREFERRED_STOP_TYPES, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
 import type { RoutePreference, PreferredStopType, AccommodationLevel } from "@/constants/planning";
+import { useGroupSize } from "@/hooks/use-group-size";
 
 const RouteTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +44,8 @@ const RouteTaskPage: React.FC = () => {
   // 偏好设置
   const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
 
+  // 使用自定义Hook管理出行人数
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
 
   const toggleStopType = (type: PreferredStopType) => {
     if (preferredStopTypes.includes(type)) {
@@ -70,9 +73,7 @@ const RouteTaskPage: React.FC = () => {
       target: endPoint,
       departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
       return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      group_size: preferences.travelType === "家庭" ? 4 : 
-                  preferences.travelType === "朋友" ? 3 : 
-                  preferences.travelType === "情侣" ? 2 : 1,
+      group_size: commonData.groupSize,
       transport_mode: commonData.primaryTransport,
       max_stopovers: maxStopovers,
       max_stopover_duration: maxStopoverDuration,
@@ -140,6 +141,7 @@ const RouteTaskPage: React.FC = () => {
             <CommonPlanningFields 
               data={commonData}
               onDataChange={setCommonData}
+              onGroupSizeChange={handleGroupSizeChange}
             />
 
             {/* 路线规划信息 */}
@@ -270,6 +272,7 @@ const RouteTaskPage: React.FC = () => {
             <PreferencesSection 
               preferences={preferences}
               onPreferencesChange={setPreferences}
+              onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}

@@ -13,6 +13,7 @@ import { useCreateSinglePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 import type { AccommodationLevel } from "@/constants/planning";
 import { DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
+import { useGroupSize } from "@/hooks/use-group-size";
 
 const SingleTaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +29,9 @@ const SingleTaskPage: React.FC = () => {
 
   // 偏好设置
   const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
+
+  // 使用自定义Hook管理出行人数
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
 
   const handlePlanGenerate = () => {
     // 验证必填字段
@@ -47,9 +51,7 @@ const SingleTaskPage: React.FC = () => {
       target: destination,
       departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
       return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      group_size: preferences.travelType === "家庭" ? 4 : 
-                  preferences.travelType === "朋友" ? 3 : 
-                  preferences.travelType === "情侣" ? 2 : 1,
+      group_size: commonData.groupSize,
       transport_mode: commonData.primaryTransport,
       preferred_transport_modes: preferences.transportMethods,
       accommodation_level: preferences.accommodationLevels,
@@ -112,6 +114,7 @@ const SingleTaskPage: React.FC = () => {
             <CommonPlanningFields 
               data={commonData}
               onDataChange={setCommonData}
+              onGroupSizeChange={handleGroupSizeChange}
             />
 
             {/* 目的地规划信息 */}
@@ -151,6 +154,7 @@ const SingleTaskPage: React.FC = () => {
             <PreferencesSection 
               preferences={preferences}
               onPreferencesChange={setPreferences}
+              onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}

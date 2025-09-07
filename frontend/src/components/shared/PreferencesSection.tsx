@@ -34,6 +34,7 @@ import type {
 interface PreferencesSectionProps {
   preferences: TravelPreferences;
   onPreferencesChange: (preferences: TravelPreferences) => void;
+  onTravelTypeChange?: (travelType: GroupTravelPreference) => void;
 }
 
 export interface TravelPreferences {
@@ -49,9 +50,14 @@ export interface TravelPreferences {
   specialRequirements: string;
 }
 
-export default function PreferencesSection({ preferences, onPreferencesChange }: PreferencesSectionProps) {
+export default function PreferencesSection({ preferences, onPreferencesChange, onTravelTypeChange }: PreferencesSectionProps) {
   const updatePreferences = (key: keyof TravelPreferences, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     onPreferencesChange({ ...preferences, [key]: value });
+    
+    // 如果是出行类型变化，通知父组件
+    if (key === 'travelType' && onTravelTypeChange) {
+      onTravelTypeChange(value as GroupTravelPreference);
+    }
   };
 
   const toggleArrayItem = (array: string[], item: string) => {
