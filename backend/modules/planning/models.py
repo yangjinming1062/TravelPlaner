@@ -36,7 +36,7 @@ class PlanningResultBase(ModelBase, ModelTimeColumns):
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False, comment="是否收藏")
 
 
-# region 单一目的地模式 (Single Destination)
+# region 单一目的地模式
 
 
 class PlanningSingleTask(PlanningTaskBase, PlanningPreferenceColumns):
@@ -63,7 +63,7 @@ class PlanningSingleResult(PlanningResultBase):
 
 # endregion
 
-# region 沿途游玩模式 (Route Planning)
+# region 沿途游玩模式
 
 
 class PlanningRouteTask(PlanningTaskBase, PlanningPreferenceColumns):
@@ -100,7 +100,7 @@ class PlanningRouteResult(PlanningResultBase):
 
 # endregion
 
-# region 多节点模式 (Multi Node)
+# region 多节点模式
 
 
 class PlanningMultiTask(PlanningTaskBase, PlanningPreferenceColumns):
@@ -129,7 +129,7 @@ class PlanningMultiResult(PlanningResultBase):
 
 # endregion
 
-# region 智能推荐模式 (Smart Recommendation)
+# region 智能推荐模式
 
 
 class PlanningSmartTask(PlanningTaskBase, PlanningPreferenceColumns):

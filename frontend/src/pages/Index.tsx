@@ -19,7 +19,7 @@ const Index = () => {
       icon: MapPin,
       image: singleDestination,
       gradient: "bg-gradient-ocean",
-      route: "/single-destination"
+      route: "/single/task"
     },
     {
       id: "route",
@@ -28,7 +28,7 @@ const Index = () => {
       icon: Route,
       image: routeTravel,
       gradient: "bg-gradient-sunset",
-      route: "/route-planning"
+      route: "/route/task"
     },
     {
       id: "multi",
@@ -37,7 +37,7 @@ const Index = () => {
       icon: Network,
       image: multiNode,
       gradient: "bg-gradient-nature",
-      route: "/multi-node"
+      route: "/multi/task"
     },
     {
       id: "ai",
@@ -46,7 +46,7 @@ const Index = () => {
       icon: Brain,
       image: aiRecommend,
       gradient: "bg-gradient-sky",
-      route: "/ai-recommend"
+      route: "/smart/task"
     }
   ];
 

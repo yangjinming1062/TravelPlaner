@@ -5,7 +5,9 @@ import {
   LoginRequest, 
   RegisterRequest, 
   UpdateUserProfileRequest,
-  UpdatePasswordRequest
+  UpdatePasswordRequest,
+  UserPreferencesSchema,
+  LoginResponse
 } from '../types/user';
 import {
   PlanningSingleTaskSchema,
@@ -27,9 +29,10 @@ export const useLogin = () => {
     mutationFn: (data: LoginRequest) => userApi.login(data),
     onSuccess: (data) => {
       // 保存 token 到 localStorage
-      localStorage.setItem('token', data.token);
+      const loginData = data as unknown as LoginResponse;
+      localStorage.setItem('token', loginData.token);
       // 更新用户信息缓存
-      queryClient.setQueryData(['user'], data.user);
+      queryClient.setQueryData(['user'], loginData.user);
     }
   });
 };
@@ -41,9 +44,10 @@ export const useRegister = () => {
     mutationFn: (data: RegisterRequest) => userApi.register(data),
     onSuccess: (data) => {
       // 保存 token 到 localStorage
-      localStorage.setItem('token', data.token);
+      const loginData = data as unknown as LoginResponse;
+      localStorage.setItem('token', loginData.token);
       // 更新用户信息缓存
-      queryClient.setQueryData(['user'], data.user);
+      queryClient.setQueryData(['user'], loginData.user);
     }
   });
 };
@@ -80,7 +84,7 @@ export const useUpdateUserPreferences = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: Partial<any>) => userApi.updateUserPreferences(data),
+    mutationFn: (data: Partial<UserPreferencesSchema>) => userApi.updateUserPreferences(data),
     onSuccess: (data) => {
       // 更新用户偏好缓存
       queryClient.setQueryData(['user-preferences'], data);
@@ -96,11 +100,15 @@ export const useCreateSinglePlan = () => {
   });
 };
 
-export const useSinglePlans = (params: PlanningSingleListRequest) => {
+export const useSinglePlansList = (params: PlanningSingleListRequest) => {
   return useQuery({
     queryKey: ['single-plans', params],
     queryFn: () => planningApi.getSinglePlans(params)
   });
+};
+
+export const useSinglePlans = (params: PlanningSingleListRequest) => {
+  return useSinglePlansList(params);
 };
 
 export const useSinglePlanResult = (taskId: string) => {
@@ -119,11 +127,15 @@ export const useCreateRoutePlan = () => {
   });
 };
 
-export const useRoutePlans = (params: PlanningRouteListRequest) => {
+export const useRoutePlansList = (params: PlanningRouteListRequest) => {
   return useQuery({
     queryKey: ['route-plans', params],
     queryFn: () => planningApi.getRoutePlans(params)
   });
+};
+
+export const useRoutePlans = (params: PlanningRouteListRequest) => {
+  return useRoutePlansList(params);
 };
 
 export const useRoutePlanResult = (taskId: string) => {
@@ -142,11 +154,15 @@ export const useCreateMultiPlan = () => {
   });
 };
 
-export const useMultiPlans = (params: PlanningMultiListRequest) => {
+export const useMultiPlansList = (params: PlanningMultiListRequest) => {
   return useQuery({
     queryKey: ['multi-plans', params],
     queryFn: () => planningApi.getMultiPlans(params)
   });
+};
+
+export const useMultiPlans = (params: PlanningMultiListRequest) => {
+  return useMultiPlansList(params);
 };
 
 export const useMultiPlanResult = (taskId: string) => {
@@ -165,11 +181,15 @@ export const useCreateSmartPlan = () => {
   });
 };
 
-export const useSmartPlans = (params: PlanningSmartListRequest) => {
+export const useSmartPlansList = (params: PlanningSmartListRequest) => {
   return useQuery({
     queryKey: ['smart-plans', params],
     queryFn: () => planningApi.getSmartPlans(params)
   });
+};
+
+export const useSmartPlans = (params: PlanningSmartListRequest) => {
+  return useSmartPlansList(params);
 };
 
 export const useSmartPlanResult = (taskId: string) => {

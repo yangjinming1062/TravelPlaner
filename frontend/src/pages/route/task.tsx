@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ import CommonPlanningFields, { type CommonPlanningData } from "@/components/shar
 import { useCreateRoutePlan } from "@/hooks/use-api";
 import { format } from "date-fns";
 
-const RoutePlanning = () => {
+const RouteTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateRoutePlan();
@@ -92,8 +92,8 @@ const RoutePlanning = () => {
       title: commonData.planTitle || `从${startPoint}到${endPoint}的沿途游玩计划`,
       source: startPoint,
       target: endPoint,
-      departure_date: commonData.departureDate ? format(commonData.departureDate, "yyyy-MM-dd") : "",
-      return_date: commonData.returnDate ? format(commonData.returnDate, "yyyy-MM-dd") : "",
+      departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
+      return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
       group_size: preferences.travelType === "家庭" ? 4 : 
                   preferences.travelType === "朋友" ? 3 : 
                   preferences.travelType === "情侣" ? 2 : 1,
@@ -122,7 +122,7 @@ const RoutePlanning = () => {
           description: "正在生成您的旅行计划，请稍候查看结果。",
         });
         // 跳转到结果页面
-        navigate(`/plan-result/route/${taskId}`);
+        navigate(`/route/result/${taskId}`);
       },
       onError: (error: any) => {
         toast({
@@ -137,7 +137,7 @@ const RoutePlanning = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-sunset text-white py-6">
+      <header className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-6">
         <div className="container mx-auto px-4 flex items-center gap-4">
           <Button 
             variant="ghost" 
@@ -149,7 +149,7 @@ const RoutePlanning = () => {
             返回
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">沿途游玩模式</h1>
+            <h1 className="text-2xl font-bold">沿途游玩规划</h1>
             <p className="text-white/90">发现旅途中的每一处美景</p>
           </div>
         </div>
@@ -167,10 +167,10 @@ const RoutePlanning = () => {
             />
 
             {/* 路线规划信息 */}
-            <Card className="shadow-travel">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Navigation className="w-5 h-5 text-accent" />
+                  <Navigation className="w-5 h-5 text-orange-500" />
                   路线信息
                 </CardTitle>
               </CardHeader>
@@ -315,43 +315,43 @@ const RoutePlanning = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">最优路线</h4>
-                    <p className="text-sm text-muted-foreground">计算最佳行驶路线，减少绕路和回头路</p>
+                    <p className="text-sm text-gray-600">计算最佳行驶路线，减少绕路和回头路</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">沿途发现</h4>
-                    <p className="text-sm text-muted-foreground">推荐沿途值得停留的景点和美食</p>
+                    <p className="text-sm text-gray-600">推荐沿途值得停留的景点和美食</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">时间平衡</h4>
-                    <p className="text-sm text-muted-foreground">合理安排驾驶时间与游玩时间的比例</p>
+                    <p className="text-sm text-gray-600">合理安排驾驶时间与游玩时间的比例</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">灵活调整</h4>
-                    <p className="text-sm text-muted-foreground">根据实际情况可随时调整行程安排</p>
+                    <p className="text-sm text-gray-600">根据实际情况可随时调整行程安排</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-accent/5 to-accent/10">
+            <Card className="bg-gradient-to-r from-orange-50 to-red-50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-accent" />
+                  <MapPin className="w-5 h-5 text-orange-500" />
                   规划内容
                 </CardTitle>
               </CardHeader>
@@ -369,26 +369,26 @@ const RoutePlanning = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-accent/20">
+            <Card className="border-orange-200">
               <CardHeader>
-                <CardTitle className="text-accent">适合场景</CardTitle>
+                <CardTitle className="text-orange-600">适合场景</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-accent rounded-full" />
+                    <div className="w-1 h-1 bg-orange-500 rounded-full" />
                     自驾游爱好者
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-accent rounded-full" />
+                    <div className="w-1 h-1 bg-orange-500 rounded-full" />
                     时间充裕的长途旅行
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-accent rounded-full" />
+                    <div className="w-1 h-1 bg-orange-500 rounded-full" />
                     喜欢探索未知景点
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-accent rounded-full" />
+                    <div className="w-1 h-1 bg-orange-500 rounded-full" />
                     家庭或朋友结伴出行
                   </li>
                 </ul>
@@ -401,4 +401,4 @@ const RoutePlanning = () => {
   );
 };
 
-export default RoutePlanning;
+export default RouteTaskPage;
