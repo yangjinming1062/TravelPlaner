@@ -182,16 +182,16 @@ const MultiTaskPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">多点连线</h4>
-                    <p className="text-sm text-gray-600">智能规划多个目的地的最佳游览顺序</p>
+                    <h4 className="font-semibold">多目的地</h4>
+                    <p className="text-sm text-gray-600">设置先后达到的多个目的地，规划不再局限于单地</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">时间优化</h4>
-                    <p className="text-sm text-gray-600">合理分配在每个节点的停留时间</p>
+                    <h4 className="font-semibold">时间精准</h4>
+                    <p className="text-sm text-gray-600">针对每个目的地的抵达和离开时间进行精准规划</p>
                   </div>
                 </div>
                 
@@ -199,15 +199,15 @@ const MultiTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">交通衔接</h4>
-                    <p className="text-sm text-gray-600">优化节点间的交通方式和时间安排</p>
+                    <p className="text-sm text-gray-600">优化目的地间的交通方式和时间安排</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">个性定制</h4>
-                    <p className="text-sm text-gray-600">针对每个节点制定专属的游玩计划</p>
+                    <h4 className="font-semibold">目的地游玩</h4>
+                    <p className="text-sm text-gray-600">为每个目的地推荐专属的游玩内容</p>
                   </div>
                 </div>
               </CardContent>
@@ -222,12 +222,11 @@ const MultiTaskPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">节点安排</Badge>
-                  <Badge variant="secondary">交通衔接</Badge>
-                  <Badge variant="secondary">住宿推荐</Badge>
+                  <Badge variant="secondary">各节点住宿</Badge>
+                  <Badge variant="secondary">各节点活动</Badge>
+                  <Badge variant="secondary">节点间交通</Badge>
                   <Badge variant="secondary">行程亮点</Badge>
-                  <Badge variant="secondary">时间优化</Badge>
-                  <Badge variant="secondary">费用预算</Badge>
+                  <Badge variant="secondary">最佳游览时间</Badge>
                 </div>
               </CardContent>
             </Card>

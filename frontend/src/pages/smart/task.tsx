@@ -227,7 +227,7 @@ const SmartTaskPage: React.FC = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>AI智能推荐</CardTitle>
+                <CardTitle>模式特色</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -241,8 +241,8 @@ const SmartTaskPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">数据分析</h4>
-                    <p className="text-sm text-gray-600">综合天气、季节、热度等多维度数据</p>
+                    <h4 className="font-semibold">重新分析</h4>
+                    <p className="text-sm text-gray-600">对推荐不满意可重新分析，直到满意为止</p>
                   </div>
                 </div>
                 
@@ -273,12 +273,12 @@ const SmartTaskPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">目的地推荐</Badge>
+                  <Badge variant="secondary">目的地详情</Badge>
                   <Badge variant="secondary">推荐理由</Badge>
-                  <Badge variant="secondary">最佳时间</Badge>
-                  <Badge variant="secondary">行程安排</Badge>
-                  <Badge variant="secondary">特色亮点</Badge>
-                  <Badge variant="secondary">预算建议</Badge>
+                  <Badge variant="secondary">目的地亮点</Badge>
+                  <Badge variant="secondary">住宿安排</Badge>
+                  <Badge variant="secondary">景点活动</Badge>
+                  <Badge variant="secondary">最佳游览时间</Badge>
                 </div>
               </CardContent>
             </Card>

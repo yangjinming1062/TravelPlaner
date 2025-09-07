@@ -285,14 +285,14 @@ const RouteTaskPage: React.FC = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>路线优势</CardTitle>
+                <CardTitle>模式特色</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">最优路线</h4>
-                    <p className="text-sm text-gray-600">计算最佳行驶路线，减少绕路和回头路</p>
+                    <h4 className="font-semibold">目的地深度</h4>
+                    <p className="text-sm text-gray-600">侧重目的地深度游玩和详细推荐</p>
                   </div>
                 </div>
                 
@@ -300,23 +300,23 @@ const RouteTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">沿途发现</h4>
-                    <p className="text-sm text-gray-600">推荐沿途值得停留的景点和美食</p>
+                    <p className="text-sm text-gray-600">发现并推荐沿途有价值的景点</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">时间平衡</h4>
-                    <p className="text-sm text-gray-600">合理安排驾驶时间与游玩时间的比例</p>
+                    <h4 className="font-semibold">路线优化</h4>
+                    <p className="text-sm text-gray-600">兼顾赶路和游玩，合理安排行程</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
-                    <h4 className="font-semibold">灵活调整</h4>
-                    <p className="text-sm text-gray-600">根据实际情况可随时调整行程安排</p>
+                    <h4 className="font-semibold">停留控制</h4>
+                    <p className="text-sm text-gray-600">可控制沿途停留次数和时长</p>
                   </div>
                 </div>
               </CardContent>
@@ -331,14 +331,12 @@ const RouteTaskPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">最优路线</Badge>
-                  <Badge variant="secondary">沿途景点</Badge>
-                  <Badge variant="secondary">休息站点</Badge>
-                  <Badge variant="secondary">加油站信息</Badge>
-                  <Badge variant="secondary">住宿推荐</Badge>
-                  <Badge variant="secondary">美食指南</Badge>
-                  <Badge variant="secondary">路况预警</Badge>
-                  <Badge variant="secondary">费用明细</Badge>
+                  <Badge variant="secondary">每日住宿安排</Badge>
+                  <Badge variant="secondary">途经点详情</Badge>
+                  <Badge variant="secondary">路线距离时间</Badge>
+                  <Badge variant="secondary">交通费用</Badge>
+                  <Badge variant="secondary">景点评分</Badge>
+                  <Badge variant="secondary">坐标位置</Badge>
                 </div>
               </CardContent>
             </Card>

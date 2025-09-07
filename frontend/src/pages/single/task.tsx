@@ -213,14 +213,12 @@ const SingleTaskPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">景点推荐</Badge>
-                  <Badge variant="secondary">路线规划</Badge>
                   <Badge variant="secondary">住宿建议</Badge>
-                  <Badge variant="secondary">美食推荐</Badge>
-                  <Badge variant="secondary">交通指引</Badge>
-                  <Badge variant="secondary">费用预算</Badge>
-                  <Badge variant="secondary">最佳时间</Badge>
-                  <Badge variant="secondary">注意事项</Badge>
+                  <Badge variant="secondary">景点活动</Badge>
+                  <Badge variant="secondary">路线规划</Badge>
+                  <Badge variant="secondary">行程亮点</Badge>
+                  <Badge variant="secondary">旅游贴士</Badge>
+                  <Badge variant="secondary">最佳游览时间</Badge>
                 </div>
               </CardContent>
             </Card>

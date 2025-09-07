@@ -18,7 +18,7 @@ const Index = () => {
     {
       id: "single",
       title: "单一目的地模式",
-      description: "专注于单个目的地的深度游玩，提供目的地内部景点推荐，优化住宿位置和行程安排",
+      description: "专注于单个目的地的深度游玩，提供目的地的景点推荐",
       icon: MapPin,
       image: singleDestination,
       gradient: "bg-gradient-ocean",
@@ -27,7 +27,7 @@ const Index = () => {
     {
       id: "route",
       title: "沿途游玩模式", 
-      description: "规划从出发地到目的地的最优路线，发现并推荐沿途有价值的景点，平衡路程时间和游玩体验",
+      description: "侧重在目的地的游玩和推荐，同时发现并推荐沿途有价值的景点",
       icon: Route,
       image: routeTravel,
       gradient: "bg-gradient-sunset",
@@ -36,7 +36,7 @@ const Index = () => {
     {
       id: "multi",
       title: "多节点模式",
-      description: "支持多个中转城市的复杂行程，精确控制每个节点的到达和停留时间，优化整体路线和交通安排",
+      description: "设置先后达到的多个目的地，针对每个目的地的抵达和离开时间推荐游玩内容",
       icon: Network,
       image: multiNode,
       gradient: "bg-gradient-nature",
@@ -45,7 +45,7 @@ const Index = () => {
     {
       id: "ai",
       title: "智能推荐模式",
-      description: "基于预算、时间、出行方式的智能目的地推荐，AI分析用户需求，推荐最适合的旅游目的地，提供完整的目的地规划方案",
+      description: "基于预算、时间、出行方式等参数由AI分析用户需求，推荐最适合的旅游目的地",
       icon: Brain,
       image: aiRecommend,
       gradient: "bg-gradient-sky",
@@ -225,8 +225,8 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-nature rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">精准定位</h3>
-              <p className="text-muted-foreground">精确的地理位置服务，不错过任何美景</p>
+              <h3 className="text-xl font-semibold mb-2">精准推荐</h3>
+              <p className="text-muted-foreground">根据你的需求，推荐最适合的旅游目的地</p>
             </div>
             
             <div className="p-6">
