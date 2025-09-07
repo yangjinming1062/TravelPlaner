@@ -1,3 +1,5 @@
+from .controller import add_planning_tasks
+from .enums import PlanningTypeEnum
 from .models import PlanningMultiResult
 from .models import PlanningMultiTask
 from .models import PlanningRouteResult
@@ -9,6 +11,9 @@ from .models import PlanningSmartTask
 from .schemas import *
 
 __all__ = [
+    "add_planning_tasks",
+    # 枚举类型
+    "PlanningTypeEnum",
     # 数据模型
     "PlanningSingleTask",
     "PlanningSingleResult",

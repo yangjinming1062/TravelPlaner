@@ -1,10 +1,3 @@
-"""empty message
-
-Revision ID: 0.0.1
-Revises: 
-Create Date: 2025-09-06 20:45:59.573793
-
-"""
 from typing import Sequence
 from typing import Union
 

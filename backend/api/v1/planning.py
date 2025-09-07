@@ -1,10 +1,8 @@
 from common.api import *
 from fastapi import BackgroundTasks
 from fastapi import Query
-from modules.planning.controller import add_planning_tasks
-from modules.planning.models import *
-from modules.planning.schemas import *
-from modules.user.models import User
+from modules.planning import *
+from modules.user import User
 
 router = get_router()
 
@@ -20,9 +18,9 @@ async def create_single_plan(
         item = PlanningSingleTask(**request.model_dump(), user_id=user.id)
         db.add(item)
         db.commit()
-        db.expunge(item)
-    add_planning_tasks(background_tasks, item)
-    return item.id
+        item_id = item.id
+    add_planning_tasks(background_tasks, PlanningTypeEnum.SINGLE, item_id)
+    return item_id
 
 
 @router.delete("/single-tasks", status_code=204, summary="删除单一目的地规划")
@@ -86,9 +84,9 @@ async def create_route_plan(
         item = PlanningRouteTask(**request.model_dump(), user_id=user.id)
         db.add(item)
         db.commit()
-        db.expunge(item)
-    add_planning_tasks(background_tasks, item)
-    return item.id
+        item_id = item.id
+    add_planning_tasks(background_tasks, PlanningTypeEnum.ROUTE, item_id)
+    return item_id
 
 
 @router.delete("/route-tasks", status_code=204, summary="删除沿途游玩规划")
@@ -150,9 +148,9 @@ async def create_multi_plan(
         item = PlanningMultiTask(**request.model_dump(), user_id=user.id)
         db.add(item)
         db.commit()
-        db.expunge(item)
-    add_planning_tasks(background_tasks, item)
-    return item.id
+        item_id = item.id
+    add_planning_tasks(background_tasks, PlanningTypeEnum.MULTI, item_id)
+    return item_id
 
 
 @router.delete("/multi-tasks", status_code=204, summary="删除多节点规划")
@@ -212,9 +210,9 @@ async def create_smart_plan(
         item = PlanningSmartTask(**request.model_dump(), user_id=user.id)
         db.add(item)
         db.commit()
-        db.expunge(item)
-    add_planning_tasks(background_tasks, item)
-    return item.id
+        item_id = item.id
+    add_planning_tasks(background_tasks, PlanningTypeEnum.SMART, item_id)
+    return item_id
 
 
 @router.delete("/smart-tasks", status_code=204, summary="删除智能推荐规划")
