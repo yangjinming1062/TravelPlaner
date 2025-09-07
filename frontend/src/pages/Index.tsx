@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Route, Network, Brain } from "lucide-react";
+import { MapPin, Route, Network, Brain, User, History, LogIn } from "lucide-react";
+import { useUserProfile } from "@/hooks/use-api";
 import heroImage from "@/assets/hero-travel.jpg";
 import singleDestination from "@/assets/single-destination.jpg";
 import routeTravel from "@/assets/route-travel.jpg";
@@ -10,6 +11,8 @@ import aiRecommend from "@/assets/ai-recommend.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { data: userProfile } = useUserProfile();
+  const isLoggedIn = !!localStorage.getItem('token');
 
   const planningModes = [
     {
@@ -52,6 +55,58 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation Bar */}
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-blue-600">智能旅游规划</h1>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {isLoggedIn ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate("/planning-history")}
+                    className="hidden md:flex"
+                  >
+                    <History className="w-4 h-4 mr-2" />
+                    规划历史
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate("/user-center")}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    {(userProfile as any)?.nickname || (userProfile as any)?.username || '用户中心'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate("/login")}
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    登录
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={() => navigate("/register")}
+                  >
+                    注册
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 
