@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,8 +43,12 @@ interface PlanRecord {
 const PlanningHistoryPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // 从URL参数初始化筛选条件
+  const initialType = searchParams.get('type') || "all";
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState(initialType);
   const [filterStatus, setFilterStatus] = useState("all");
   const [allPlans, setAllPlans] = useState<PlanRecord[]>([]);
 
@@ -56,31 +60,42 @@ const PlanningHistoryPage: React.FC = () => {
   const multiPlansQuery = useMultiPlansList({ page: 0, size: 100 });
   const smartPlansQuery = useSmartPlansList({ page: 0, size: 100 });
 
+  // 监听URL参数变化
+  useEffect(() => {
+    const typeParam = searchParams.get('type') || "all";
+    if (typeParam !== filterType) {
+      setFilterType(typeParam);
+    }
+  }, [searchParams]);
+
   // 合并所有规划数据
   useEffect(() => {
     const plans: PlanRecord[] = [];
 
     // 单一目的地规划
     if (singlePlansQuery.data?.data) {
-      plans.push(...singlePlansQuery.data.data.map(plan => ({
+      const singleData = singlePlansQuery.data as any;
+      plans.push(...singleData.data.map((plan: any) => ({
         ...plan,
         type: "single" as const,
-        destination: (plan as any).target || "未知目的地"
+        destination: plan.target || "未知目的地"
       })));
     }
 
-    // 沿途游玩规划
+    // 沿途游玩规划  
     if (routePlansQuery.data?.data) {
-      plans.push(...routePlansQuery.data.data.map(plan => ({
+      const routeData = routePlansQuery.data as any;
+      plans.push(...routeData.data.map((plan: any) => ({
         ...plan,
         type: "route" as const,
-        destination: (plan as any).target || "未知目的地"
+        destination: plan.target || "未知目的地"
       })));
     }
 
     // 多节点规划
     if (multiPlansQuery.data?.data) {
-      plans.push(...multiPlansQuery.data.data.map(plan => ({
+      const multiData = multiPlansQuery.data as any;
+      plans.push(...multiData.data.map((plan: any) => ({
         ...plan,
         type: "multi" as const,
         destination: "多个节点"
@@ -89,10 +104,11 @@ const PlanningHistoryPage: React.FC = () => {
 
     // 智能推荐规划
     if (smartPlansQuery.data?.data) {
-      plans.push(...smartPlansQuery.data.data.map(plan => ({
+      const smartData = smartPlansQuery.data as any;
+      plans.push(...smartData.data.map((plan: any) => ({
         ...plan,
         type: "smart" as const,
-        destination: (plan as any).destination || "AI推荐目的地"
+        destination: plan.destination || "AI推荐目的地"
       })));
     }
 
@@ -179,12 +195,26 @@ const PlanningHistoryPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <Button onClick={() => navigate("/")} variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回首页
-            </Button>
-            <h1 className="text-2xl font-bold text-blue-600">规划历史</h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <Button onClick={() => navigate("/")} variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                返回首页
+              </Button>
+              <h1 className="text-2xl font-bold text-blue-600">
+                {filterType === "all" ? "规划历史" : `${getTypeText(filterType)}规划历史`}
+              </h1>
+            </div>
+            
+            {filterType !== "all" && (
+              <Button 
+                onClick={() => navigate(`/${filterType}/task`)}
+                className="flex items-center gap-2"
+              >
+                <Heart className="w-4 h-4" />
+                创建新的{getTypeText(filterType)}规划
+              </Button>
+            )}
           </div>
 
           {/* Filters */}
@@ -202,7 +232,17 @@ const PlanningHistoryPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                <Select value={filterType} onValueChange={setFilterType}>
+                <Select value={filterType} onValueChange={(value) => {
+                  setFilterType(value);
+                  // 更新URL参数
+                  const newParams = new URLSearchParams(searchParams);
+                  if (value === "all") {
+                    newParams.delete('type');
+                  } else {
+                    newParams.set('type', value);
+                  }
+                  setSearchParams(newParams, { replace: true });
+                }}>
                   <SelectTrigger className="w-full md:w-40">
                     <SelectValue placeholder="规划类型" />
                   </SelectTrigger>
