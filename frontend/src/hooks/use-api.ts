@@ -111,12 +111,36 @@ export const useSinglePlans = (params: PlanningSingleListRequest) => {
   return useSinglePlansList(params);
 };
 
-export const useSinglePlanResult = (taskId: number) => {
+// 通用规划任务状态查询
+export const usePlanTaskStatus = (taskType: string, taskId: number) => {
+  return useQuery({
+    queryKey: ['plan-task-status', taskType, taskId],
+    queryFn: () => planningApi.getPlanTaskStatus(taskType, taskId),
+    refetchInterval: 10000, // 每10秒自动刷新状态
+    refetchIntervalInBackground: true, // 后台也继续刷新
+    staleTime: 0 // 立即过期，确保总是获取最新状态
+  });
+};
+
+// 各规划类型的便捷状态查询hooks
+export const useSinglePlanStatus = (taskId: number) => usePlanTaskStatus("single", taskId);
+export const useRoutePlanStatus = (taskId: number) => usePlanTaskStatus("route", taskId);
+export const useMultiPlanStatus = (taskId: number) => usePlanTaskStatus("multi", taskId);
+export const useSmartPlanStatus = (taskId: number) => usePlanTaskStatus("smart", taskId);
+
+export const useSinglePlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['single-plan-result', taskId],
     queryFn: () => planningApi.getSinglePlanResult(taskId),
-    retry: 3, // 对于规划结果，可能需要重试几次，因为生成需要时间
-    retryDelay: 3000 // 3秒后重试
+    enabled: enabled, // 只有在任务完成时才尝试获取结果
+    retry: (failureCount, error: any) => {
+      // 如果是任务正在处理中的错误，不重试
+      if (error?.response?.status === 400) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: 5000 // 5秒后重试
   });
 };
 
@@ -138,12 +162,18 @@ export const useRoutePlans = (params: PlanningRouteListRequest) => {
   return useRoutePlansList(params);
 };
 
-export const useRoutePlanResult = (taskId: number) => {
+export const useRoutePlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['route-plan-result', taskId],
     queryFn: () => planningApi.getRoutePlanResult(taskId),
-    retry: 3,
-    retryDelay: 3000
+    enabled: enabled,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 400) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: 5000
   });
 };
 
@@ -165,12 +195,18 @@ export const useMultiPlans = (params: PlanningMultiListRequest) => {
   return useMultiPlansList(params);
 };
 
-export const useMultiPlanResult = (taskId: number) => {
+export const useMultiPlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['multi-plan-result', taskId],
     queryFn: () => planningApi.getMultiPlanResult(taskId),
-    retry: 3,
-    retryDelay: 3000
+    enabled: enabled,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 400) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: 5000
   });
 };
 
@@ -192,12 +228,18 @@ export const useSmartPlans = (params: PlanningSmartListRequest) => {
   return useSmartPlansList(params);
 };
 
-export const useSmartPlanResult = (taskId: number) => {
+export const useSmartPlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['smart-plan-result', taskId],
     queryFn: () => planningApi.getSmartPlanResult(taskId),
-    retry: 3,
-    retryDelay: 3000
+    enabled: enabled,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 400) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: 5000
   });
 };
 

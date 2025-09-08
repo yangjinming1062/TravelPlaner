@@ -10,19 +10,27 @@ import {
   Lightbulb
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useSinglePlanResult, useUpdatePlanFavorite } from "@/hooks/use-api";
+import { useSinglePlanResult, usePlanTaskStatus, useUpdatePlanFavorite } from "@/hooks/use-api";
 
 // 导入公共组件
 import { PlanSummary } from "@/components/shared/PlanSummary";
 import { DailyPlanList } from "@/components/shared/DailyPlan";
 import { HighlightsList } from "@/components/shared/Highlights";
+import PlanningStatusDisplay from "@/components/shared/PlanningStatusDisplay";
 
 const SingleResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const taskIdNumber = parseInt(taskId || "0", 10);
-  const { data: planResult, isLoading, isError, error } = useSinglePlanResult(taskIdNumber);
+  
+  // 首先获取任务状态
+  const { data: taskStatus, isLoading: statusLoading, isError: statusError } = usePlanTaskStatus("single", taskIdNumber);
+  
+  // 只有当任务完成时才尝试获取结果
+  const shouldFetchResult = taskStatus?.status === "completed" && taskStatus?.has_result;
+  const { data: planResult, isLoading: resultLoading, isError: resultError, error } = useSinglePlanResult(taskIdNumber, shouldFetchResult);
+  
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
@@ -62,54 +70,24 @@ const SingleResultPage: React.FC = () => {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin mx-auto text-blue-500" />
-          <p className="mt-4 text-lg">正在生成您的旅行计划...</p>
-          <p className="text-gray-500">这可能需要一些时间</p>
-        </div>
-      </div>
-    );
-  }
+  // 检查是否需要显示状态组件
+  const shouldShowStatus = statusLoading || statusError || !taskStatus || 
+    taskStatus.status !== "completed" || resultLoading || resultError || !planResult;
 
-  if (isError) {
+  if (shouldShowStatus) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <AlertCircle className="w-16 h-16 mx-auto text-red-500" />
-          <h2 className="text-2xl font-bold mt-4">获取规划结果失败</h2>
-          <p className="mt-2 text-gray-500">
-            {error?.message || "无法获取旅行计划，请稍后重试。"}
-          </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
-            返回上一页
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!planResult) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">未找到规划结果</h2>
-          <p className="mt-2 text-gray-500">
-            该旅行计划可能仍在生成中或已被删除。
-          </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
-            返回上一页
-          </Button>
-        </div>
-      </div>
+      <PlanningStatusDisplay
+        taskStatus={taskStatus}
+        isStatusLoading={statusLoading}
+        isStatusError={statusError}
+        isResultLoading={resultLoading}
+        isResultError={resultError}
+        hasResult={!!planResult}
+        resultError={error}
+        planningTypeDisplayName="单一目的地规划"
+        planningTypeColor="text-blue-500"
+        createNewPlanRoute="/single/task"
+      />
     );
   }
 

@@ -7,20 +7,28 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useRoutePlanResult, useUpdatePlanFavorite } from "@/hooks/use-api";
+import { useRoutePlanResult, useRoutePlanStatus, useUpdatePlanFavorite } from "@/hooks/use-api";
 
 // 导入公共组件
 import { PlanSummary } from "@/components/shared/PlanSummary";
 import { DailyPlanList } from "@/components/shared/DailyPlan";
 import { RouteInfoList, RouteSummary } from "@/components/shared/RouteInfo";
 import { WaypointsList } from "@/components/shared/Waypoints";
+import PlanningStatusDisplay from "@/components/shared/PlanningStatusDisplay";
 
 const RouteResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const taskIdNumber = parseInt(taskId || "0", 10);
-  const { data: planResult, isLoading, isError, error } = useRoutePlanResult(taskIdNumber);
+  
+  // 首先获取任务状态
+  const { data: taskStatus, isLoading: statusLoading, isError: statusError } = useRoutePlanStatus(taskIdNumber);
+  
+  // 只有当任务完成时才尝试获取结果
+  const shouldFetchResult = taskStatus?.data?.status === "completed" && taskStatus?.data?.has_result;
+  const { data: planResult, isLoading: resultLoading, isError: resultError, error } = useRoutePlanResult(taskIdNumber, shouldFetchResult);
+  
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
   
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
@@ -58,54 +66,24 @@ const RouteResultPage: React.FC = () => {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin mx-auto text-orange-500" />
-          <p className="mt-4 text-lg">正在生成您的沿途游玩方案...</p>
-          <p className="text-gray-500">这可能需要一些时间</p>
-        </div>
-      </div>
-    );
-  }
+  // 检查是否需要显示状态组件
+  const shouldShowStatus = statusLoading || statusError || !taskStatus || 
+    taskStatus.data?.status !== "completed" || resultLoading || resultError || !planResult;
 
-  if (isError) {
+  if (shouldShowStatus) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <AlertCircle className="w-16 h-16 mx-auto text-red-500" />
-          <h2 className="text-2xl font-bold mt-4">获取规划结果失败</h2>
-          <p className="mt-2 text-gray-500">
-            {error?.message || "无法获取旅行计划，请稍后重试。"}
-          </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
-            返回上一页
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!planResult) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">未找到规划结果</h2>
-          <p className="mt-2 text-gray-500">
-            该旅行计划可能仍在生成中或已被删除。
-          </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
-            返回上一页
-          </Button>
-        </div>
-      </div>
+      <PlanningStatusDisplay
+        taskStatus={taskStatus?.data}
+        isStatusLoading={statusLoading}
+        isStatusError={statusError}
+        isResultLoading={resultLoading}
+        isResultError={resultError}
+        hasResult={!!planResult}
+        resultError={error}
+        planningTypeDisplayName="沿途游玩规划"
+        planningTypeColor="text-orange-500"
+        createNewPlanRoute="/route/task"
+      />
     );
   }
 
@@ -133,31 +111,31 @@ const RouteResultPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* 规划概览 */}
         <PlanSummary 
-          plan={planResult as any}
+          plan={planResult.data}
           onToggleFavorite={handleFavoriteToggle}
           onShare={handleShare}
           onExport={handleExport}
         />
 
         {/* 路线总览 */}
-        {planResult.route_plan && planResult.route_plan.length > 0 && (
-          <RouteSummary routePlans={planResult.route_plan} />
+        {planResult.data.route_plan && planResult.data.route_plan.length > 0 && (
+          <RouteSummary routePlans={planResult.data.route_plan} />
         )}
 
         {/* 途经景点 */}
-        {planResult.waypoints && planResult.waypoints.length > 0 && (
-          <WaypointsList waypoints={planResult.waypoints} />
+        {planResult.data.waypoints && planResult.data.waypoints.length > 0 && (
+          <WaypointsList waypoints={planResult.data.waypoints} />
         )}
 
         {/* 详细路线信息 */}
-        {planResult.route_plan && planResult.route_plan.length > 0 && (
-          <RouteInfoList routePlans={planResult.route_plan} />
+        {planResult.data.route_plan && planResult.data.route_plan.length > 0 && (
+          <RouteInfoList routePlans={planResult.data.route_plan} />
         )}
 
         {/* 每日行程安排 */}
-        {planResult.daily_plan && planResult.daily_plan.length > 0 && (
+        {planResult.data.daily_plan && planResult.data.daily_plan.length > 0 && (
           <DailyPlanList 
-            dailyPlans={planResult.daily_plan}
+            dailyPlans={planResult.data.daily_plan}
             showRouteInfo={true}
           />
         )}

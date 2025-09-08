@@ -30,6 +30,21 @@ export const getSinglePlans = (params: PlanningSingleListRequest) => {
   return apiClient.post<PlanningSingleListResponse>('/planning/single-tasks/list', params);
 };
 
+// 通用任务状态检查
+export const getPlanTaskStatus = (taskType: string, taskId: number) => {
+  return apiClient.get<{ 
+    task_id: number; 
+    task_type: string;
+    status: string; 
+    has_result: boolean; 
+    title: string; 
+    target?: string; 
+    max_travel_distance?: number;
+    preferred_environment?: string;
+    created_at: string 
+  }>(`/planning/tasks/${taskType}/${taskId}/status`);
+};
+
 export const getSinglePlanResult = (taskId: number) => {
   return apiClient.get<PlanningSingleResultSchema>(`/planning/single-tasks/${taskId}/result`);
 };
