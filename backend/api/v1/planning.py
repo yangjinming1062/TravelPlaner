@@ -14,11 +14,11 @@ def check_task_status(task, task_id: int):
         raise APIException(APICode.NOT_FOUND, "任务不存在")
 
     if task.status == "pending":
-        raise APIException(APICode.BAD_REQUEST, "任务尚未开始处理")
+        raise APIException(APICode.QUERY, "任务尚未开始处理")
     elif task.status == "processing":
-        raise APIException(APICode.BAD_REQUEST, "任务正在处理中，请稍后再试")
+        raise APIException(APICode.QUERY, "任务正在处理中，请稍后再试")
     elif task.status == "failed":
-        raise APIException(APICode.INTERNAL_SERVER_ERROR, "任务处理失败")
+        raise APIException(APICode.QUERY, "任务处理失败")
 
 
 # region API: 单一目的地规划
@@ -145,16 +145,25 @@ async def get_route_plans(
 
 @router.get("/route-tasks/{task_id}/result", summary="获取沿途游玩规划结果")
 async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
-    with DatabaseManager() as db:
-        # 检查任务状态
-        task = db.query(PlanningRouteTask).filter(PlanningRouteTask.id == task_id).first()
-        check_task_status(task, task_id)
+    try:
+        with DatabaseManager() as db:
+            # 检查任务状态
+            task = db.query(PlanningRouteTask).filter(PlanningRouteTask.id == task_id).first()
+            check_task_status(task, task_id)
 
-        result = db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id == task_id).first()
-        if not result:
-            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
-        db.expunge(result)
-    return PlanningRouteResultSchema.model_validate(result)
+            result = db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id == task_id).first()
+            if not result:
+                raise APIException(APICode.NOT_FOUND, "规划结果不存在")
+            db.expunge(result)
+        return PlanningRouteResultSchema.model_validate(result)
+    except APIException:
+        # 重新抛出已知的API异常
+        raise
+    except Exception as e:
+        logger.error(f"获取沿途游玩规划结果时发生错误 (task_id: {task_id}): {e}")
+        if "connection" in str(e).lower() or "operational" in str(e).lower():
+            raise APIException(APICode.EXCEPTION, "数据库连接失败，请稍后重试")
+        raise APIException(APICode.EXCEPTION, f"获取规划结果失败: {str(e)}")
 
 
 # endregion

@@ -75,7 +75,7 @@ class Config(BaseModel):
         description="数据库连接池大小",
     )
     db_pool_recycle: int = Field(
-        default=int(get_env("DB_POOL_RECYCLE", 60)),
+        default=int(get_env("DB_POOL_RECYCLE", 300)),
         description="数据库连接池回收时间",
     )
     db_echo: bool = Field(

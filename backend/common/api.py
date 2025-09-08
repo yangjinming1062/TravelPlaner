@@ -102,14 +102,21 @@ async def get_user(token: str = Depends(OAUTH2_SCHEME)):
     try:
         payload = jwt.decode(token, CONFIG.jwt_secret, algorithms=[CONSTANTS.JWT_ALGORITHM])
         if uid := payload.get("uid"):
-            with DatabaseManager() as db:
-                if user := db.get(User, uid):
-                    if user.status == UserStatusEnum.FORBIDDEN:
-                        raise APIException(APICode.FORBIDDEN)
-                    db.expunge(user)
-                    return user
-                else:
-                    raise APIException(APICode.INVALID_USER)
+            try:
+                with DatabaseManager() as db:
+                    if user := db.get(User, uid):
+                        if user.status == UserStatusEnum.FORBIDDEN:
+                            raise APIException(APICode.FORBIDDEN)
+                        db.expunge(user)
+                        return user
+                    else:
+                        raise APIException(APICode.INVALID_USER)
+            except Exception as e:
+                logger.error(f"获取用户信息时数据库连接失败: {e}")
+                # 如果是数据库连接问题，返回服务器错误而不是用户认证错误
+                if "connection" in str(e).lower() or "operational" in str(e).lower():
+                    raise APIException(APICode.EXCEPTION, "数据库连接失败，请稍后重试")
+                raise APIException(APICode.INVALID_USER)
         else:
             raise APIException(APICode.INVALID_TOKEN)
     except JWTError:
