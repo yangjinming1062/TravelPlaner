@@ -40,7 +40,7 @@ def upgrade() -> None:
             nullable=False,
             comment="预算灵活性：节俭为主、性价比优先、舒适为主",
         ),
-        sa.Column("dietary_restrictions", sa.JSON(), nullable=False, comment="饮食限制"),
+        sa.Column("dietary_restrictions", sa.TEXT(), nullable=False, comment="饮食限制"),
         sa.Column("group_travel_preference", sa.TEXT(), nullable=False, comment="出行类型：独行、情侣、家庭、朋友"),
         sa.Column("custom_preferences", sa.TEXT(), nullable=False, comment="附加的需求"),
         sa.PrimaryKeyConstraint("id"),
@@ -74,7 +74,7 @@ def upgrade() -> None:
             nullable=False,
             comment="预算灵活性：节俭为主、性价比优先、舒适为主",
         ),
-        sa.Column("dietary_restrictions", sa.JSON(), nullable=False, comment="饮食限制"),
+        sa.Column("dietary_restrictions", sa.TEXT(), nullable=False, comment="饮食限制"),
         sa.Column("group_travel_preference", sa.TEXT(), nullable=False, comment="出行类型：独行、情侣、家庭、朋友"),
         sa.Column("custom_preferences", sa.TEXT(), nullable=False, comment="附加的需求"),
         sa.ForeignKeyConstraint(
@@ -124,7 +124,7 @@ def upgrade() -> None:
             nullable=False,
             comment="预算灵活性：节俭为主、性价比优先、舒适为主",
         ),
-        sa.Column("dietary_restrictions", sa.JSON(), nullable=False, comment="饮食限制"),
+        sa.Column("dietary_restrictions", sa.TEXT(), nullable=False, comment="饮食限制"),
         sa.Column("group_travel_preference", sa.TEXT(), nullable=False, comment="出行类型：独行、情侣、家庭、朋友"),
         sa.Column("custom_preferences", sa.TEXT(), nullable=False, comment="附加的需求"),
         sa.ForeignKeyConstraint(
@@ -162,7 +162,7 @@ def upgrade() -> None:
             nullable=False,
             comment="预算灵活性：节俭为主、性价比优先、舒适为主",
         ),
-        sa.Column("dietary_restrictions", sa.JSON(), nullable=False, comment="饮食限制"),
+        sa.Column("dietary_restrictions", sa.TEXT(), nullable=False, comment="饮食限制"),
         sa.Column("group_travel_preference", sa.TEXT(), nullable=False, comment="出行类型：独行、情侣、家庭、朋友"),
         sa.Column("custom_preferences", sa.TEXT(), nullable=False, comment="附加的需求"),
         sa.ForeignKeyConstraint(
@@ -202,7 +202,7 @@ def upgrade() -> None:
             nullable=False,
             comment="预算灵活性：节俭为主、性价比优先、舒适为主",
         ),
-        sa.Column("dietary_restrictions", sa.JSON(), nullable=False, comment="饮食限制"),
+        sa.Column("dietary_restrictions", sa.TEXT(), nullable=False, comment="饮食限制"),
         sa.Column("group_travel_preference", sa.TEXT(), nullable=False, comment="出行类型：独行、情侣、家庭、朋友"),
         sa.Column("custom_preferences", sa.TEXT(), nullable=False, comment="附加的需求"),
         sa.ForeignKeyConstraint(

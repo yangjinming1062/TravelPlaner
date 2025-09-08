@@ -25,10 +25,7 @@ import OptionalFieldsSection, {
 import NavigationHeader from '@/components/shared/NavigationHeader';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  ENVIRONMENT_PREFERENCES,
-  AVOID_REGIONS,
-} from '@/constants/planning';
+import { ENVIRONMENT_PREFERENCES, AVOID_REGIONS } from '@/constants/planning';
 import { useCreateSmartPlan } from '@/hooks/use-api';
 import { format } from 'date-fns';
 import { DEFAULT_TRAVEL_PREFERENCES } from '@/constants/planning';
@@ -52,7 +49,10 @@ const SmartSpecificFields = ({
   onDataChange: (data: SmartSpecificData) => void;
   className?: string;
 }) => {
-  const updateData = (key: keyof SmartSpecificData, value: number | string | AvoidRegion[]) => {
+  const updateData = (
+    key: keyof SmartSpecificData,
+    value: number | string | AvoidRegion[],
+  ) => {
     onDataChange({ ...data, [key]: value });
   };
 
@@ -60,12 +60,12 @@ const SmartSpecificFields = ({
     const newAvoidRegions = data.avoidRegions.includes(region)
       ? data.avoidRegions.filter((r) => r !== region)
       : [...data.avoidRegions, region];
-    
+
     updateData('avoidRegions', newAvoidRegions);
   };
 
   return (
-    <Card className={cn("shadow-sm", className)}>
+    <Card className={cn('shadow-sm', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-700">
           <Sparkles className="w-5 h-5" />
@@ -82,14 +82,16 @@ const SmartSpecificFields = ({
             <MapPin className="w-4 h-4 text-blue-500" />
             <span className="text-sm font-medium text-gray-700">出行范围</span>
           </div>
-          
+
           <div>
             <Label className="text-base font-medium">
               最大出行距离: {data.maxTravelDistance} 公里
             </Label>
             <Slider
               value={[data.maxTravelDistance]}
-              onValueChange={(value) => updateData('maxTravelDistance', value[0])}
+              onValueChange={(value) =>
+                updateData('maxTravelDistance', value[0])
+              }
               max={3000}
               min={100}
               step={50}
@@ -103,7 +105,10 @@ const SmartSpecificFields = ({
 
         {/* 环境偏好 */}
         <div>
-          <Label htmlFor="preferred-environment" className="text-base font-medium">
+          <Label
+            htmlFor="preferred-environment"
+            className="text-base font-medium"
+          >
             环境偏好
           </Label>
           <Select
@@ -130,7 +135,9 @@ const SmartSpecificFields = ({
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-red-500" />
-            <Label className="text-base font-medium">避免的地区类型（多选）</Label>
+            <Label className="text-base font-medium">
+              避免的地区类型（多选）
+            </Label>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {AVOID_REGIONS.map((region) => (
@@ -269,9 +276,7 @@ const SmartTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions
-        ? [preferences.dietaryRestrictions as any] // eslint-disable-line @typescript-eslint/no-explicit-any
-        : [],
+      dietary_restrictions: preferences.dietaryRestrictions || '',
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };

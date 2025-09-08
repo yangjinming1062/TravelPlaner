@@ -32,16 +32,19 @@ interface MultiSpecificData {
 }
 
 // 多节点特有字段组件
-const MultiSpecificFields = ({ 
-  data, 
-  onDataChange, 
-  className 
+const MultiSpecificFields = ({
+  data,
+  onDataChange,
+  className,
 }: {
   data: MultiSpecificData;
   onDataChange: (data: MultiSpecificData) => void;
   className?: string;
 }) => {
-  const updateData = (key: keyof MultiSpecificData, value: string | NodeScheduleSchema[]) => {
+  const updateData = (
+    key: keyof MultiSpecificData,
+    value: string | NodeScheduleSchema[],
+  ) => {
     onDataChange({ ...data, [key]: value });
   };
 
@@ -211,9 +214,7 @@ const MultiTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions
-        ? [preferences.dietaryRestrictions as any] // eslint-disable-line @typescript-eslint/no-explicit-any
-        : [],
+      dietary_restrictions: preferences.dietaryRestrictions || '',
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };

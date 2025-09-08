@@ -42,8 +42,7 @@ const PreferencesSetupPage: React.FC = () => {
           existingPreferences.budget_min && existingPreferences.budget_max
             ? `${existingPreferences.budget_min}-${existingPreferences.budget_max}`
             : '',
-        dietaryRestrictions:
-          existingPreferences.dietary_restrictions?.join(', ') || '',
+        dietaryRestrictions: existingPreferences.dietary_restrictions || '',
         travelType: existingPreferences.group_travel_preference || '独行',
         specialRequirements: existingPreferences.custom_preferences || '',
       });
@@ -59,12 +58,7 @@ const PreferencesSetupPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions
-        ? preferences.dietaryRestrictions
-            .split(',')
-            .map((s) => s.trim())
-            .filter((s) => s)
-        : [],
+      dietary_restrictions: preferences.dietaryRestrictions || '',
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };

@@ -19,7 +19,6 @@ import {
   TRAVEL_STYLES,
   BUDGET_PREFERENCES,
   GROUP_TRAVEL_PREFERENCES,
-  DIETARY_RESTRICTIONS,
 } from '@/constants/planning';
 import type {
   TransportMode,

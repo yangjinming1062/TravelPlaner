@@ -124,9 +124,7 @@ const SingleTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions
-        ? [preferences.dietaryRestrictions as any]
-        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+      dietary_restrictions: preferences.dietaryRestrictions || '',
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };

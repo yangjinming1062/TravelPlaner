@@ -73,7 +73,7 @@ class PlanningPreferenceColumns:
     )
 
     # 特殊需求
-    dietary_restrictions: Mapped[list] = mapped_column(JSON, default=[], comment="饮食限制")
+    dietary_restrictions: Mapped[str] = mapped_column(TEXT, default="", comment="饮食限制")
     group_travel_preference: Mapped[str] = mapped_column(
         TEXT, default="家庭", comment="出行类型：独行、情侣、家庭、朋友"
     )

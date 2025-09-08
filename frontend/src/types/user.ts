@@ -32,7 +32,7 @@ export interface UserProfileSchema extends UserSchema {
   activity_preferences: string[];
   attraction_categories: string[];
   travel_style: string;
-  dietary_restrictions: string[];
+  dietary_restrictions: string;
   display_language: string;
   custom_preferences: string;
 }
@@ -47,7 +47,7 @@ export interface UserPreferencesSchema {
   activity_preferences: string[];
   attraction_categories: string[];
   travel_style: string;
-  dietary_restrictions: string[];
+  dietary_restrictions: string;
   display_language: string;
   custom_preferences: string;
 }

@@ -11,7 +11,6 @@ import type {
   PreferredStopType,
   EnvironmentPreference,
   AvoidRegion,
-  DietaryRestriction,
   PlanningStatus,
 } from '../constants/planning';
 
@@ -47,7 +46,7 @@ export interface PlanningPreferencesSchema {
   budget_min?: number;
   budget_max?: number;
   budget_flexibility?: BudgetPreference;
-  dietary_restrictions?: DietaryRestriction[];
+  dietary_restrictions?: string;
   group_travel_preference?: GroupTravelPreference;
   custom_preferences?: string;
 }

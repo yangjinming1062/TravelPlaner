@@ -57,6 +57,6 @@ class PlanningPreferencesSchema(SchemaBase):
     budget_min: Optional[int] = Field(None, ge=0, description="最低预算")
     budget_max: Optional[int] = Field(None, ge=0, description="最高预算")
     budget_flexibility: Optional[str] = Field(None, description="预算灵活性")
-    dietary_restrictions: Optional[list[str]] = Field(None, description="饮食限制")
+    dietary_restrictions: Optional[str] = Field(None, description="饮食限制")
     group_travel_preference: Optional[str] = Field(None, description="出行类型")
     custom_preferences: Optional[str] = Field(None, description="附加的需求")

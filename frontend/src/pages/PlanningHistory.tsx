@@ -359,7 +359,8 @@ const PlanningHistoryPage: React.FC = () => {
                             {new Date(
                               record.departure_date,
                             ).toLocaleDateString()}{' '}
-                            - {new Date(record.return_date).toLocaleDateString()}
+                            -{' '}
+                            {new Date(record.return_date).toLocaleDateString()}
                           </div>
                           <div className="text-xs text-gray-400">
                             创建于{' '}

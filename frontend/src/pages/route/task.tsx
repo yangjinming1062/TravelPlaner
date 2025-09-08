@@ -10,7 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Route, Clock, Send, CheckCircle, Navigation, MapPin } from 'lucide-react';
+import {
+  Route,
+  Clock,
+  Send,
+  CheckCircle,
+  Navigation,
+  MapPin,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import CollapsiblePreferencesSection, {
@@ -25,10 +32,7 @@ import OptionalFieldsSection, {
 import NavigationHeader from '@/components/shared/NavigationHeader';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  ROUTE_PREFERENCES,
-  PREFERRED_STOP_TYPES,
-} from '@/constants/planning';
+import { ROUTE_PREFERENCES, PREFERRED_STOP_TYPES } from '@/constants/planning';
 import { useCreateRoutePlan } from '@/hooks/use-api';
 import { format } from 'date-fns';
 import { DEFAULT_TRAVEL_PREFERENCES } from '@/constants/planning';
@@ -62,12 +66,12 @@ const RouteSpecificFields = ({
     const newStopTypes = data.preferredStopTypes.includes(type)
       ? data.preferredStopTypes.filter((t) => t !== type)
       : [...data.preferredStopTypes, type];
-    
+
     updateData('preferredStopTypes', newStopTypes);
   };
 
   return (
-    <Card className={cn("shadow-sm", className)}>
+    <Card className={cn('shadow-sm', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-700">
           <Route className="w-5 h-5" />
@@ -84,7 +88,7 @@ const RouteSpecificFields = ({
             <MapPin className="w-4 h-4 text-blue-500" />
             <span className="text-sm font-medium text-gray-700">停留设置</span>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label className="text-base font-medium">
@@ -109,7 +113,9 @@ const RouteSpecificFields = ({
               </Label>
               <Slider
                 value={[data.maxStopoverDuration]}
-                onValueChange={(value) => updateData('maxStopoverDuration', value[0])}
+                onValueChange={(value) =>
+                  updateData('maxStopoverDuration', value[0])
+                }
                 max={24}
                 min={1}
                 step={1}
@@ -125,7 +131,10 @@ const RouteSpecificFields = ({
         {/* 路线偏好 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Label htmlFor="route-preference" className="text-base font-medium flex items-center gap-2">
+            <Label
+              htmlFor="route-preference"
+              className="text-base font-medium flex items-center gap-2"
+            >
               <Navigation className="w-4 h-4" />
               路线偏好
             </Label>
@@ -155,7 +164,9 @@ const RouteSpecificFields = ({
             </Label>
             <Slider
               value={[data.maxDetourDistance]}
-              onValueChange={(value) => updateData('maxDetourDistance', value[0])}
+              onValueChange={(value) =>
+                updateData('maxDetourDistance', value[0])
+              }
               max={500}
               min={10}
               step={10}
@@ -312,9 +323,7 @@ const RouteTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions
-        ? [preferences.dietaryRestrictions as any]
-        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+      dietary_restrictions: preferences.dietaryRestrictions || '',
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
