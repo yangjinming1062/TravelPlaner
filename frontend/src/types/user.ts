@@ -27,7 +27,7 @@ export interface UserProfileSchema extends UserSchema {
   budget_max: number;
   budget_flexibility: string;
   preferred_transport_modes: string[];
-  accommodation_level: number;
+  accommodation_level: number[];
   group_travel_preference: string;
   activity_preferences: string[];
   attraction_categories: string[];
@@ -42,7 +42,7 @@ export interface UserPreferencesSchema {
   budget_max: number;
   budget_flexibility: string;
   preferred_transport_modes: string[];
-  accommodation_level: number;
+  accommodation_level: number[];
   group_travel_preference: string;
   activity_preferences: string[];
   attraction_categories: string[];

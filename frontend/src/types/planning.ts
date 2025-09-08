@@ -40,7 +40,7 @@ export interface PaginateResponse {
 
 export interface PlanningPreferencesSchema {
   preferred_transport_modes?: TransportMode[];
-  accommodation_level?: AccommodationLevel[];
+  accommodation_level?: number[];
   activity_preferences?: ActivityPreference[];
   attraction_categories?: AttractionCategory[];
   travel_style?: TravelStyle;

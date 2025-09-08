@@ -129,7 +129,7 @@ export const PLANNING_STATUS = [
 // 偏好设置默认值
 export const DEFAULT_PREFERENCES = {
   preferred_transport_modes: [],
-  accommodation_level: 3,
+  accommodation_level: [3],
   activity_preferences: [],
   attraction_categories: [],
   travel_style: '平衡型',

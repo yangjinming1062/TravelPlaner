@@ -37,8 +37,8 @@ interface PlanRecord {
   type: 'single' | 'route' | 'multi' | 'smart';
   destination: string;
   source: string;
-  departureDate: string;
-  returnDate: string;
+  departure_date: string;
+  return_date: string;
   status: 'completed' | 'processing' | 'pending' | 'failed';
   is_favorite?: boolean;
   created_at: string;
@@ -357,9 +357,9 @@ const PlanningHistoryPage: React.FC = () => {
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
                             {new Date(
-                              record.departureDate,
+                              record.departure_date,
                             ).toLocaleDateString()}{' '}
-                            - {new Date(record.returnDate).toLocaleDateString()}
+                            - {new Date(record.return_date).toLocaleDateString()}
                           </div>
                           <div className="text-xs text-gray-400">
                             创建于{' '}
