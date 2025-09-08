@@ -1,66 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, Users, Send } from 'lucide-react';
+import { Clock, Send, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import PreferencesSection, {
+import CollapsiblePreferencesSection, {
   type TravelPreferences,
-} from '@/components/shared/PreferencesSection';
-import CommonPlanningFields, {
-  type CommonPlanningData,
-} from '@/components/shared/CommonPlanningFields';
+} from '@/components/shared/CollapsiblePreferencesSection';
+import RequiredFieldsSection, {
+  type RequiredFieldsData,
+} from '@/components/shared/RequiredFieldsSection';
+import OptionalFieldsSection, {
+  type OptionalFieldsData,
+} from '@/components/shared/OptionalFieldsSection';
 import NavigationHeader from '@/components/shared/NavigationHeader';
 import { useCreateSinglePlan } from '@/hooks/use-api';
 import { format } from 'date-fns';
-import type { AccommodationLevel } from '@/constants/planning';
-import {
-  DEFAULT_TRAVEL_PREFERENCES,
-  DEFAULT_COMMON_PLANNING_DATA,
-} from '@/constants/planning';
+import { DEFAULT_TRAVEL_PREFERENCES } from '@/constants/planning';
 import { useGroupSize } from '@/hooks/use-group-size';
 
 const SingleTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateSinglePlan();
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
 
   // 确保页面加载时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>(
-    DEFAULT_COMMON_PLANNING_DATA,
-  );
+  // 必填字段数据
+  const [requiredData, setRequiredData] = useState<RequiredFieldsData>({
+    departureDate: undefined,
+    returnDate: undefined,
+    startPoint: '',
+    destination: '',
+  });
 
-  // 单一目的地特有信息
-  const [destination, setDestination] = useState('');
-  const [startPoint, setStartPoint] = useState('');
+  // 可选字段数据
+  const [optionalData, setOptionalData] = useState<OptionalFieldsData>({
+    planTitle: '',
+    groupSize: 1,
+    primaryTransport: '飞机',
+  });
 
   // 偏好设置
   const [preferences, setPreferences] = useState<TravelPreferences>(
     DEFAULT_TRAVEL_PREFERENCES,
   );
 
-  // 使用自定义Hook管理出行人数
-  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(
-    commonData,
-    setCommonData,
-  );
+  // 检查必填字段是否完整
+  const isRequiredFieldsComplete = () => {
+    return !!(
+      requiredData.startPoint &&
+      requiredData.destination &&
+      requiredData.departureDate &&
+      requiredData.returnDate
+    );
+  };
+
+  // 当必填字段完成时自动滚动到生成按钮
+  useEffect(() => {
+    if (isRequiredFieldsComplete() && generateButtonRef.current) {
+      setTimeout(() => {
+        generateButtonRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 300);
+    }
+  }, [
+    requiredData.startPoint,
+    requiredData.destination,
+    requiredData.departureDate,
+    requiredData.returnDate,
+  ]);
+
+  // 管理出行人数的Hook
+  const handleTravelTypeChange = (travelType: any) => {
+    const groupSizeMap: Record<string, number> = {
+      独行: 1,
+      情侣: 2,
+      家庭: 4,
+      朋友: 3,
+    };
+    const newGroupSize = groupSizeMap[travelType] || optionalData.groupSize;
+    setOptionalData({ ...optionalData, groupSize: newGroupSize });
+  };
+
+  const handleGroupSizeChange = (newSize: number) => {
+    setOptionalData({ ...optionalData, groupSize: newSize });
+  };
 
   const handlePlanGenerate = () => {
     // 验证必填字段
-    if (
-      !destination ||
-      !startPoint ||
-      !commonData.departureDate ||
-      !commonData.returnDate
-    ) {
+    if (!isRequiredFieldsComplete()) {
       toast({
         title: '信息不完整',
         description: '请填写所有必填字段。',
@@ -71,13 +107,17 @@ const SingleTaskPage: React.FC = () => {
 
     // 构造请求数据
     const requestData = {
-      title: commonData.planTitle || `前往${destination}的旅行计划`,
-      source: startPoint,
-      target: destination,
-      departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      group_size: commonData.groupSize,
-      transport_mode: commonData.primaryTransport,
+      title:
+        optionalData.planTitle || `前往${requiredData.destination}的旅行计划`,
+      source: requiredData.startPoint!,
+      target: requiredData.destination!,
+      departure_date: format(
+        requiredData.departureDate!,
+        "yyyy-MM-dd'T'HH:mm:ss",
+      ),
+      return_date: format(requiredData.returnDate!, "yyyy-MM-dd'T'HH:mm:ss"),
+      group_size: optionalData.groupSize,
+      transport_mode: optionalData.primaryTransport,
       preferred_transport_modes: preferences.transportMethods,
       accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
@@ -125,68 +165,48 @@ const SingleTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
-            {/* 基本信息 */}
-            <CommonPlanningFields
-              data={commonData}
-              onDataChange={setCommonData}
+            {/* 必填信息 */}
+            <RequiredFieldsSection
+              data={requiredData}
+              onDataChange={setRequiredData}
+              mode="single"
+            />
+
+            {/* 可选设置 */}
+            <OptionalFieldsSection
+              data={optionalData}
+              onDataChange={setOptionalData}
               onGroupSizeChange={handleGroupSizeChange}
             />
 
-            {/* 目的地规划信息 */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-blue-500" />
-                  目的地信息
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="startPoint">出发地 *</Label>
-                  <Input
-                    id="startPoint"
-                    placeholder="输入出发城市"
-                    value={startPoint}
-                    onChange={(e) => setStartPoint(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="destination">目的地 *</Label>
-                  <Input
-                    id="destination"
-                    placeholder="输入你想去的城市或景点"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 偏好设置 */}
-            <PreferencesSection
+            {/* 偏好设置 - 可折叠 */}
+            <CollapsiblePreferencesSection
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onTravelTypeChange={handleTravelTypeChange}
             />
 
-            {/* 生成按钮 */}
+            {/* 生成按钮 - 放在最下方 */}
             <Button
-              className="w-full"
+              ref={generateButtonRef}
+              className={`w-full transition-all duration-300 ${
+                isRequiredFieldsComplete()
+                  ? 'bg-green-600 hover:bg-green-700 shadow-lg scale-105'
+                  : 'bg-gray-400 hover:bg-gray-500'
+              }`}
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={
-                !destination ||
-                !startPoint ||
-                !commonData.departureDate ||
-                !commonData.returnDate ||
-                isPending
-              }
+              disabled={!isRequiredFieldsComplete() || isPending}
             >
+              {isRequiredFieldsComplete() && !isPending && (
+                <CheckCircle className="w-4 h-4 mr-2" />
+              )}
               <Send className="w-4 h-4 mr-2" />
-              {isPending ? '生成中...' : '生成专属旅游方案'}
+              {isPending
+                ? '生成中...'
+                : isRequiredFieldsComplete()
+                  ? '生成专属旅游方案'
+                  : '请先完成必填信息'}
             </Button>
           </div>
 

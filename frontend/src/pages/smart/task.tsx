@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -13,76 +10,237 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Send, Sparkles, MapPin } from 'lucide-react';
+import { Send, Sparkles, CheckCircle, MapPin, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import PreferencesSection, {
+import CollapsiblePreferencesSection, {
   type TravelPreferences,
-} from '@/components/shared/PreferencesSection';
-import CommonPlanningFields, {
-  type CommonPlanningData,
-} from '@/components/shared/CommonPlanningFields';
+} from '@/components/shared/CollapsiblePreferencesSection';
+import RequiredFieldsSection, {
+  type RequiredFieldsData,
+} from '@/components/shared/RequiredFieldsSection';
+import OptionalFieldsSection, {
+  type OptionalFieldsData,
+} from '@/components/shared/OptionalFieldsSection';
 import NavigationHeader from '@/components/shared/NavigationHeader';
-import { useCreateSmartPlan } from '@/hooks/use-api';
-import { format } from 'date-fns';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   ENVIRONMENT_PREFERENCES,
   AVOID_REGIONS,
-  DEFAULT_TRAVEL_PREFERENCES,
-  DEFAULT_COMMON_PLANNING_DATA,
 } from '@/constants/planning';
-import type {
-  EnvironmentPreference,
-  AvoidRegion,
-  AccommodationLevel,
-} from '@/constants/planning';
-import { useGroupSize } from '@/hooks/use-group-size';
+import { useCreateSmartPlan } from '@/hooks/use-api';
+import { format } from 'date-fns';
+import { DEFAULT_TRAVEL_PREFERENCES } from '@/constants/planning';
+import type { EnvironmentPreference, AvoidRegion } from '@/constants/planning';
+import { cn } from '@/lib/utils';
+
+// 智能推荐特有数据接口
+interface SmartSpecificData {
+  maxTravelDistance: number;
+  preferredEnvironment: EnvironmentPreference | '';
+  avoidRegions: AvoidRegion[];
+}
+
+// 智能推荐特有字段组件
+const SmartSpecificFields = ({
+  data,
+  onDataChange,
+  className,
+}: {
+  data: SmartSpecificData;
+  onDataChange: (data: SmartSpecificData) => void;
+  className?: string;
+}) => {
+  const updateData = (key: keyof SmartSpecificData, value: number | string | AvoidRegion[]) => {
+    onDataChange({ ...data, [key]: value });
+  };
+
+  const toggleAvoidRegion = (region: AvoidRegion) => {
+    const newAvoidRegions = data.avoidRegions.includes(region)
+      ? data.avoidRegions.filter((r) => r !== region)
+      : [...data.avoidRegions, region];
+    
+    updateData('avoidRegions', newAvoidRegions);
+  };
+
+  return (
+    <Card className={cn("shadow-sm", className)}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-gray-700">
+          <Sparkles className="w-5 h-5" />
+          智能推荐设置
+          <span className="text-sm font-normal text-gray-500">
+            (可选，帮助AI为您推荐最合适的目的地)
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* 出行距离设置 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-medium text-gray-700">出行范围</span>
+          </div>
+          
+          <div>
+            <Label className="text-base font-medium">
+              最大出行距离: {data.maxTravelDistance} 公里
+            </Label>
+            <Slider
+              value={[data.maxTravelDistance]}
+              onValueChange={(value) => updateData('maxTravelDistance', value[0])}
+              max={3000}
+              min={100}
+              step={50}
+              className="mt-2"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              从出发地可接受的最大距离范围
+            </p>
+          </div>
+        </div>
+
+        {/* 环境偏好 */}
+        <div>
+          <Label htmlFor="preferred-environment" className="text-base font-medium">
+            环境偏好
+          </Label>
+          <Select
+            value={data.preferredEnvironment}
+            onValueChange={(value) => updateData('preferredEnvironment', value)}
+          >
+            <SelectTrigger className="mt-2">
+              <SelectValue placeholder="选择您偏好的环境类型" />
+            </SelectTrigger>
+            <SelectContent>
+              {ENVIRONMENT_PREFERENCES.map((env) => (
+                <SelectItem key={env.value} value={env.value}>
+                  {env.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-500 mt-1">
+            AI会根据您的环境偏好推荐相应的目的地
+          </p>
+        </div>
+
+        {/* 避免的地区 */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-4 h-4 text-red-500" />
+            <Label className="text-base font-medium">避免的地区类型（多选）</Label>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {AVOID_REGIONS.map((region) => (
+              <div key={region.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`avoid-${region.value}`}
+                  checked={data.avoidRegions.includes(region.value)}
+                  onCheckedChange={() => toggleAvoidRegion(region.value)}
+                />
+                <Label htmlFor={`avoid-${region.value}`} className="text-sm">
+                  {region.label}
+                </Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            选择您希望避免的地区类型，AI会在推荐时排除这些区域
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const SmartTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateSmartPlan();
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
 
   // 确保页面加载时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>(
-    DEFAULT_COMMON_PLANNING_DATA,
-  );
+  // 必填字段数据
+  const [requiredData, setRequiredData] = useState<RequiredFieldsData>({
+    departureDate: undefined,
+    returnDate: undefined,
+    startPoint: '',
+  });
 
-  // 智能推荐特有信息
-  const [startPoint, setStartPoint] = useState('');
-  const [maxTravelDistance, setMaxTravelDistance] = useState(1000);
-  const [preferredEnvironment, setPreferredEnvironment] = useState<
-    EnvironmentPreference | ''
-  >('');
-  const [avoidRegions, setAvoidRegions] = useState<AvoidRegion[]>([]);
+  // 可选字段数据
+  const [optionalData, setOptionalData] = useState<OptionalFieldsData>({
+    planTitle: '',
+    groupSize: 1,
+    primaryTransport: '飞机',
+  });
+
+  // 智能推荐特有数据
+  const [smartData, setSmartData] = useState<SmartSpecificData>({
+    maxTravelDistance: 1000,
+    preferredEnvironment: '',
+    avoidRegions: [],
+  });
 
   // 偏好设置
   const [preferences, setPreferences] = useState<TravelPreferences>(
     DEFAULT_TRAVEL_PREFERENCES,
   );
 
-  // 使用自定义Hook管理出行人数
-  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(
-    commonData,
-    setCommonData,
-  );
+  // 检查必填字段是否完整
+  const isRequiredFieldsComplete = useCallback(() => {
+    return !!(
+      requiredData.startPoint &&
+      requiredData.departureDate &&
+      requiredData.returnDate
+    );
+  }, [
+    requiredData.startPoint,
+    requiredData.departureDate,
+    requiredData.returnDate,
+  ]);
 
-  const toggleAvoidRegion = (region: AvoidRegion) => {
-    if (avoidRegions.includes(region)) {
-      setAvoidRegions(avoidRegions.filter((r) => r !== region));
-    } else {
-      setAvoidRegions([...avoidRegions, region]);
+  // 当必填字段完成时自动滚动到生成按钮
+  useEffect(() => {
+    if (isRequiredFieldsComplete() && generateButtonRef.current) {
+      setTimeout(() => {
+        generateButtonRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 300);
     }
+  }, [
+    requiredData.startPoint,
+    requiredData.departureDate,
+    requiredData.returnDate,
+    isRequiredFieldsComplete,
+  ]);
+
+  // 管理出行人数的Hook
+  const handleTravelTypeChange = (travelType: string) => {
+    const groupSizeMap: Record<string, number> = {
+      独行: 1,
+      情侣: 2,
+      家庭: 4,
+      朋友: 3,
+    };
+    const newGroupSize = groupSizeMap[travelType] || optionalData.groupSize;
+    setOptionalData({ ...optionalData, groupSize: newGroupSize });
+  };
+
+  const handleGroupSizeChange = (newSize: number) => {
+    setOptionalData({ ...optionalData, groupSize: newSize });
   };
 
   const handlePlanGenerate = () => {
     // 验证必填字段
-    if (!startPoint || !commonData.departureDate || !commonData.returnDate) {
+    if (!isRequiredFieldsComplete()) {
       toast({
         title: '信息不完整',
         description: '请填写所有必填字段。',
@@ -93,15 +251,18 @@ const SmartTaskPage: React.FC = () => {
 
     // 构造请求数据
     const requestData = {
-      title: commonData.planTitle || `智能推荐旅行计划`,
-      source: startPoint,
-      departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      return_date: format(commonData.returnDate, "yyyy-MM-dd'T'HH:mm:ss"),
-      group_size: commonData.groupSize,
-      transport_mode: commonData.primaryTransport,
-      max_travel_distance: maxTravelDistance,
-      preferred_environment: preferredEnvironment || '海边',
-      avoid_regions: avoidRegions,
+      title: optionalData.planTitle || `智能推荐旅行计划`,
+      source: requiredData.startPoint!,
+      departure_date: format(
+        requiredData.departureDate!,
+        "yyyy-MM-dd'T'HH:mm:ss",
+      ),
+      return_date: format(requiredData.returnDate!, "yyyy-MM-dd'T'HH:mm:ss"),
+      group_size: optionalData.groupSize,
+      transport_mode: optionalData.primaryTransport,
+      max_travel_distance: smartData.maxTravelDistance,
+      preferred_environment: smartData.preferredEnvironment || '海边',
+      avoid_regions: smartData.avoidRegions,
       preferred_transport_modes: preferences.transportMethods,
       accommodation_level: preferences.accommodationLevels,
       activity_preferences: preferences.activityTypes,
@@ -109,8 +270,8 @@ const SmartTaskPage: React.FC = () => {
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
       dietary_restrictions: preferences.dietaryRestrictions
-        ? [preferences.dietaryRestrictions as any]
-        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? [preferences.dietaryRestrictions as any] // eslint-disable-line @typescript-eslint/no-explicit-any
+        : [],
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -124,8 +285,7 @@ const SmartTaskPage: React.FC = () => {
         });
         navigate(`/smart/result/${taskId}`);
       },
-      onError: (error: any) => {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
+      onError: (error: Error) => {
         toast({
           title: '提交失败',
           description: error.message || '无法提交规划请求，请稍后重试。',
@@ -148,124 +308,51 @@ const SmartTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
-            {/* 基本信息 */}
-            <CommonPlanningFields
-              data={commonData}
-              onDataChange={setCommonData}
+            {/* 必填信息 */}
+            <RequiredFieldsSection
+              data={requiredData}
+              onDataChange={setRequiredData}
+              mode="smart"
+            />
+
+            {/* 可选设置 */}
+            <OptionalFieldsSection
+              data={optionalData}
+              onDataChange={setOptionalData}
               onGroupSizeChange={handleGroupSizeChange}
             />
 
-            {/* 智能推荐配置 */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-green-500" />
-                  智能推荐配置
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <Label htmlFor="startPoint">出发地 *</Label>
-                  <Input
-                    id="startPoint"
-                    placeholder="输入您的出发城市"
-                    value={startPoint}
-                    onChange={(e) => setStartPoint(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
+            {/* 智能推荐特有设置 */}
+            <SmartSpecificFields data={smartData} onDataChange={setSmartData} />
 
-                <div>
-                  <Label htmlFor="max-travel-distance">最大出行距离 (km)</Label>
-                  <div className="mt-2">
-                    <Slider
-                      id="max-travel-distance"
-                      value={[maxTravelDistance]}
-                      onValueChange={(value) => setMaxTravelDistance(value[0])}
-                      max={3000}
-                      min={100}
-                      step={100}
-                    />
-                    <div className="text-center mt-1">
-                      <span className="text-sm font-medium">
-                        {maxTravelDistance} km
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="preferred-environment">环境偏好</Label>
-                  <Select
-                    value={preferredEnvironment}
-                    onValueChange={(value) =>
-                      setPreferredEnvironment(value as EnvironmentPreference)
-                    }
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="选择环境偏好" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ENVIRONMENT_PREFERENCES.map((env) => (
-                        <SelectItem key={env.value} value={env.value}>
-                          {env.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-base font-medium">
-                    避免的地区类型（多选）
-                  </Label>
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    {AVOID_REGIONS.map((region) => (
-                      <div
-                        key={region.value}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`avoid-${region.value}`}
-                          checked={avoidRegions.includes(region.value)}
-                          onCheckedChange={() =>
-                            toggleAvoidRegion(region.value)
-                          }
-                        />
-                        <Label
-                          htmlFor={`avoid-${region.value}`}
-                          className="text-sm"
-                        >
-                          {region.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 偏好设置 */}
-            <PreferencesSection
+            {/* 偏好设置 - 可折叠 */}
+            <CollapsiblePreferencesSection
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onTravelTypeChange={handleTravelTypeChange}
             />
 
-            {/* 生成按钮 */}
+            {/* 生成按钮 - 放在最下方 */}
             <Button
-              className="w-full"
+              ref={generateButtonRef}
+              className={`w-full transition-all duration-300 ${
+                isRequiredFieldsComplete()
+                  ? 'bg-green-600 hover:bg-green-700 shadow-lg scale-105'
+                  : 'bg-gray-400 hover:bg-gray-500'
+              }`}
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={
-                !startPoint ||
-                !commonData.departureDate ||
-                !commonData.returnDate ||
-                isPending
-              }
+              disabled={!isRequiredFieldsComplete() || isPending}
             >
+              {isRequiredFieldsComplete() && !isPending && (
+                <CheckCircle className="w-4 h-4 mr-2" />
+              )}
               <Send className="w-4 h-4 mr-2" />
-              {isPending ? 'AI分析中...' : '获取智能推荐'}
+              {isPending
+                ? 'AI分析中...'
+                : isRequiredFieldsComplete()
+                  ? '获取智能推荐'
+                  : '请先完成必填信息'}
             </Button>
           </div>
 
