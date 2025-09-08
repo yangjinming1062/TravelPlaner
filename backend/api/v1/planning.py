@@ -7,6 +7,20 @@ from modules.user import User
 router = get_router()
 
 
+# 通用状态检查函数
+def check_task_status(task, task_id: int):
+    """检查任务状态，如果状态不是completed则抛出相应异常"""
+    if not task:
+        raise APIException(APICode.NOT_FOUND, "任务不存在")
+
+    if task.status == "pending":
+        raise APIException(APICode.BAD_REQUEST, "任务尚未开始处理")
+    elif task.status == "processing":
+        raise APIException(APICode.BAD_REQUEST, "任务正在处理中，请稍后再试")
+    elif task.status == "failed":
+        raise APIException(APICode.INTERNAL_SERVER_ERROR, "任务处理失败")
+
+
 # region API: 单一目的地规划
 
 
@@ -64,9 +78,13 @@ async def get_single_plans(
 @router.get("/single-tasks/{task_id}/result", summary="获取单一目的地规划结果")
 async def get_single_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSingleResultSchema:
     with DatabaseManager() as db:
+        # 检查任务状态
+        task = db.query(PlanningSingleTask).filter(PlanningSingleTask.id == task_id).first()
+        check_task_status(task, task_id)
+
         result = db.query(PlanningSingleResult).filter(PlanningSingleResult.task_id == task_id).first()
         if not result:
-            raise APIException(APICode.NOT_FOUND)
+            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
         db.expunge(result)
     return PlanningSingleResultSchema.model_validate(result)
 
@@ -128,9 +146,13 @@ async def get_route_plans(
 @router.get("/route-tasks/{task_id}/result", summary="获取沿途游玩规划结果")
 async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
     with DatabaseManager() as db:
+        # 检查任务状态
+        task = db.query(PlanningRouteTask).filter(PlanningRouteTask.id == task_id).first()
+        check_task_status(task, task_id)
+
         result = db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id == task_id).first()
         if not result:
-            raise APIException(APICode.NOT_FOUND)
+            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
         db.expunge(result)
     return PlanningRouteResultSchema.model_validate(result)
 
@@ -190,9 +212,13 @@ async def get_multi_plans(
 @router.get("/multi-tasks/{task_id}/result", summary="获取多节点规划结果")
 async def get_multi_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningMultiResultSchema:
     with DatabaseManager() as db:
+        # 检查任务状态
+        task = db.query(PlanningMultiTask).filter(PlanningMultiTask.id == task_id).first()
+        check_task_status(task, task_id)
+
         result = db.query(PlanningMultiResult).filter(PlanningMultiResult.task_id == task_id).first()
         if not result:
-            raise APIException(APICode.NOT_FOUND)
+            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
         db.expunge(result)
     return PlanningMultiResultSchema.model_validate(result)
 
@@ -252,9 +278,13 @@ async def get_smart_plans(
 @router.get("/smart-tasks/{task_id}/result", summary="获取智能推荐规划结果")
 async def get_smart_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSmartResultSchema:
     with DatabaseManager() as db:
+        # 检查任务状态
+        task = db.query(PlanningSmartTask).filter(PlanningSmartTask.id == task_id).first()
+        check_task_status(task, task_id)
+
         result = db.query(PlanningSmartResult).filter(PlanningSmartResult.task_id == task_id).first()
         if not result:
-            raise APIException(APICode.NOT_FOUND)
+            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
         db.expunge(result)
     return PlanningSmartResultSchema.model_validate(result)
 
@@ -263,6 +293,53 @@ async def get_smart_plan_result(task_id: int, _user: User = Depends(get_user)) -
 
 
 # region API: 通用规划操作
+
+
+@router.get("/tasks/{task_type}/{task_id}/status", summary="获取规划任务状态")
+async def get_plan_task_status(task_type: str, task_id: int, _user: User = Depends(get_user)) -> dict:
+    # 定义任务类型与任务模型、结果模型的映射关系
+    task_model_map = {
+        "single": (PlanningSingleTask, PlanningSingleResult),
+        "route": (PlanningRouteTask, PlanningRouteResult),
+        "multi": (PlanningMultiTask, PlanningMultiResult),
+        "smart": (PlanningSmartTask, PlanningSmartResult),
+    }
+
+    # 获取对应的模型
+    models = task_model_map.get(task_type)
+    if not models:
+        raise APIException(APICode.UN_SUPPORT, "不支持的规划类型")
+
+    task_model, result_model = models
+
+    with DatabaseManager() as db:
+        task = db.query(task_model).filter(task_model.id == task_id).first()
+        if not task:
+            raise APIException(APICode.NOT_FOUND, "任务不存在")
+
+        # 检查是否有对应的结果
+        result = db.query(result_model).filter(result_model.task_id == task_id).first()
+        has_result = result is not None
+
+        # 构建基础返回信息
+        response = {
+            "task_id": task_id,
+            "task_type": task_type,
+            "status": task.status,
+            "has_result": has_result,
+            "title": task.title,
+            "created_at": task.created_at.isoformat(),
+        }
+
+        # 根据任务类型添加特定字段
+        if task_type in ["single", "route"]:
+            response["target"] = task.target
+        elif task_type == "smart":
+            response["max_travel_distance"] = task.max_travel_distance
+            response["preferred_environment"] = task.preferred_environment
+        # multi类型没有特定的target字段，使用通用信息
+
+        return response
 
 
 @router.patch("/tasks/{task_type}/{task_id}/favorite", status_code=204, summary="更新规划收藏状态")
