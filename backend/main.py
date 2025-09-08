@@ -90,12 +90,10 @@ def create_app():
     _app.add_middleware(
         CORSMiddleware,
         allow_origins=[
-            "http://localhost:3000",  # Vite开发服务器
-            "http://localhost:5173",  # Vite开发服务器（新版本）
+            "http://localhost:8080",  # 前端开发服务器
             "http://localhost",  # Docker前端
             "http://localhost:80",  # Docker前端
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
+            "http://127.0.0.1:8080",  # 前端开发服务器
             "http://127.0.0.1",
             "http://127.0.0.1:80",
         ],
@@ -120,4 +118,4 @@ if __name__ == "__main__":  # Debug时使用该方法
         print(f"错误消息：{m}，错误码：{c}，状态码：{s}")
     if CONFIG.debug:
         logger.info("Debug mode")
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
