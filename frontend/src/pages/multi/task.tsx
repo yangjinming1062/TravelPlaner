@@ -17,9 +17,8 @@ import OptionalFieldsSection, {
   type OptionalFieldsData,
 } from '@/components/shared/OptionalFieldsSection';
 import NavigationHeader from '@/components/shared/NavigationHeader';
-import { NodeScheduleInput } from '@/components/shared/NodeSchedule';
 import { NodeScheduleSchema } from '@/types/planning';
-import { Network, MapPin } from 'lucide-react';
+import { Network, MapPin, Calendar, Clock } from 'lucide-react';
 import { useCreateMultiPlan } from '@/hooks/use-api';
 import { format } from 'date-fns';
 import { DEFAULT_TRAVEL_PREFERENCES } from '@/constants/planning';
@@ -27,9 +26,144 @@ import { cn } from '@/lib/utils';
 
 // 多节点特有数据接口
 interface MultiSpecificData {
-  startPoint: string;
   nodesSchedule: NodeScheduleSchema[];
 }
+
+// 节点时间安排组件（专用于多节点规划）
+interface NodeScheduleInputProps {
+  nodes: NodeScheduleSchema[];
+  onNodesChange?: (nodes: NodeScheduleSchema[]) => void;
+}
+
+const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
+  nodes,
+  onNodesChange,
+}) => {
+  const handleNodeChange = (index: number, updatedNode: NodeScheduleSchema) => {
+    if (onNodesChange) {
+      const newNodes = [...nodes];
+      newNodes[index] = updatedNode;
+      onNodesChange(newNodes);
+    }
+  };
+
+  const handleAddNode = () => {
+    if (onNodesChange) {
+      const newNode: NodeScheduleSchema = {
+        location: '',
+        arrival_date: '',
+        departure_date: '',
+      };
+      onNodesChange([...nodes, newNode]);
+    }
+  };
+
+  const handleRemoveNode = (index: number) => {
+    if (onNodesChange && nodes.length > 1) {
+      const newNodes = nodes.filter((_, i) => i !== index);
+      onNodesChange(newNodes);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-purple-500" />
+          节点安排
+        </h4>
+        <button
+          type="button"
+          onClick={handleAddNode}
+          className="text-sm text-purple-600 hover:text-purple-700"
+        >
+          + 添加节点
+        </button>
+      </div>
+      <p className="text-xs text-gray-500 mb-3">
+        节点1为出发地，后续节点为按顺序游览的目的地
+      </p>
+
+      {nodes.map((node, index) => (
+        <Card key={index} className="relative">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold">
+                  {index + 1}
+                </div>
+                <span className="font-medium">
+                  {index === 0 ? '出发地' : `目的地 ${index}`}
+                </span>
+              </div>
+              {nodes.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNode(index)}
+                  className="text-red-600 hover:text-red-700 text-sm"
+                >
+                  移除
+                </button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                地点名称
+              </label>
+              <Input
+                type="text"
+                value={node.location}
+                onChange={(e) =>
+                  handleNodeChange(index, {
+                    ...node,
+                    location: e.target.value,
+                  })
+                }
+                placeholder={index === 0 ? '请输入出发地' : '请输入目的地'}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-1">
+                  到达日期
+                </Label>
+                <Input
+                  type="date"
+                  value={node.arrival_date}
+                  onChange={(e) =>
+                    handleNodeChange(index, {
+                      ...node,
+                      arrival_date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-1">
+                  离开日期
+                </Label>
+                <Input
+                  type="date"
+                  value={node.departure_date}
+                  onChange={(e) =>
+                    handleNodeChange(index, {
+                      ...node,
+                      departure_date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
 
 // 多节点特有字段组件
 const MultiSpecificFields = ({
@@ -43,49 +177,27 @@ const MultiSpecificFields = ({
 }) => {
   const updateData = (
     key: keyof MultiSpecificData,
-    value: string | NodeScheduleSchema[],
+    value: NodeScheduleSchema[],
   ) => {
     onDataChange({ ...data, [key]: value });
   };
 
   return (
-    <Card className={cn('shadow-sm', className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-700">
+    <Card className={cn('shadow-sm border-red-100', className)}>
+      <CardHeader className="bg-red-50/50">
+        <CardTitle className="flex items-center gap-2 text-red-700">
           <Network className="w-5 h-5" />
           多节点行程设置
-          <span className="text-sm font-normal text-gray-500">
-            (可选，规划多个目的地的详细行程)
+          <span className="text-sm font-normal text-red-600">
+            (必填，至少需要一个节点)
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* 出发地 */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium text-gray-700">出发地点</span>
-          </div>
-
-          <div>
-            <Label htmlFor="start-point" className="text-base font-medium">
-              出发地
-            </Label>
-            <Input
-              id="start-point"
-              placeholder="输入出发城市"
-              value={data.startPoint}
-              onChange={(e) => updateData('startPoint', e.target.value)}
-              className="mt-2"
-            />
-            <p className="text-xs text-gray-500 mt-1">您的整个行程的起始地点</p>
-          </div>
-        </div>
-
         {/* 节点行程安排 */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <Network className="w-4 h-4 text-purple-500" />
+            <Network className="w-4 h-4 text-red-500" />
             <span className="text-sm font-medium text-gray-700">
               节点行程安排
             </span>
@@ -96,7 +208,7 @@ const MultiSpecificFields = ({
             onNodesChange={(nodes) => updateData('nodesSchedule', nodes)}
           />
           <p className="text-xs text-gray-500 mt-2">
-            添加您计划访问的各个目的地及对应的到达和离开时间
+            第一个节点为出发地，后续节点为按顺序游览的目的地
           </p>
         </div>
       </CardContent>
@@ -130,7 +242,6 @@ const MultiTaskPage: React.FC = () => {
 
   // 多节点特有数据
   const [multiData, setMultiData] = useState<MultiSpecificData>({
-    startPoint: '',
     nodesSchedule: [{ location: '', arrival_date: '', departure_date: '' }],
   });
 
@@ -184,6 +295,15 @@ const MultiTaskPage: React.FC = () => {
     }
 
     // 验证节点信息
+    if (multiData.nodesSchedule.length === 0) {
+      toast({
+        title: '节点信息不完整',
+        description: '至少需要设置一个节点。',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const hasIncompleteNodes = multiData.nodesSchedule.some(
       (node) => !node.location || !node.arrival_date || !node.departure_date,
     );
@@ -199,7 +319,7 @@ const MultiTaskPage: React.FC = () => {
     // 构造请求数据
     const requestData = {
       title: optionalData.planTitle || `多节点旅行计划`,
-      source: multiData.startPoint,
+      source: multiData.nodesSchedule[0]?.location || '',
       departure_date: format(
         requiredData.departureDate!,
         "yyyy-MM-dd'T'HH:mm:ss",
@@ -251,14 +371,7 @@ const MultiTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
-            {/* 必填信息 */}
-            <RequiredFieldsSection
-              data={requiredData}
-              onDataChange={setRequiredData}
-              mode="multi"
-            />
-
-            {/* 可选设置 */}
+            {/* 基本设置 */}
             <OptionalFieldsSection
               data={optionalData}
               onDataChange={setOptionalData}
@@ -267,6 +380,13 @@ const MultiTaskPage: React.FC = () => {
 
             {/* 多节点特有设置 */}
             <MultiSpecificFields data={multiData} onDataChange={setMultiData} />
+
+            {/* 必填信息 */}
+            <RequiredFieldsSection
+              data={requiredData}
+              onDataChange={setRequiredData}
+              mode="multi"
+            />
 
             {/* 偏好设置 - 可折叠 */}
             <CollapsiblePreferencesSection

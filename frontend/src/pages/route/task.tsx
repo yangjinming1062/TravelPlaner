@@ -43,7 +43,7 @@ import { cn } from '@/lib/utils';
 interface RouteSpecificData {
   maxStopovers: number;
   maxStopoverDuration: number;
-  routePreference: RoutePreference;
+  routePreference: RoutePreference | '';
   maxDetourDistance: number;
   preferredStopTypes: PreferredStopType[];
 }
@@ -71,13 +71,13 @@ const RouteSpecificFields = ({
   };
 
   return (
-    <Card className={cn('shadow-sm', className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-700">
+    <Card className={cn('shadow-sm border-red-100', className)}>
+      <CardHeader className="bg-red-50/50">
+        <CardTitle className="flex items-center gap-2 text-red-700">
           <Route className="w-5 h-5" />
           沿途游玩设置
-          <span className="text-sm font-normal text-gray-500">
-            (可选，用于定制您的沿途体验)
+          <span className="text-sm font-normal text-red-600">
+            (沿途游玩的核心设置)
           </span>
         </CardTitle>
       </CardHeader>
@@ -85,7 +85,7 @@ const RouteSpecificFields = ({
         {/* 沿途停留设置 */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-4 h-4 text-blue-500" />
+            <MapPin className="w-4 h-4 text-red-500" />
             <span className="text-sm font-medium text-gray-700">停留设置</span>
           </div>
 
@@ -168,12 +168,12 @@ const RouteSpecificFields = ({
                 updateData('maxDetourDistance', value[0])
               }
               max={500}
-              min={10}
-              step={10}
+              min={0}
+              step={5}
               className="mt-2"
             />
             <p className="text-xs text-gray-500 mt-1">
-              为游览景点可接受的最大绕行距离
+              为游览景点可接受的最大绕行距离（0表示不绕行，走最直接路线）
             </p>
           </div>
         </div>
@@ -232,10 +232,10 @@ const RouteTaskPage: React.FC = () => {
 
   // 沿途游玩特有数据
   const [routeData, setRouteData] = useState<RouteSpecificData>({
-    maxStopovers: 3,
-    maxStopoverDuration: 2,
-    routePreference: '平衡',
-    maxDetourDistance: 100,
+    maxStopovers: 1,
+    maxStopoverDuration: 1,
+    routePreference: '',
+    maxDetourDistance: 0,
     preferredStopTypes: [],
   });
 
@@ -298,6 +298,19 @@ const RouteTaskPage: React.FC = () => {
       return;
     }
 
+    // 验证沿途游玩设置
+    if (
+      !routeData.routePreference ||
+      routeData.preferredStopTypes.length === 0
+    ) {
+      toast({
+        title: '沿途游玩设置不完整',
+        description: '请选择路线偏好和至少一种停留类型。',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // 构造请求数据
     const requestData = {
       title:
@@ -314,7 +327,7 @@ const RouteTaskPage: React.FC = () => {
       transport_mode: optionalData.primaryTransport,
       max_stopovers: routeData.maxStopovers,
       max_stopover_duration: routeData.maxStopoverDuration,
-      route_preference: routeData.routePreference,
+      route_preference: routeData.routePreference as any,
       max_detour_distance: routeData.maxDetourDistance,
       preferred_stop_types: routeData.preferredStopTypes,
       preferred_transport_modes: preferences.transportMethods,
@@ -362,14 +375,7 @@ const RouteTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
-            {/* 必填信息 */}
-            <RequiredFieldsSection
-              data={requiredData}
-              onDataChange={setRequiredData}
-              mode="route"
-            />
-
-            {/* 可选设置 */}
+            {/* 基本设置 */}
             <OptionalFieldsSection
               data={optionalData}
               onDataChange={setOptionalData}
@@ -378,6 +384,13 @@ const RouteTaskPage: React.FC = () => {
 
             {/* 沿途游玩特有设置 */}
             <RouteSpecificFields data={routeData} onDataChange={setRouteData} />
+
+            {/* 必填信息 */}
+            <RequiredFieldsSection
+              data={requiredData}
+              onDataChange={setRequiredData}
+              mode="route"
+            />
 
             {/* 偏好设置 - 可折叠 */}
             <CollapsiblePreferencesSection

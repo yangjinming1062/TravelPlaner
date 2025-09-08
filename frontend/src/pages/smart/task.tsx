@@ -35,7 +35,7 @@ import { cn } from '@/lib/utils';
 // 智能推荐特有数据接口
 interface SmartSpecificData {
   maxTravelDistance: number;
-  preferredEnvironment: EnvironmentPreference | '';
+  preferredEnvironments: EnvironmentPreference[];
   avoidRegions: AvoidRegion[];
 }
 
@@ -51,9 +51,17 @@ const SmartSpecificFields = ({
 }) => {
   const updateData = (
     key: keyof SmartSpecificData,
-    value: number | string | AvoidRegion[],
+    value: number | EnvironmentPreference[] | AvoidRegion[],
   ) => {
     onDataChange({ ...data, [key]: value });
+  };
+
+  const toggleEnvironment = (environment: EnvironmentPreference) => {
+    const newEnvironments = data.preferredEnvironments.includes(environment)
+      ? data.preferredEnvironments.filter((e) => e !== environment)
+      : [...data.preferredEnvironments, environment];
+
+    updateData('preferredEnvironments', newEnvironments);
   };
 
   const toggleAvoidRegion = (region: AvoidRegion) => {
@@ -65,13 +73,13 @@ const SmartSpecificFields = ({
   };
 
   return (
-    <Card className={cn('shadow-sm', className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-700">
+    <Card className={cn('shadow-sm border-red-100', className)}>
+      <CardHeader className="bg-red-50/50">
+        <CardTitle className="flex items-center gap-2 text-red-700">
           <Sparkles className="w-5 h-5" />
           智能推荐设置
-          <span className="text-sm font-normal text-gray-500">
-            (可选，帮助AI为您推荐最合适的目的地)
+          <span className="text-sm font-normal text-red-600">
+            (AI推荐的核心参数)
           </span>
         </CardTitle>
       </CardHeader>
@@ -79,7 +87,7 @@ const SmartSpecificFields = ({
         {/* 出行距离设置 */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-4 h-4 text-blue-500" />
+            <MapPin className="w-4 h-4 text-red-500" />
             <span className="text-sm font-medium text-gray-700">出行范围</span>
           </div>
 
@@ -105,29 +113,23 @@ const SmartSpecificFields = ({
 
         {/* 环境偏好 */}
         <div>
-          <Label
-            htmlFor="preferred-environment"
-            className="text-base font-medium"
-          >
-            环境偏好
-          </Label>
-          <Select
-            value={data.preferredEnvironment}
-            onValueChange={(value) => updateData('preferredEnvironment', value)}
-          >
-            <SelectTrigger className="mt-2">
-              <SelectValue placeholder="选择您偏好的环境类型" />
-            </SelectTrigger>
-            <SelectContent>
-              {ENVIRONMENT_PREFERENCES.map((env) => (
-                <SelectItem key={env.value} value={env.value}>
+          <Label className="text-base font-medium">环境偏好（多选）</Label>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {ENVIRONMENT_PREFERENCES.map((env) => (
+              <div key={env.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`env-${env.value}`}
+                  checked={data.preferredEnvironments.includes(env.value)}
+                  onCheckedChange={() => toggleEnvironment(env.value)}
+                />
+                <Label htmlFor={`env-${env.value}`} className="text-sm">
                   {env.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-gray-500 mt-1">
-            AI会根据您的环境偏好推荐相应的目的地
+                </Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            选择您偏好的环境类型，AI会根据您的选择推荐相应的目的地
           </p>
         </div>
 
@@ -189,8 +191,8 @@ const SmartTaskPage: React.FC = () => {
 
   // 智能推荐特有数据
   const [smartData, setSmartData] = useState<SmartSpecificData>({
-    maxTravelDistance: 1000,
-    preferredEnvironment: '',
+    maxTravelDistance: 100,
+    preferredEnvironments: [],
     avoidRegions: [],
   });
 
@@ -256,6 +258,16 @@ const SmartTaskPage: React.FC = () => {
       return;
     }
 
+    // 验证智能推荐设置
+    if (smartData.preferredEnvironments.length === 0) {
+      toast({
+        title: '智能推荐设置不完整',
+        description: '请至少选择一种环境偏好。',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // 构造请求数据
     const requestData = {
       title: optionalData.planTitle || `智能推荐旅行计划`,
@@ -268,7 +280,7 @@ const SmartTaskPage: React.FC = () => {
       group_size: optionalData.groupSize,
       transport_mode: optionalData.primaryTransport,
       max_travel_distance: smartData.maxTravelDistance,
-      preferred_environment: smartData.preferredEnvironment || '海边',
+      preferred_environment: smartData.preferredEnvironments[0] || '海滨度假',
       avoid_regions: smartData.avoidRegions,
       preferred_transport_modes: preferences.transportMethods,
       accommodation_level: preferences.accommodationLevels,
@@ -313,14 +325,7 @@ const SmartTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
-            {/* 必填信息 */}
-            <RequiredFieldsSection
-              data={requiredData}
-              onDataChange={setRequiredData}
-              mode="smart"
-            />
-
-            {/* 可选设置 */}
+            {/* 基本设置 */}
             <OptionalFieldsSection
               data={optionalData}
               onDataChange={setOptionalData}
@@ -329,6 +334,13 @@ const SmartTaskPage: React.FC = () => {
 
             {/* 智能推荐特有设置 */}
             <SmartSpecificFields data={smartData} onDataChange={setSmartData} />
+
+            {/* 必填信息 */}
+            <RequiredFieldsSection
+              data={requiredData}
+              onDataChange={setRequiredData}
+              mode="smart"
+            />
 
             {/* 偏好设置 - 可折叠 */}
             <CollapsiblePreferencesSection

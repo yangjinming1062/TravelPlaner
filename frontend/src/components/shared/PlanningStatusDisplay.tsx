@@ -86,15 +86,25 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <p className="mt-2 text-gray-500">
             您的{planningTypeDisplayName}任务正在排队处理，请稍等片刻...
           </p>
-          <div className="mt-6 space-y-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/planning-history')}
-            >
-              查看规划历史
-            </Button>
-            <p className="text-sm text-gray-400">
-              您可以稍后在规划历史中查看结果
+          <div className="mt-6 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className="flex-1"
+              >
+                返回首页
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/planning-history')}
+                className="flex-1"
+              >
+                查看规划历史
+              </Button>
+            </div>
+            <p className="text-sm text-gray-400 text-center">
+              您可以稍后在规划历史中查看结果，无需一直等待
             </p>
           </div>
         </div>
@@ -138,14 +148,24 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
               💡 AI正在分析最优方案，处理完成后会自动显示结果
             </p>
           </div>
-          <div className="mt-6 space-y-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/planning-history')}
-            >
-              查看规划历史
-            </Button>
-            <p className="text-sm text-gray-400">
+          <div className="mt-6 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className="flex-1"
+              >
+                返回首页
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/planning-history')}
+                className="flex-1"
+              >
+                查看规划历史
+              </Button>
+            </div>
+            <p className="text-sm text-gray-400 text-center">
               您可以稍后在规划历史中查看结果，无需一直等待
             </p>
           </div>
@@ -164,13 +184,22 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <p className="mt-2 text-gray-500">
             很抱歉，生成{planningTypeDisplayName}时出现了问题，请稍后重试。
           </p>
-          <div className="mt-6 space-x-3">
-            <Button onClick={() => navigate(createNewPlanRoute)}>
-              重新规划
-            </Button>
-            <Button variant="outline" onClick={() => navigate(-1)}>
-              返回上一页
-            </Button>
+          <div className="mt-6 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => navigate(createNewPlanRoute)}
+                className="flex-1"
+              >
+                重新规划
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className="flex-1"
+              >
+                返回首页
+              </Button>
+            </div>
           </div>
         </div>
       </div>

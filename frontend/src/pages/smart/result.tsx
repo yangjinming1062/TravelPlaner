@@ -22,6 +22,7 @@ import { PlanSummary } from '@/components/shared/PlanSummary';
 import { DailyPlanList } from '@/components/shared/DailyPlan';
 import { HighlightsList } from '@/components/shared/Highlights';
 import PlanningStatusDisplay from '@/components/shared/PlanningStatusDisplay';
+import PlanResultActions from '@/components/shared/PlanResultActions';
 
 const SmartResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -209,18 +210,7 @@ const SmartResultPage: React.FC = () => {
         )}
 
         {/* 底部操作按钮 */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/smart/list')}
-            className="flex-1"
-          >
-            查看历史推荐
-          </Button>
-          <Button onClick={() => navigate('/smart/task')} className="flex-1">
-            获取新的推荐
-          </Button>
-        </div>
+        <PlanResultActions planType="smart" />
       </div>
     </div>
   );

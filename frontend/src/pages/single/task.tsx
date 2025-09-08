@@ -163,18 +163,18 @@ const SingleTaskPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
+            {/* 基本设置 */}
+            <OptionalFieldsSection
+              data={optionalData}
+              onDataChange={setOptionalData}
+              onGroupSizeChange={handleGroupSizeChange}
+            />
+
             {/* 必填信息 */}
             <RequiredFieldsSection
               data={requiredData}
               onDataChange={setRequiredData}
               mode="single"
-            />
-
-            {/* 可选设置 */}
-            <OptionalFieldsSection
-              data={optionalData}
-              onDataChange={setOptionalData}
-              onGroupSizeChange={handleGroupSizeChange}
             />
 
             {/* 偏好设置 - 可折叠 */}

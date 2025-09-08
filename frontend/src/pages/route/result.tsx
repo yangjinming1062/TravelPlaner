@@ -1,20 +1,129 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  MapPin,
+  Clock,
+  Star,
+  StickyNote,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   useRoutePlanResult,
   useRoutePlanStatus,
   useUpdatePlanFavorite,
 } from '@/hooks/use-api';
+import { WaypointSchema } from '@/types/planning';
 
 // 导入公共组件
 import { PlanSummary } from '@/components/shared/PlanSummary';
 import { DailyPlanList } from '@/components/shared/DailyPlan';
 import { RouteInfoList, RouteSummary } from '@/components/shared/RouteInfo';
-import { WaypointsList } from '@/components/shared/Waypoints';
 import PlanningStatusDisplay from '@/components/shared/PlanningStatusDisplay';
+import PlanResultActions from '@/components/shared/PlanResultActions';
+
+// 途经点列表组件（专用于沿途游玩结果展示）
+interface WaypointsProps {
+  waypoints: WaypointSchema[];
+  className?: string;
+}
+
+const WaypointsList: React.FC<WaypointsProps> = ({
+  waypoints,
+  className = '',
+}) => {
+  if (!waypoints || waypoints.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={className}>
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <MapPin className="w-5 h-5 text-green-500" />
+        途经景点
+        <Badge variant="outline">{waypoints.length}个</Badge>
+      </h3>
+      <div className="space-y-4">
+        {waypoints.map((waypoint, index) => (
+          <WaypointCard key={index} waypoint={waypoint} index={index + 1} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 单个途经点卡片组件（专用于沿途游玩结果展示）
+interface WaypointCardProps {
+  waypoint: WaypointSchema;
+  index: number;
+}
+
+const WaypointCard: React.FC<WaypointCardProps> = ({ waypoint, index }) => (
+  <Card className="relative overflow-hidden">
+    <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+    <CardHeader className="pb-3">
+      <CardTitle className="text-base flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">
+            {index}
+          </div>
+          <span>{waypoint.name}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {waypoint.rating && (
+            <Badge
+              variant="outline"
+              className="text-yellow-600 border-yellow-300"
+            >
+              <Star className="w-3 h-3 mr-1 fill-current" />
+              {waypoint.rating}
+            </Badge>
+          )}
+          <Badge variant="secondary" className="text-xs">
+            <Clock className="w-3 h-3 mr-1" />
+            {waypoint.estimated_visit_time}
+          </Badge>
+        </div>
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-3">
+      {/* 描述信息 */}
+      <div className="text-sm text-gray-600 leading-relaxed">
+        {waypoint.description}
+      </div>
+
+      {/* 位置信息 */}
+      <div className="flex items-center gap-2 text-xs text-gray-500">
+        <MapPin className="w-3 h-3" />
+        <span>
+          坐标: {waypoint.latitude.toFixed(6)}, {waypoint.longitude.toFixed(6)}
+        </span>
+      </div>
+
+      {/* 备注信息 */}
+      {waypoint.notes && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <StickyNote className="w-4 h-4 text-yellow-600 mt-0.5" />
+            <div>
+              <div className="text-sm font-medium text-yellow-800">
+                温馨提示
+              </div>
+              <div className="text-sm text-yellow-700 mt-1">
+                {waypoint.notes}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
 
 const RouteResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -164,18 +273,7 @@ const RouteResultPage: React.FC = () => {
           )}
 
         {/* 底部操作按钮 */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/route/list')}
-            className="flex-1"
-          >
-            查看历史规划
-          </Button>
-          <Button onClick={() => navigate('/route/task')} className="flex-1">
-            创建新的规划
-          </Button>
-        </div>
+        <PlanResultActions planType="route" />
       </div>
     </div>
   );

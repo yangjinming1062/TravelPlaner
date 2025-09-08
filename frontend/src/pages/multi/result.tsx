@@ -1,20 +1,125 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  MapPin,
+  ArrowRight,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   useMultiPlanResult,
   useMultiPlanStatus,
   useUpdatePlanFavorite,
 } from '@/hooks/use-api';
+import { NodeScheduleDetailSchema } from '@/types/planning';
 
 // 导入公共组件
 import { PlanSummary } from '@/components/shared/PlanSummary';
 import { HighlightsList } from '@/components/shared/Highlights';
-import { NodeScheduleList } from '@/components/shared/NodeSchedule';
+import { DailyPlanCard } from '@/components/shared/DailyPlan';
 import { RouteInfoList } from '@/components/shared/RouteInfo';
 import PlanningStatusDisplay from '@/components/shared/PlanningStatusDisplay';
+import PlanResultActions from '@/components/shared/PlanResultActions';
+
+// 节点详细安排列表组件（专用于多节点结果展示）
+interface NodeScheduleListProps {
+  nodesDetails: NodeScheduleDetailSchema[];
+  className?: string;
+}
+
+const NodeScheduleList: React.FC<NodeScheduleListProps> = ({
+  nodesDetails,
+  className = '',
+}) => {
+  if (!nodesDetails || nodesDetails.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={className}>
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <MapPin className="w-5 h-5 text-purple-500" />
+        节点详细安排
+        <Badge variant="outline">{nodesDetails.length}个节点</Badge>
+      </h3>
+      <div className="space-y-6">
+        {nodesDetails.map((node, index) => (
+          <NodeScheduleCard
+            key={index}
+            node={node}
+            nodeIndex={index + 1}
+            isLast={index === nodesDetails.length - 1}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 单个节点卡片组件（专用于多节点结果展示）
+interface NodeScheduleCardProps {
+  node: NodeScheduleDetailSchema;
+  nodeIndex: number;
+  isLast?: boolean;
+}
+
+const NodeScheduleCard: React.FC<NodeScheduleCardProps> = ({
+  node,
+  nodeIndex,
+  isLast = false,
+}) => (
+  <div className="relative">
+    <Card className="relative overflow-hidden">
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
+      <CardHeader className="bg-purple-50 border-b border-purple-100">
+        <CardTitle className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
+            {nodeIndex}
+          </div>
+          <div className="flex-grow">
+            <h4 className="text-lg">{node.location}</h4>
+            <div className="text-sm text-purple-600 mt-1">
+              节点 {nodeIndex} · {node.daily_plan.length} 天行程
+            </div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6">
+        {node.daily_plan.length > 0 ? (
+          <div className="space-y-4">
+            {node.daily_plan.map((dailyPlan, dayIndex) => (
+              <DailyPlanCard
+                key={dayIndex}
+                dailyPlan={dailyPlan}
+                showRouteInfo={false}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div>暂无详细行程安排</div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* 节点间连接线和箭头 */}
+    {!isLast && (
+      <div className="flex justify-center py-4">
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
+          <ArrowRight className="w-4 h-4 text-gray-600" />
+          <span className="text-sm text-gray-600">下一节点</span>
+        </div>
+      </div>
+    )}
+  </div>
+);
 
 const MultiResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -153,18 +258,7 @@ const MultiResultPage: React.FC = () => {
         )}
 
         {/* 底部操作按钮 */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/multi/list')}
-            className="flex-1"
-          >
-            查看历史规划
-          </Button>
-          <Button onClick={() => navigate('/multi/task')} className="flex-1">
-            创建新的规划
-          </Button>
-        </div>
+        <PlanResultActions planType="multi" />
       </div>
     </div>
   );

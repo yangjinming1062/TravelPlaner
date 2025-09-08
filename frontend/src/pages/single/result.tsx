@@ -16,6 +16,7 @@ import { PlanSummary } from '@/components/shared/PlanSummary';
 import { DailyPlanList } from '@/components/shared/DailyPlan';
 import { HighlightsList } from '@/components/shared/Highlights';
 import PlanningStatusDisplay from '@/components/shared/PlanningStatusDisplay';
+import PlanResultActions from '@/components/shared/PlanResultActions';
 
 const SingleResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -175,18 +176,7 @@ const SingleResultPage: React.FC = () => {
         )}
 
         {/* 底部操作按钮 */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/single/list')}
-            className="flex-1"
-          >
-            查看历史规划
-          </Button>
-          <Button onClick={() => navigate('/single/task')} className="flex-1">
-            创建新的规划
-          </Button>
-        </div>
+        <PlanResultActions planType="single" />
       </div>
     </div>
   );
