@@ -127,9 +127,6 @@ def update_user_profile(request: UpdateUserProfileRequest, user: User = Depends(
     """更新用户基本信息"""
     with DatabaseManager() as db:
         user = db.get(User, user.id)
-        if not user:
-            raise APIException(APICode.NOT_FOUND)
-
         # 只更新提供的字段
         if request.nickname is not None:
             user.nickname = request.nickname
@@ -145,8 +142,6 @@ def update_user_profile(request: UpdateUserProfileRequest, user: User = Depends(
             user.phone = request.phone
         if request.gender is not None:
             user.gender = request.gender
-
-        db.commit()
         return UserSchema.model_validate(user)
 
 
@@ -155,14 +150,9 @@ def change_password(request: UpdatePasswordRequest, user: User = Depends(get_use
     """修改登录密码"""
     with DatabaseManager() as db:
         user = db.get(User, user.id)
-        if not user:
-            raise APIException(APICode.NOT_FOUND)
-
         if request.old != SecretManager.decrypt(user.password):
             raise APIException(APICode.INVALID_PASSWORD)
-
         user.password = SecretManager.encrypt(request.new)
-        db.commit()
         return {"message": "密码修改成功"}
 
 
@@ -182,9 +172,6 @@ def update_user_preferences(request: UserPreferencesSchema, user: User = Depends
     """更新用户旅游偏好设置"""
     with DatabaseManager() as db:
         user = db.get(User, user.id)
-        if not user:
-            raise APIException(APICode.NOT_FOUND)
-
         # 只更新提供的字段
         if request.budget_min is not None:
             user.budget_min = request.budget_min
@@ -210,8 +197,6 @@ def update_user_preferences(request: UserPreferencesSchema, user: User = Depends
             user.display_language = request.display_language
         if request.custom_preferences is not None:
             user.custom_preferences = request.custom_preferences
-
-        db.commit()
         return UserPreferencesSchema.model_validate(user)
 
 
