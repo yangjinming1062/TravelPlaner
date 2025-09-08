@@ -1,55 +1,68 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  Loader2,
-  AlertCircle,
-  Lightbulb
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useSinglePlanResult, usePlanTaskStatus, useUpdatePlanFavorite } from "@/hooks/use-api";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Loader2, AlertCircle, Lightbulb } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  useSinglePlanResult,
+  usePlanTaskStatus,
+  useUpdatePlanFavorite,
+} from '@/hooks/use-api';
 
 // 导入公共组件
-import { PlanSummary } from "@/components/shared/PlanSummary";
-import { DailyPlanList } from "@/components/shared/DailyPlan";
-import { HighlightsList } from "@/components/shared/Highlights";
-import PlanningStatusDisplay from "@/components/shared/PlanningStatusDisplay";
+import { PlanSummary } from '@/components/shared/PlanSummary';
+import { DailyPlanList } from '@/components/shared/DailyPlan';
+import { HighlightsList } from '@/components/shared/Highlights';
+import PlanningStatusDisplay from '@/components/shared/PlanningStatusDisplay';
 
 const SingleResultPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const taskIdNumber = parseInt(taskId || "0", 10);
-  
+  const taskIdNumber = parseInt(taskId || '0', 10);
+
   // 首先获取任务状态
-  const { data: taskStatus, isLoading: statusLoading, isError: statusError } = usePlanTaskStatus("single", taskIdNumber);
-  
+  const {
+    data: taskStatus,
+    isLoading: statusLoading,
+    isError: statusError,
+  } = usePlanTaskStatus('single', taskIdNumber);
+
   // 只有当任务完成时才尝试获取结果
-  const shouldFetchResult = taskStatus?.status === "completed" && taskStatus?.has_result;
-  const { data: planResult, isLoading: resultLoading, isError: resultError, error } = useSinglePlanResult(taskIdNumber, shouldFetchResult);
-  
+  const shouldFetchResult =
+    taskStatus?.status === 'completed' && taskStatus?.has_result;
+  const {
+    data: planResult,
+    isLoading: resultLoading,
+    isError: resultError,
+    error,
+  } = useSinglePlanResult(taskIdNumber, shouldFetchResult);
+
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
-  
+
   const handleFavoriteToggle = (planId: string, isFavorite: boolean) => {
     updateFavorite(
-      { taskType: "single", taskId: parseInt(planId, 10), data: { is_favorite: isFavorite } },
+      {
+        taskType: 'single',
+        taskId: parseInt(planId, 10),
+        data: { is_favorite: isFavorite },
+      },
       {
         onSuccess: () => {
           toast({
-            title: isFavorite ? "已添加到收藏" : "已取消收藏",
+            title: isFavorite ? '已添加到收藏' : '已取消收藏',
           });
         },
         onError: (error) => {
           toast({
-            title: "操作失败",
-            description: error.message || "无法更新收藏状态，请稍后重试。",
-            variant: "destructive",
+            title: '操作失败',
+            description: error.message || '无法更新收藏状态，请稍后重试。',
+            variant: 'destructive',
           });
-        }
-      }
+        },
+      },
     );
   };
 
@@ -57,22 +70,28 @@ const SingleResultPage: React.FC = () => {
     // 实现分享功能
     navigator.clipboard.writeText(window.location.href);
     toast({
-      title: "链接已复制",
-      description: "已复制分享链接到剪贴板",
+      title: '链接已复制',
+      description: '已复制分享链接到剪贴板',
     });
   };
 
   const handleExport = (planId: string) => {
     // 实现导出功能
     toast({
-      title: "导出功能",
-      description: "导出功能开发中...",
+      title: '导出功能',
+      description: '导出功能开发中...',
     });
   };
 
   // 检查是否需要显示状态组件
-  const shouldShowStatus = statusLoading || statusError || !taskStatus || 
-    taskStatus.status !== "completed" || resultLoading || resultError || !planResult;
+  const shouldShowStatus =
+    statusLoading ||
+    statusError ||
+    !taskStatus ||
+    taskStatus.status !== 'completed' ||
+    resultLoading ||
+    resultError ||
+    !planResult;
 
   if (shouldShowStatus) {
     return (
@@ -96,8 +115,8 @@ const SingleResultPage: React.FC = () => {
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-6">
         <div className="container mx-auto px-4 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="text-white hover:bg-white/20"
             onClick={() => navigate(-1)}
@@ -114,7 +133,7 @@ const SingleResultPage: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* 规划概览 */}
-        <PlanSummary 
+        <PlanSummary
           plan={planResult}
           onToggleFavorite={handleFavoriteToggle}
           onShare={handleShare}
@@ -128,7 +147,7 @@ const SingleResultPage: React.FC = () => {
 
         {/* 每日行程安排 */}
         {planResult.daily_plan && planResult.daily_plan.length > 0 && (
-          <DailyPlanList 
+          <DailyPlanList
             dailyPlans={planResult.daily_plan}
             showRouteInfo={true}
           />
@@ -146,7 +165,9 @@ const SingleResultPage: React.FC = () => {
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
                 {planResult.tips.map((tip, index) => (
-                  <li key={index} className="text-gray-600 leading-relaxed">{tip}</li>
+                  <li key={index} className="text-gray-600 leading-relaxed">
+                    {tip}
+                  </li>
                 ))}
               </ul>
             </CardContent>
@@ -155,17 +176,14 @@ const SingleResultPage: React.FC = () => {
 
         {/* 底部操作按钮 */}
         <div className="flex flex-col sm:flex-row gap-4 pt-8">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate('/single/list')}
             className="flex-1"
           >
             查看历史规划
           </Button>
-          <Button 
-            onClick={() => navigate('/single/task')}
-            className="flex-1"
-          >
+          <Button onClick={() => navigate('/single/task')} className="flex-1">
             创建新的规划
           </Button>
         </div>

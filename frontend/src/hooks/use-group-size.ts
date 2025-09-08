@@ -9,7 +9,11 @@ import type { CommonPlanningData } from '@/components/shared/CommonPlanningField
  */
 export const useGroupSize = (
   commonData: CommonPlanningData,
-  setCommonData: (data: CommonPlanningData | ((prev: CommonPlanningData) => CommonPlanningData)) => void
+  setCommonData: (
+    data:
+      | CommonPlanningData
+      | ((prev: CommonPlanningData) => CommonPlanningData),
+  ) => void,
 ) => {
   // 跟踪用户是否手动编辑过人数
   const userEditedRef = useRef(false);
@@ -20,9 +24,14 @@ export const useGroupSize = (
    */
   const handleTravelTypeChange = (travelType: GroupTravelPreference) => {
     if (!userEditedRef.current) {
-      const selectedGroup = GROUP_TRAVEL_PREFERENCES.find(g => g.value === travelType);
+      const selectedGroup = GROUP_TRAVEL_PREFERENCES.find(
+        (g) => g.value === travelType,
+      );
       if (selectedGroup) {
-        setCommonData(prev => ({ ...prev, groupSize: selectedGroup.defaultGroupSize }));
+        setCommonData((prev) => ({
+          ...prev,
+          groupSize: selectedGroup.defaultGroupSize,
+        }));
       }
     }
   };
@@ -33,7 +42,7 @@ export const useGroupSize = (
    */
   const handleGroupSizeChange = (newSize: number) => {
     userEditedRef.current = true;
-    setCommonData(prev => ({ ...prev, groupSize: newSize }));
+    setCommonData((prev) => ({ ...prev, groupSize: newSize }));
   };
 
   /**

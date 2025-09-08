@@ -18,7 +18,7 @@ import {
   PlanningMultiListRequest,
   PlanningSmartListRequest,
   PlanningResultFavoriteRequest,
-  PlanningStatsResponse
+  PlanningStatsResponse,
 } from '../types/planning';
 
 // 单一目的地规划
@@ -27,26 +27,31 @@ export const createSinglePlan = (data: PlanningSingleTaskSchema) => {
 };
 
 export const getSinglePlans = (params: PlanningSingleListRequest) => {
-  return apiClient.post<PlanningSingleListResponse>('/planning/single-tasks/list', params);
+  return apiClient.post<PlanningSingleListResponse>(
+    '/planning/single-tasks/list',
+    params,
+  );
 };
 
 // 通用任务状态检查
 export const getPlanTaskStatus = (taskType: string, taskId: number) => {
-  return apiClient.get<{ 
-    task_id: number; 
+  return apiClient.get<{
+    task_id: number;
     task_type: string;
-    status: string; 
-    has_result: boolean; 
-    title: string; 
-    target?: string; 
+    status: string;
+    has_result: boolean;
+    title: string;
+    target?: string;
     max_travel_distance?: number;
     preferred_environment?: string;
-    created_at: string 
+    created_at: string;
   }>(`/planning/tasks/${taskType}/${taskId}/status`);
 };
 
 export const getSinglePlanResult = (taskId: number) => {
-  return apiClient.get<PlanningSingleResultSchema>(`/planning/single-tasks/${taskId}/result`);
+  return apiClient.get<PlanningSingleResultSchema>(
+    `/planning/single-tasks/${taskId}/result`,
+  );
 };
 
 export const deleteSinglePlans = (taskIds: number[]) => {
@@ -59,11 +64,16 @@ export const createRoutePlan = (data: PlanningRouteTaskSchema) => {
 };
 
 export const getRoutePlans = (params: PlanningRouteListRequest) => {
-  return apiClient.post<PlanningRouteListResponse>('/planning/route-tasks/list', params);
+  return apiClient.post<PlanningRouteListResponse>(
+    '/planning/route-tasks/list',
+    params,
+  );
 };
 
 export const getRoutePlanResult = (taskId: number) => {
-  return apiClient.get<PlanningRouteResultSchema>(`/planning/route-tasks/${taskId}/result`);
+  return apiClient.get<PlanningRouteResultSchema>(
+    `/planning/route-tasks/${taskId}/result`,
+  );
 };
 
 export const deleteRoutePlans = (taskIds: number[]) => {
@@ -76,11 +86,16 @@ export const createMultiPlan = (data: PlanningMultiTaskSchema) => {
 };
 
 export const getMultiPlans = (params: PlanningMultiListRequest) => {
-  return apiClient.post<PlanningMultiListResponse>('/planning/multi-tasks/list', params);
+  return apiClient.post<PlanningMultiListResponse>(
+    '/planning/multi-tasks/list',
+    params,
+  );
 };
 
 export const getMultiPlanResult = (taskId: number) => {
-  return apiClient.get<PlanningMultiResultSchema>(`/planning/multi-tasks/${taskId}/result`);
+  return apiClient.get<PlanningMultiResultSchema>(
+    `/planning/multi-tasks/${taskId}/result`,
+  );
 };
 
 export const deleteMultiPlans = (taskIds: number[]) => {
@@ -93,11 +108,16 @@ export const createSmartPlan = (data: PlanningSmartTaskSchema) => {
 };
 
 export const getSmartPlans = (params: PlanningSmartListRequest) => {
-  return apiClient.post<PlanningSmartListResponse>('/planning/smart-tasks/list', params);
+  return apiClient.post<PlanningSmartListResponse>(
+    '/planning/smart-tasks/list',
+    params,
+  );
 };
 
 export const getSmartPlanResult = (taskId: number) => {
-  return apiClient.get<PlanningSmartResultSchema>(`/planning/smart-tasks/${taskId}/result`);
+  return apiClient.get<PlanningSmartResultSchema>(
+    `/planning/smart-tasks/${taskId}/result`,
+  );
 };
 
 export const deleteSmartPlans = (taskIds: number[]) => {
@@ -105,8 +125,15 @@ export const deleteSmartPlans = (taskIds: number[]) => {
 };
 
 // 通用规划操作
-export const updatePlanFavorite = (taskType: string, taskId: number, data: PlanningResultFavoriteRequest) => {
-  return apiClient.patch(`/planning/tasks/${taskType}/${taskId}/favorite`, data);
+export const updatePlanFavorite = (
+  taskType: string,
+  taskId: number,
+  data: PlanningResultFavoriteRequest,
+) => {
+  return apiClient.patch(
+    `/planning/tasks/${taskType}/${taskId}/favorite`,
+    data,
+  );
 };
 
 export const getPlanningStats = () => {

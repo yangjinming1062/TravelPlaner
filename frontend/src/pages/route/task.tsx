@@ -1,61 +1,84 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Route, MapPin, Clock, Send, Navigation } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
-import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
-import NavigationHeader from "@/components/shared/NavigationHeader";
-import { useCreateRoutePlan } from "@/hooks/use-api";
-import { format } from "date-fns";
-import { ROUTE_PREFERENCES, PREFERRED_STOP_TYPES, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
-import type { RoutePreference, PreferredStopType, AccommodationLevel } from "@/constants/planning";
-import { useGroupSize } from "@/hooks/use-group-size";
+} from '@/components/ui/select';
+import { Route, MapPin, Clock, Send, Navigation } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import PreferencesSection, {
+  type TravelPreferences,
+} from '@/components/shared/PreferencesSection';
+import CommonPlanningFields, {
+  type CommonPlanningData,
+} from '@/components/shared/CommonPlanningFields';
+import NavigationHeader from '@/components/shared/NavigationHeader';
+import { useCreateRoutePlan } from '@/hooks/use-api';
+import { format } from 'date-fns';
+import {
+  ROUTE_PREFERENCES,
+  PREFERRED_STOP_TYPES,
+  DEFAULT_TRAVEL_PREFERENCES,
+  DEFAULT_COMMON_PLANNING_DATA,
+} from '@/constants/planning';
+import type {
+  RoutePreference,
+  PreferredStopType,
+  AccommodationLevel,
+} from '@/constants/planning';
+import { useGroupSize } from '@/hooks/use-group-size';
 
 const RouteTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateRoutePlan();
-  
+
   // 确保页面加载时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
+  const [commonData, setCommonData] = useState<CommonPlanningData>(
+    DEFAULT_COMMON_PLANNING_DATA,
+  );
 
   // 沿途游玩特有信息
-  const [startPoint, setStartPoint] = useState("");
-  const [endPoint, setEndPoint] = useState("");
+  const [startPoint, setStartPoint] = useState('');
+  const [endPoint, setEndPoint] = useState('');
   const [maxStopovers, setMaxStopovers] = useState(3);
   const [maxStopoverDuration, setMaxStopoverDuration] = useState(2);
-  const [routePreference, setRoutePreference] = useState<RoutePreference>("平衡");
+  const [routePreference, setRoutePreference] =
+    useState<RoutePreference>('平衡');
   const [maxDetourDistance, setMaxDetourDistance] = useState(100);
-  const [preferredStopTypes, setPreferredStopTypes] = useState<PreferredStopType[]>([]);
+  const [preferredStopTypes, setPreferredStopTypes] = useState<
+    PreferredStopType[]
+  >([]);
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
+  const [preferences, setPreferences] = useState<TravelPreferences>(
+    DEFAULT_TRAVEL_PREFERENCES,
+  );
 
   // 使用自定义Hook管理出行人数
-  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(
+    commonData,
+    setCommonData,
+  );
 
   const toggleStopType = (type: PreferredStopType) => {
     if (preferredStopTypes.includes(type)) {
-      setPreferredStopTypes(preferredStopTypes.filter(t => t !== type));
+      setPreferredStopTypes(preferredStopTypes.filter((t) => t !== type));
     } else {
       setPreferredStopTypes([...preferredStopTypes, type]);
     }
@@ -63,18 +86,24 @@ const RouteTaskPage: React.FC = () => {
 
   const handlePlanGenerate = () => {
     // 验证必填字段
-    if (!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate) {
+    if (
+      !startPoint ||
+      !endPoint ||
+      !commonData.departureDate ||
+      !commonData.returnDate
+    ) {
       toast({
-        title: "信息不完整",
-        description: "请填写所有必填字段。",
-        variant: "destructive",
+        title: '信息不完整',
+        description: '请填写所有必填字段。',
+        variant: 'destructive',
       });
       return;
     }
 
     // 构造请求数据
     const requestData = {
-      title: commonData.planTitle || `从${startPoint}到${endPoint}的沿途游玩计划`,
+      title:
+        commonData.planTitle || `从${startPoint}到${endPoint}的沿途游玩计划`,
       source: startPoint,
       target: endPoint,
       departure_date: format(commonData.departureDate, "yyyy-MM-dd'T'HH:mm:ss"),
@@ -92,7 +121,9 @@ const RouteTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+      dietary_restrictions: preferences.dietaryRestrictions
+        ? [preferences.dietaryRestrictions as any]
+        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -101,26 +132,27 @@ const RouteTaskPage: React.FC = () => {
     createPlan(requestData, {
       onSuccess: (taskId) => {
         toast({
-          title: "规划任务已提交",
-          description: "正在生成您的旅行计划，请稍候查看结果。",
+          title: '规划任务已提交',
+          description: '正在生成您的旅行计划，请稍候查看结果。',
         });
         // 跳转到结果页面
         navigate(`/route/result/${taskId}`);
       },
-      onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      onError: (error: any) => {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         toast({
-          title: "提交失败",
-          description: error.message || "无法提交规划请求，请稍后重试。",
-          variant: "destructive",
+          title: '提交失败',
+          description: error.message || '无法提交规划请求，请稍后重试。',
+          variant: 'destructive',
         });
-      }
+      },
     });
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <NavigationHeader 
+      <NavigationHeader
         title="沿途游玩规划"
         description="发现旅途中的每一处美景"
         className="bg-gradient-to-r from-orange-500 to-red-500"
@@ -128,11 +160,10 @@ const RouteTaskPage: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
             {/* 基本信息 */}
-            <CommonPlanningFields 
+            <CommonPlanningFields
               data={commonData}
               onDataChange={setCommonData}
               onGroupSizeChange={handleGroupSizeChange}
@@ -184,24 +215,32 @@ const RouteTaskPage: React.FC = () => {
                         step={1}
                       />
                       <div className="text-center mt-1">
-                        <span className="text-sm font-medium">{maxStopovers} 次</span>
+                        <span className="text-sm font-medium">
+                          {maxStopovers} 次
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="max-stopover-duration">计划停留时长 (小时)</Label>
+                    <Label htmlFor="max-stopover-duration">
+                      计划停留时长 (小时)
+                    </Label>
                     <div className="mt-2">
                       <Slider
                         id="max-stopover-duration"
                         value={[maxStopoverDuration]}
-                        onValueChange={(value) => setMaxStopoverDuration(value[0])}
+                        onValueChange={(value) =>
+                          setMaxStopoverDuration(value[0])
+                        }
                         max={24}
                         min={1}
                         step={1}
                       />
                       <div className="text-center mt-1">
-                        <span className="text-sm font-medium">{maxStopoverDuration} 小时</span>
+                        <span className="text-sm font-medium">
+                          {maxStopoverDuration} 小时
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -210,7 +249,12 @@ const RouteTaskPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="route-preference">路线偏好</Label>
-                    <Select value={routePreference} onValueChange={(value) => setRoutePreference(value as RoutePreference)}>
+                    <Select
+                      value={routePreference}
+                      onValueChange={(value) =>
+                        setRoutePreference(value as RoutePreference)
+                      }
+                    >
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="选择路线偏好" />
                       </SelectTrigger>
@@ -225,34 +269,48 @@ const RouteTaskPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="max-detour-distance">最大绕行距离 (km)</Label>
+                    <Label htmlFor="max-detour-distance">
+                      最大绕行距离 (km)
+                    </Label>
                     <div className="mt-2">
                       <Slider
                         id="max-detour-distance"
                         value={[maxDetourDistance]}
-                        onValueChange={(value) => setMaxDetourDistance(value[0])}
+                        onValueChange={(value) =>
+                          setMaxDetourDistance(value[0])
+                        }
                         max={500}
                         min={10}
                         step={10}
                       />
                       <div className="text-center mt-1">
-                        <span className="text-sm font-medium">{maxDetourDistance} km</span>
+                        <span className="text-sm font-medium">
+                          {maxDetourDistance} km
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-base font-medium">偏好停留类型（多选）</Label>
+                  <Label className="text-base font-medium">
+                    偏好停留类型（多选）
+                  </Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     {PREFERRED_STOP_TYPES.map((option) => (
-                      <div key={option.value} className="flex items-center space-x-2">
+                      <div
+                        key={option.value}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={`stop-${option.value}`}
                           checked={preferredStopTypes.includes(option.value)}
                           onCheckedChange={() => toggleStopType(option.value)}
                         />
-                        <Label htmlFor={`stop-${option.value}`} className="text-sm">
+                        <Label
+                          htmlFor={`stop-${option.value}`}
+                          className="text-sm"
+                        >
                           {option.label}
                         </Label>
                       </div>
@@ -263,21 +321,27 @@ const RouteTaskPage: React.FC = () => {
             </Card>
 
             {/* 偏好设置 */}
-            <PreferencesSection 
+            <PreferencesSection
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!startPoint || !endPoint || !commonData.departureDate || !commonData.returnDate || isPending}
+              disabled={
+                !startPoint ||
+                !endPoint ||
+                !commonData.departureDate ||
+                !commonData.returnDate ||
+                isPending
+              }
             >
               <Send className="w-4 h-4 mr-2" />
-              {isPending ? "生成中..." : "规划沿途路线"}
+              {isPending ? '生成中...' : '规划沿途路线'}
             </Button>
           </div>
 
@@ -292,23 +356,29 @@ const RouteTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">目的地深度</h4>
-                    <p className="text-sm text-gray-600">侧重目的地深度游玩和详细推荐</p>
+                    <p className="text-sm text-gray-600">
+                      侧重目的地深度游玩和详细推荐
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">沿途发现</h4>
-                    <p className="text-sm text-gray-600">发现并推荐沿途有价值的景点</p>
+                    <p className="text-sm text-gray-600">
+                      发现并推荐沿途有价值的景点
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">路线优化</h4>
-                    <p className="text-sm text-gray-600">兼顾赶路和游玩，合理安排行程</p>
+                    <p className="text-sm text-gray-600">
+                      兼顾赶路和游玩，合理安排行程
+                    </p>
                   </div>
                 </div>
 
@@ -316,7 +386,9 @@ const RouteTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">停留控制</h4>
-                    <p className="text-sm text-gray-600">可控制沿途停留次数和时长</p>
+                    <p className="text-sm text-gray-600">
+                      可控制沿途停留次数和时长
+                    </p>
                   </div>
                 </div>
               </CardContent>

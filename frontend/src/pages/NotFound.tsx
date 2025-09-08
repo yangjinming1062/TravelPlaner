@@ -1,14 +1,14 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 
 const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
     console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
+      '404 Error: User attempted to access non-existent route:',
+      location.pathname,
     );
   }, [location.pathname]);
 
@@ -20,8 +20,8 @@ const NotFound = () => {
         <p className="text-muted-foreground mb-8">
           抱歉，您访问的页面不存在或已被移除
         </p>
-        <Button 
-          onClick={() => window.location.href = "/"} 
+        <Button
+          onClick={() => (window.location.href = '/')}
           size="lg"
           className="shadow-soft"
         >

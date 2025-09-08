@@ -10,9 +10,9 @@ interface RouteInfoProps {
   className?: string;
 }
 
-export const RouteInfoList: React.FC<RouteInfoProps> = ({ 
-  routePlans, 
-  className = "" 
+export const RouteInfoList: React.FC<RouteInfoProps> = ({
+  routePlans,
+  className = '',
 }) => {
   if (!routePlans || routePlans.length === 0) {
     return null;
@@ -26,7 +26,11 @@ export const RouteInfoList: React.FC<RouteInfoProps> = ({
       </h3>
       <div className="space-y-4">
         {routePlans.map((route, index) => (
-          <RouteCard key={index} route={route} isLast={index === routePlans.length - 1} />
+          <RouteCard
+            key={index}
+            route={route}
+            isLast={index === routePlans.length - 1}
+          />
         ))}
       </div>
     </div>
@@ -39,7 +43,10 @@ interface RouteCardProps {
   isLast?: boolean;
 }
 
-export const RouteCard: React.FC<RouteCardProps> = ({ route, isLast = false }) => (
+export const RouteCard: React.FC<RouteCardProps> = ({
+  route,
+  isLast = false,
+}) => (
   <Card className="relative">
     <CardHeader className="pb-3">
       <CardTitle className="text-base flex items-center justify-between">
@@ -60,11 +67,9 @@ export const RouteCard: React.FC<RouteCardProps> = ({ route, isLast = false }) =
           <span className="font-medium">{route.from_location}</span>
           <span className="text-xs text-gray-500">出发 {route.from_time}</span>
         </div>
-        
-        {!isLast && (
-          <div className="ml-1 w-0.5 h-4 bg-gray-300"></div>
-        )}
-        
+
+        {!isLast && <div className="ml-1 w-0.5 h-4 bg-gray-300"></div>}
+
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500"></div>
           <span className="font-medium">{route.to_location}</span>
@@ -97,9 +102,9 @@ interface CompactRouteInfoProps {
   maxItems?: number;
 }
 
-export const CompactRouteInfo: React.FC<CompactRouteInfoProps> = ({ 
-  routePlans, 
-  maxItems = 2 
+export const CompactRouteInfo: React.FC<CompactRouteInfoProps> = ({
+  routePlans,
+  maxItems = 2,
 }) => {
   if (!routePlans || routePlans.length === 0) {
     return null;
@@ -107,8 +112,14 @@ export const CompactRouteInfo: React.FC<CompactRouteInfoProps> = ({
 
   const displayRoutes = routePlans.slice(0, maxItems);
   const hasMore = routePlans.length > maxItems;
-  const totalDistance = routePlans.reduce((sum, route) => sum + route.total_distance, 0);
-  const totalCost = routePlans.reduce((sum, route) => sum + (route.cost || 0), 0);
+  const totalDistance = routePlans.reduce(
+    (sum, route) => sum + route.total_distance,
+    0,
+  );
+  const totalCost = routePlans.reduce(
+    (sum, route) => sum + (route.cost || 0),
+    0,
+  );
 
   return (
     <div className="space-y-2">
@@ -116,7 +127,7 @@ export const CompactRouteInfo: React.FC<CompactRouteInfoProps> = ({
         <Navigation className="w-4 h-4 text-blue-500" />
         交通概览
       </div>
-      
+
       {/* 总体统计 */}
       <div className="flex items-center gap-4 text-xs text-gray-500">
         <span>总距离: {totalDistance}km</span>
@@ -126,12 +137,21 @@ export const CompactRouteInfo: React.FC<CompactRouteInfoProps> = ({
       {/* 路线列表 */}
       <div className="space-y-1">
         {displayRoutes.map((route, index) => (
-          <div key={index} className="text-sm flex items-center justify-between p-2 bg-gray-50 rounded">
+          <div
+            key={index}
+            className="text-sm flex items-center justify-between p-2 bg-gray-50 rounded"
+          >
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">{route.transport_type}</Badge>
-              <span>{route.from_location} → {route.to_location}</span>
+              <Badge variant="outline" className="text-xs">
+                {route.transport_type}
+              </Badge>
+              <span>
+                {route.from_location} → {route.to_location}
+              </span>
             </div>
-            <span className="text-xs text-gray-500">{route.estimated_time}</span>
+            <span className="text-xs text-gray-500">
+              {route.estimated_time}
+            </span>
           </div>
         ))}
         {hasMore && (
@@ -154,24 +174,38 @@ export const RouteSummary: React.FC<RouteSummaryProps> = ({ routePlans }) => {
     return null;
   }
 
-  const totalDistance = routePlans.reduce((sum, route) => sum + route.total_distance, 0);
-  const totalCost = routePlans.reduce((sum, route) => sum + (route.cost || 0), 0);
-  const transportTypes = [...new Set(routePlans.map(route => route.transport_type))];
+  const totalDistance = routePlans.reduce(
+    (sum, route) => sum + route.total_distance,
+    0,
+  );
+  const totalCost = routePlans.reduce(
+    (sum, route) => sum + (route.cost || 0),
+    0,
+  );
+  const transportTypes = [
+    ...new Set(routePlans.map((route) => route.transport_type)),
+  ];
 
   return (
     <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
       <CardContent className="pt-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{routePlans.length}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {routePlans.length}
+            </div>
             <div className="text-sm text-gray-600">路线段数</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{totalDistance}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {totalDistance}
+            </div>
             <div className="text-sm text-gray-600">总距离(km)</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{transportTypes.length}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {transportTypes.length}
+            </div>
             <div className="text-sm text-gray-600">交通方式</div>
           </div>
           <div className="text-center">
@@ -181,7 +215,7 @@ export const RouteSummary: React.FC<RouteSummaryProps> = ({ routePlans }) => {
             <div className="text-sm text-gray-600">预计费用</div>
           </div>
         </div>
-        
+
         {transportTypes.length > 0 && (
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-blue-200">
             <span className="text-sm text-gray-600">包含交通方式:</span>

@@ -1,17 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Calendar, MapPin } from "lucide-react";
-import { TRANSPORT_MODES } from "@/constants/planning";
-import type { TransportMode } from "@/constants/planning";
+} from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Calendar, MapPin } from 'lucide-react';
+import { TRANSPORT_MODES } from '@/constants/planning';
+import type { TransportMode } from '@/constants/planning';
 
 export interface CommonPlanningData {
   planTitle: string;
@@ -28,13 +28,14 @@ interface CommonPlanningFieldsProps {
   onGroupSizeChange?: (newSize: number) => void;
 }
 
-export default function CommonPlanningFields({ 
-  data, 
-  onDataChange, 
+export default function CommonPlanningFields({
+  data,
+  onDataChange,
   showTransport = true,
-  onGroupSizeChange 
+  onGroupSizeChange,
 }: CommonPlanningFieldsProps) {
-  const updateData = (key: keyof CommonPlanningData, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const updateData = (key: keyof CommonPlanningData, value: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (key === 'groupSize' && onGroupSizeChange) {
       onGroupSizeChange(value);
     } else {
@@ -58,7 +59,7 @@ export default function CommonPlanningFields({
             id="plan-title"
             placeholder="请输入规划标题（可自动生成）"
             value={data.planTitle}
-            onChange={(e) => updateData("planTitle", e.target.value)}
+            onChange={(e) => updateData('planTitle', e.target.value)}
             className="mt-2"
           />
         </div>
@@ -70,7 +71,7 @@ export default function CommonPlanningFields({
             <div className="mt-2">
               <DatePicker
                 date={data.departureDate}
-                onDateChange={(date) => updateData("departureDate", date)}
+                onDateChange={(date) => updateData('departureDate', date)}
                 placeholder="选择出发日期"
                 className="w-full"
               />
@@ -81,7 +82,7 @@ export default function CommonPlanningFields({
             <div className="mt-2">
               <DatePicker
                 date={data.returnDate}
-                onDateChange={(date) => updateData("returnDate", date)}
+                onDateChange={(date) => updateData('returnDate', date)}
                 placeholder="选择返程日期"
                 className="w-full"
                 disabled={!data.departureDate}
@@ -100,7 +101,9 @@ export default function CommonPlanningFields({
             max="20"
             placeholder="请输入出行人数"
             value={data.groupSize}
-            onChange={(e) => updateData("groupSize", parseInt(e.target.value) || 1)}
+            onChange={(e) =>
+              updateData('groupSize', parseInt(e.target.value) || 1)
+            }
             className="mt-2"
           />
         </div>
@@ -109,7 +112,10 @@ export default function CommonPlanningFields({
         {showTransport && (
           <div>
             <Label htmlFor="primary-transport">主要交通方式</Label>
-            <Select value={data.primaryTransport} onValueChange={(value) => updateData("primaryTransport", value)}>
+            <Select
+              value={data.primaryTransport}
+              onValueChange={(value) => updateData('primaryTransport', value)}
+            >
               <SelectTrigger className="mt-2">
                 <SelectValue placeholder="选择主要交通方式" />
               </SelectTrigger>

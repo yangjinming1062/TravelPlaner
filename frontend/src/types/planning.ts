@@ -123,7 +123,9 @@ export interface PlanningSingleResultSchema extends PlanningResultBase {
   tips: string[];
 }
 
-export interface PlanningSingleTaskSchema extends PlanningTaskBase, PlanningPreferencesSchema {
+export interface PlanningSingleTaskSchema
+  extends PlanningTaskBase,
+    PlanningPreferencesSchema {
   target: string;
 }
 
@@ -160,7 +162,9 @@ export interface PlanningRouteResultSchema {
   waypoints: WaypointSchema[];
 }
 
-export interface PlanningRouteTaskSchema extends PlanningTaskBase, PlanningPreferencesSchema {
+export interface PlanningRouteTaskSchema
+  extends PlanningTaskBase,
+    PlanningPreferencesSchema {
   target: string;
   max_stopovers: number;
   max_stopover_duration: number;
@@ -203,7 +207,9 @@ export interface NodeScheduleSchema {
   departure_date: string;
 }
 
-export interface PlanningMultiTaskSchema extends PlanningTaskBase, PlanningPreferencesSchema {
+export interface PlanningMultiTaskSchema
+  extends PlanningTaskBase,
+    PlanningPreferencesSchema {
   nodes_schedule: NodeScheduleSchema[];
 }
 
@@ -226,7 +232,9 @@ export interface PlanningSmartResultSchema extends PlanningResultBase {
   daily_plan: DailyPlanSchema[];
 }
 
-export interface PlanningSmartTaskSchema extends PlanningTaskBase, PlanningPreferencesSchema {
+export interface PlanningSmartTaskSchema
+  extends PlanningTaskBase,
+    PlanningPreferencesSchema {
   max_travel_distance: number;
   preferred_environment: EnvironmentPreference;
   avoid_regions: AvoidRegion[];

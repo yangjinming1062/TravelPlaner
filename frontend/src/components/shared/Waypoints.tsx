@@ -9,9 +9,9 @@ interface WaypointsProps {
   className?: string;
 }
 
-export const WaypointsList: React.FC<WaypointsProps> = ({ 
-  waypoints, 
-  className = "" 
+export const WaypointsList: React.FC<WaypointsProps> = ({
+  waypoints,
+  className = '',
 }) => {
   if (!waypoints || waypoints.length === 0) {
     return null;
@@ -39,7 +39,10 @@ interface WaypointCardProps {
   index: number;
 }
 
-export const WaypointCard: React.FC<WaypointCardProps> = ({ waypoint, index }) => (
+export const WaypointCard: React.FC<WaypointCardProps> = ({
+  waypoint,
+  index,
+}) => (
   <Card className="relative overflow-hidden">
     <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
     <CardHeader className="pb-3">
@@ -52,7 +55,10 @@ export const WaypointCard: React.FC<WaypointCardProps> = ({ waypoint, index }) =
         </div>
         <div className="flex items-center gap-2">
           {waypoint.rating && (
-            <Badge variant="outline" className="text-yellow-600 border-yellow-300">
+            <Badge
+              variant="outline"
+              className="text-yellow-600 border-yellow-300"
+            >
               <Star className="w-3 h-3 mr-1 fill-current" />
               {waypoint.rating}
             </Badge>
@@ -73,7 +79,9 @@ export const WaypointCard: React.FC<WaypointCardProps> = ({ waypoint, index }) =
       {/* 位置信息 */}
       <div className="flex items-center gap-2 text-xs text-gray-500">
         <MapPin className="w-3 h-3" />
-        <span>坐标: {waypoint.latitude.toFixed(6)}, {waypoint.longitude.toFixed(6)}</span>
+        <span>
+          坐标: {waypoint.latitude.toFixed(6)}, {waypoint.longitude.toFixed(6)}
+        </span>
       </div>
 
       {/* 备注信息 */}
@@ -82,8 +90,12 @@ export const WaypointCard: React.FC<WaypointCardProps> = ({ waypoint, index }) =
           <div className="flex items-start gap-2">
             <StickyNote className="w-4 h-4 text-yellow-600 mt-0.5" />
             <div>
-              <div className="text-sm font-medium text-yellow-800">温馨提示</div>
-              <div className="text-sm text-yellow-700 mt-1">{waypoint.notes}</div>
+              <div className="text-sm font-medium text-yellow-800">
+                温馨提示
+              </div>
+              <div className="text-sm text-yellow-700 mt-1">
+                {waypoint.notes}
+              </div>
             </div>
           </div>
         </div>
@@ -98,9 +110,9 @@ interface CompactWaypointsProps {
   maxItems?: number;
 }
 
-export const CompactWaypoints: React.FC<CompactWaypointsProps> = ({ 
-  waypoints, 
-  maxItems = 3 
+export const CompactWaypoints: React.FC<CompactWaypointsProps> = ({
+  waypoints,
+  maxItems = 3,
 }) => {
   if (!waypoints || waypoints.length === 0) {
     return null;
@@ -108,9 +120,11 @@ export const CompactWaypoints: React.FC<CompactWaypointsProps> = ({
 
   const displayWaypoints = waypoints.slice(0, maxItems);
   const hasMore = waypoints.length > maxItems;
-  const avgRating = waypoints
-    .filter(w => w.rating)
-    .reduce((sum, w) => sum + (w.rating || 0), 0) / waypoints.filter(w => w.rating).length;
+  const avgRating =
+    waypoints
+      .filter((w) => w.rating)
+      .reduce((sum, w) => sum + (w.rating || 0), 0) /
+    waypoints.filter((w) => w.rating).length;
 
   return (
     <div className="space-y-2">
@@ -126,10 +140,13 @@ export const CompactWaypoints: React.FC<CompactWaypointsProps> = ({
           </div>
         )}
       </div>
-      
+
       <div className="space-y-1">
         {displayWaypoints.map((waypoint, index) => (
-          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+          <div
+            key={index}
+            className="flex items-center justify-between p-2 bg-gray-50 rounded"
+          >
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
                 {index + 1}
@@ -138,12 +155,17 @@ export const CompactWaypoints: React.FC<CompactWaypointsProps> = ({
             </div>
             <div className="flex items-center gap-2">
               {waypoint.rating && (
-                <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-300">
+                <Badge
+                  variant="outline"
+                  className="text-xs text-yellow-600 border-yellow-300"
+                >
                   <Star className="w-2 h-2 mr-1 fill-current" />
                   {waypoint.rating}
                 </Badge>
               )}
-              <span className="text-xs text-gray-500">{waypoint.estimated_visit_time}</span>
+              <span className="text-xs text-gray-500">
+                {waypoint.estimated_visit_time}
+              </span>
             </div>
           </div>
         ))}

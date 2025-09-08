@@ -9,9 +9,9 @@ interface HighlightsProps {
   className?: string;
 }
 
-export const HighlightsList: React.FC<HighlightsProps> = ({ 
-  highlights, 
-  className = "" 
+export const HighlightsList: React.FC<HighlightsProps> = ({
+  highlights,
+  className = '',
 }) => {
   if (!highlights || highlights.length === 0) {
     return null;
@@ -64,9 +64,9 @@ interface CompactHighlightsProps {
   maxItems?: number;
 }
 
-export const CompactHighlights: React.FC<CompactHighlightsProps> = ({ 
-  highlights, 
-  maxItems = 3 
+export const CompactHighlights: React.FC<CompactHighlightsProps> = ({
+  highlights,
+  maxItems = 3,
 }) => {
   if (!highlights || highlights.length === 0) {
     return null;
@@ -83,7 +83,10 @@ export const CompactHighlights: React.FC<CompactHighlightsProps> = ({
       </div>
       <div className="space-y-1">
         {displayHighlights.map((highlight, index) => (
-          <div key={index} className="text-sm text-gray-600 flex items-start gap-2">
+          <div
+            key={index}
+            className="text-sm text-gray-600 flex items-start gap-2"
+          >
             <span className="text-yellow-500 text-xs mt-1">●</span>
             <span className="flex-grow">{highlight.name}</span>
           </div>

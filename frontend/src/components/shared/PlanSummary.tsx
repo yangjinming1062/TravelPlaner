@@ -2,14 +2,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Users, 
-  CreditCard, 
-  Heart, 
-  HeartOff, 
+import {
+  Calendar,
+  Users,
+  CreditCard,
+  Heart,
+  HeartOff,
   Share2,
-  Download
+  Download,
 } from 'lucide-react';
 import { PlanningResultBase } from '@/types/planning';
 
@@ -28,7 +28,7 @@ export const PlanSummary: React.FC<PlanSummaryProps> = ({
   onShare,
   onExport,
   showActions = true,
-  className = ""
+  className = '',
 }) => {
   const handleToggleFavorite = () => {
     if (onToggleFavorite) {
@@ -66,15 +66,29 @@ export const PlanSummary: React.FC<PlanSummaryProps> = ({
                 onClick={handleToggleFavorite}
                 className={`p-2 ${plan.is_favorite ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-red-500'}`}
               >
-                {plan.is_favorite ? <Heart className="w-4 h-4 fill-current" /> : <HeartOff className="w-4 h-4" />}
+                {plan.is_favorite ? (
+                  <Heart className="w-4 h-4 fill-current" />
+                ) : (
+                  <HeartOff className="w-4 h-4" />
+                )}
               </Button>
               {onShare && (
-                <Button variant="ghost" size="sm" onClick={handleShare} className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShare}
+                  className="p-2"
+                >
                   <Share2 className="w-4 h-4" />
                 </Button>
               )}
               {onExport && (
-                <Button variant="ghost" size="sm" onClick={handleExport} className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExport}
+                  className="p-2"
+                >
                   <Download className="w-4 h-4" />
                 </Button>
               )}
@@ -91,13 +105,15 @@ export const PlanSummary: React.FC<PlanSummaryProps> = ({
               <div className="font-medium">{plan.total_days} 天</div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <CreditCard className="w-4 h-4 text-green-500" />
             <div>
               <div className="text-sm text-gray-500">预估费用</div>
               <div className="font-medium">
-                {plan.estimated_budget > 0 ? `¥${plan.estimated_budget}` : '待估算'}
+                {plan.estimated_budget > 0
+                  ? `¥${plan.estimated_budget}`
+                  : '待估算'}
               </div>
             </div>
           </div>
@@ -133,7 +149,7 @@ interface CompactPlanSummaryProps {
 export const CompactPlanSummary: React.FC<CompactPlanSummaryProps> = ({
   plan,
   onToggleFavorite,
-  onClick
+  onClick,
 }) => {
   const handleClick = () => {
     if (onClick) {
@@ -149,7 +165,7 @@ export const CompactPlanSummary: React.FC<CompactPlanSummaryProps> = ({
   };
 
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleClick}
     >
@@ -158,7 +174,9 @@ export const CompactPlanSummary: React.FC<CompactPlanSummaryProps> = ({
           <div className="flex-grow">
             <h4 className="font-medium mb-1">{plan.plan_title}</h4>
             {plan.plan_description && (
-              <p className="text-sm text-gray-500 line-clamp-2">{plan.plan_description}</p>
+              <p className="text-sm text-gray-500 line-clamp-2">
+                {plan.plan_description}
+              </p>
             )}
           </div>
           <Button
@@ -167,10 +185,14 @@ export const CompactPlanSummary: React.FC<CompactPlanSummaryProps> = ({
             onClick={handleToggleFavorite}
             className={`p-1 ml-2 ${plan.is_favorite ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-red-500'}`}
           >
-            {plan.is_favorite ? <Heart className="w-4 h-4 fill-current" /> : <HeartOff className="w-4 h-4" />}
+            {plan.is_favorite ? (
+              <Heart className="w-4 h-4 fill-current" />
+            ) : (
+              <HeartOff className="w-4 h-4" />
+            )}
           </Button>
         </div>
-        
+
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
@@ -179,10 +201,15 @@ export const CompactPlanSummary: React.FC<CompactPlanSummaryProps> = ({
             </span>
             <span className="flex items-center gap-1">
               <CreditCard className="w-3 h-3 text-green-500" />
-              {plan.estimated_budget > 0 ? `¥${plan.estimated_budget}` : '待估算'}
+              {plan.estimated_budget > 0
+                ? `¥${plan.estimated_budget}`
+                : '待估算'}
             </span>
           </div>
-          <Badge variant={plan.is_favorite ? 'default' : 'secondary'} className="text-xs">
+          <Badge
+            variant={plan.is_favorite ? 'default' : 'secondary'}
+            className="text-xs"
+          >
             {plan.is_favorite ? '已收藏' : '未收藏'}
           </Badge>
         </div>
@@ -207,36 +234,61 @@ export const PlanStatsCard: React.FC<PlanStatsCardProps> = ({
   highlights = 0,
   activities = 0,
   waypoints = 0,
-  className = ""
+  className = '',
 }) => {
   const stats = [
     { label: '行程天数', value: totalDays, unit: '天', icon: Calendar },
-    { label: '预估费用', value: estimatedBudget, unit: '元', icon: CreditCard, prefix: '¥' },
+    {
+      label: '预估费用',
+      value: estimatedBudget,
+      unit: '元',
+      icon: CreditCard,
+      prefix: '¥',
+    },
   ];
 
   if (highlights > 0) {
-    stats.push({ label: '精彩亮点', value: highlights, unit: '个', icon: Calendar });
+    stats.push({
+      label: '精彩亮点',
+      value: highlights,
+      unit: '个',
+      icon: Calendar,
+    });
   }
-  
+
   if (activities > 0) {
-    stats.push({ label: '活动安排', value: activities, unit: '项', icon: Users });
+    stats.push({
+      label: '活动安排',
+      value: activities,
+      unit: '项',
+      icon: Users,
+    });
   }
-  
+
   if (waypoints > 0) {
-    stats.push({ label: '途经景点', value: waypoints, unit: '个', icon: Calendar });
+    stats.push({
+      label: '途经景点',
+      value: waypoints,
+      unit: '个',
+      icon: Calendar,
+    });
   }
 
   return (
-    <Card className={`bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 ${className}`}>
+    <Card
+      className={`bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 ${className}`}
+    >
       <CardContent className="pt-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-2xl font-bold text-blue-600">
-                {stat.prefix || ''}{stat.value > 0 ? stat.value : '-'}
+                {stat.prefix || ''}
+                {stat.value > 0 ? stat.value : '-'}
               </div>
               <div className="text-sm text-gray-600">
-                {stat.label}{stat.value > 0 && !stat.prefix ? `(${stat.unit})` : ''}
+                {stat.label}
+                {stat.value > 0 && !stat.prefix ? `(${stat.unit})` : ''}
               </div>
             </div>
           ))}

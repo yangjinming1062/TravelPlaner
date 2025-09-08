@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { LogIn, UserPlus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useLogin } from "@/hooks/use-api";
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { LogIn, UserPlus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useLogin } from '@/hooks/use-api';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,47 +16,50 @@ const LoginPage: React.FC = () => {
   const { mutate: login, isPending } = useLogin();
 
   // 获取用户原本想要访问的页面
-  const from = (location.state as any)?.from || "/";
-  
+  const from = (location.state as any)?.from || '/';
+
   const [formData, setFormData] = useState({
-    username: "",
-    password: ""
+    username: '',
+    password: '',
   });
 
   const handleLogin = () => {
     if (!formData.username || !formData.password) {
       toast({
-        title: "信息不完整",
-        description: "请输入用户名和密码",
-        variant: "destructive",
+        title: '信息不完整',
+        description: '请输入用户名和密码',
+        variant: 'destructive',
       });
       return;
     }
 
-    login({
-      username: formData.username,
-      password: formData.password
-    }, {
-      onSuccess: () => {
-        toast({
-          title: "登录成功",
-          description: "欢迎回来！",
-        });
-        // 重定向到用户原本想要访问的页面
-        navigate(from, { replace: true });
+    login(
+      {
+        username: formData.username,
+        password: formData.password,
       },
-      onError: (error: any) => {
-        toast({
-          title: "登录失败",
-          description: error.message || "用户名或密码错误",
-          variant: "destructive",
-        });
-      }
-    });
+      {
+        onSuccess: () => {
+          toast({
+            title: '登录成功',
+            description: '欢迎回来！',
+          });
+          // 重定向到用户原本想要访问的页面
+          navigate(from, { replace: true });
+        },
+        onError: (error: any) => {
+          toast({
+            title: '登录失败',
+            description: error.message || '用户名或密码错误',
+            variant: 'destructive',
+          });
+        },
+      },
+    );
   };
 
   const handleRegister = () => {
-    navigate("/register");
+    navigate('/register');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -82,7 +85,9 @@ const LoginPage: React.FC = () => {
                 id="username"
                 placeholder="请输入用户名"
                 value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, username: e.target.value }))
+                }
                 onKeyPress={handleKeyPress}
                 className="mt-2"
               />
@@ -95,20 +100,22 @@ const LoginPage: React.FC = () => {
                 type="password"
                 placeholder="请输入密码"
                 value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, password: e.target.value }))
+                }
                 onKeyPress={handleKeyPress}
                 className="mt-2"
               />
             </div>
 
-            <Button 
-              onClick={handleLogin} 
-              className="w-full" 
+            <Button
+              onClick={handleLogin}
+              className="w-full"
               size="lg"
               disabled={isPending}
             >
               <LogIn className="w-4 h-4 mr-2" />
-              {isPending ? "登录中..." : "登录"}
+              {isPending ? '登录中...' : '登录'}
             </Button>
 
             <div className="relative">
@@ -122,7 +129,12 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <Button onClick={handleRegister} variant="outline" className="w-full" size="lg">
+            <Button
+              onClick={handleRegister}
+              variant="outline"
+              className="w-full"
+              size="lg"
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               注册新账号
             </Button>

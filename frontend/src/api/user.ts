@@ -1,11 +1,11 @@
 // 用户相关 API
 import apiClient from './index';
-import { 
-  LoginRequest, 
-  RegisterRequest, 
-  LoginResponse, 
+import {
+  LoginRequest,
+  RegisterRequest,
+  LoginResponse,
   UserProfileSchema,
-  UserPreferencesSchema
+  UserPreferencesSchema,
 } from '../types/user';
 
 // 登录

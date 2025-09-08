@@ -1,54 +1,74 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Send, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
-import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
-import NavigationHeader from "@/components/shared/NavigationHeader";
-import { NodeScheduleInput } from "@/components/shared/NodeSchedule";
-import { NodeScheduleSchema } from "@/types/planning";
-import { useCreateMultiPlan } from "@/hooks/use-api";
-import { format } from "date-fns";
-import type { AccommodationLevel } from "@/constants/planning";
-import { DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
-import { useGroupSize } from "@/hooks/use-group-size";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Send, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import PreferencesSection, {
+  type TravelPreferences,
+} from '@/components/shared/PreferencesSection';
+import CommonPlanningFields, {
+  type CommonPlanningData,
+} from '@/components/shared/CommonPlanningFields';
+import NavigationHeader from '@/components/shared/NavigationHeader';
+import { NodeScheduleInput } from '@/components/shared/NodeSchedule';
+import { NodeScheduleSchema } from '@/types/planning';
+import { useCreateMultiPlan } from '@/hooks/use-api';
+import { format } from 'date-fns';
+import type { AccommodationLevel } from '@/constants/planning';
+import {
+  DEFAULT_TRAVEL_PREFERENCES,
+  DEFAULT_COMMON_PLANNING_DATA,
+} from '@/constants/planning';
+import { useGroupSize } from '@/hooks/use-group-size';
 
 const MultiTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateMultiPlan();
-  
+
   // 确保页面加载时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
+  const [commonData, setCommonData] = useState<CommonPlanningData>(
+    DEFAULT_COMMON_PLANNING_DATA,
+  );
 
   // 多节点特有信息
-  const [startPoint, setStartPoint] = useState("");
+  const [startPoint, setStartPoint] = useState('');
   const [nodesSchedule, setNodesSchedule] = useState<NodeScheduleSchema[]>([
-    { location: "", arrival_date: "", departure_date: "" }
+    { location: '', arrival_date: '', departure_date: '' },
   ]);
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
+  const [preferences, setPreferences] = useState<TravelPreferences>(
+    DEFAULT_TRAVEL_PREFERENCES,
+  );
 
   // 使用自定义Hook管理出行人数
-  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(
+    commonData,
+    setCommonData,
+  );
 
   const handlePlanGenerate = () => {
     // 验证必填字段
-    if (!startPoint || !commonData.departureDate || !commonData.returnDate || 
-        nodesSchedule.some(node => !node.location || !node.arrival_date || !node.departure_date)) {
+    if (
+      !startPoint ||
+      !commonData.departureDate ||
+      !commonData.returnDate ||
+      nodesSchedule.some(
+        (node) => !node.location || !node.arrival_date || !node.departure_date,
+      )
+    ) {
       toast({
-        title: "信息不完整",
-        description: "请填写所有必填字段。",
-        variant: "destructive",
+        title: '信息不完整',
+        description: '请填写所有必填字段。',
+        variant: 'destructive',
       });
       return;
     }
@@ -68,7 +88,9 @@ const MultiTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+      dietary_restrictions: preferences.dietaryRestrictions
+        ? [preferences.dietaryRestrictions as any]
+        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -77,25 +99,26 @@ const MultiTaskPage: React.FC = () => {
     createPlan(requestData, {
       onSuccess: (taskId) => {
         toast({
-          title: "规划任务已提交",
-          description: "正在生成您的旅行计划，请稍候查看结果。",
+          title: '规划任务已提交',
+          description: '正在生成您的旅行计划，请稍候查看结果。',
         });
         navigate(`/multi/result/${taskId}`);
       },
-      onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      onError: (error: any) => {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         toast({
-          title: "提交失败",
-          description: error.message || "无法提交规划请求，请稍后重试。",
-          variant: "destructive",
+          title: '提交失败',
+          description: error.message || '无法提交规划请求，请稍后重试。',
+          variant: 'destructive',
         });
-      }
+      },
     });
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <NavigationHeader 
+      <NavigationHeader
         title="多节点规划"
         description="精心安排多个目的地的完美旅程"
         className="bg-gradient-to-r from-purple-500 to-indigo-500"
@@ -103,11 +126,10 @@ const MultiTaskPage: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
             {/* 基本信息 */}
-            <CommonPlanningFields 
+            <CommonPlanningFields
               data={commonData}
               onDataChange={setCommonData}
               onGroupSizeChange={handleGroupSizeChange}
@@ -154,21 +176,26 @@ const MultiTaskPage: React.FC = () => {
             </Card>
 
             {/* 偏好设置 */}
-            <PreferencesSection 
+            <PreferencesSection
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!startPoint || !commonData.departureDate || !commonData.returnDate || isPending}
+              disabled={
+                !startPoint ||
+                !commonData.departureDate ||
+                !commonData.returnDate ||
+                isPending
+              }
             >
               <Send className="w-4 h-4 mr-2" />
-              {isPending ? "生成中..." : "生成多节点方案"}
+              {isPending ? '生成中...' : '生成多节点方案'}
             </Button>
           </div>
 
@@ -183,23 +210,29 @@ const MultiTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">多目的地</h4>
-                    <p className="text-sm text-gray-600">设置先后达到的多个目的地，规划不再局限于单地</p>
+                    <p className="text-sm text-gray-600">
+                      设置先后达到的多个目的地，规划不再局限于单地
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">时间精准</h4>
-                    <p className="text-sm text-gray-600">针对每个目的地的抵达和离开时间进行精准规划</p>
+                    <p className="text-sm text-gray-600">
+                      针对每个目的地的抵达和离开时间进行精准规划
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">交通衔接</h4>
-                    <p className="text-sm text-gray-600">优化目的地间的交通方式和时间安排</p>
+                    <p className="text-sm text-gray-600">
+                      优化目的地间的交通方式和时间安排
+                    </p>
                   </div>
                 </div>
 
@@ -207,7 +240,9 @@ const MultiTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">目的地游玩</h4>
-                    <p className="text-sm text-gray-600">为每个目的地推荐专属的游玩内容</p>
+                    <p className="text-sm text-gray-600">
+                      为每个目的地推荐专属的游玩内容
+                    </p>
                   </div>
                 </div>
               </CardContent>

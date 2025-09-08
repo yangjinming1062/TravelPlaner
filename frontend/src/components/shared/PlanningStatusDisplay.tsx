@@ -1,10 +1,7 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { 
-  Loader2,
-  AlertCircle
-} from "lucide-react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 interface TaskStatus {
   task_id: number;
@@ -41,7 +38,7 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
   resultError,
   planningTypeDisplayName,
   planningTypeColor,
-  createNewPlanRoute
+  createNewPlanRoute,
 }) => {
   const navigate = useNavigate();
 
@@ -50,7 +47,9 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className={`w-10 h-10 animate-spin mx-auto ${planningTypeColor}`} />
+          <Loader2
+            className={`w-10 h-10 animate-spin mx-auto ${planningTypeColor}`}
+          />
           <p className="mt-4 text-lg">正在敦促AI加紧生成结果...</p>
         </div>
       </div>
@@ -67,10 +66,7 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <p className="mt-2 text-gray-500">
             找不到指定的规划任务，可能已被删除。
           </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
+          <Button className="mt-6" onClick={() => navigate(-1)}>
             返回上一页
           </Button>
         </div>
@@ -79,18 +75,20 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
   }
 
   // 任务排队中
-  if (taskStatus?.status === "pending") {
+  if (taskStatus?.status === 'pending') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
-          <Loader2 className={`w-16 h-16 animate-spin mx-auto ${planningTypeColor}`} />
+          <Loader2
+            className={`w-16 h-16 animate-spin mx-auto ${planningTypeColor}`}
+          />
           <h2 className="text-2xl font-bold mt-4">规划任务排队中</h2>
           <p className="mt-2 text-gray-500">
             您的{planningTypeDisplayName}任务正在排队处理，请稍等片刻...
           </p>
           <div className="mt-6 space-y-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate('/planning-history')}
             >
               查看规划历史
@@ -105,16 +103,16 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
   }
 
   // 任务处理中
-  if (taskStatus?.status === "processing") {
+  if (taskStatus?.status === 'processing') {
     const getProcessingMessage = () => {
       switch (taskStatus.task_type) {
-        case "single":
+        case 'single':
           return `AI正在为您精心规划${taskStatus.target}的旅行方案...`;
-        case "route":
+        case 'route':
           return `AI正在为您精心规划到${taskStatus.target}的沿途游玩路线...`;
-        case "multi":
+        case 'multi':
           return `AI正在为您精心规划多节点旅行方案...`;
-        case "smart":
+        case 'smart':
           return `AI正在基于您的偏好智能推荐最适合的旅行目的地...`;
         default:
           return `AI正在为您精心规划旅行方案...`;
@@ -124,19 +122,25 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
-          <Loader2 className={`w-16 h-16 animate-spin mx-auto ${planningTypeColor}`} />
-          <h2 className="text-2xl font-bold mt-4">正在生成{planningTypeDisplayName}</h2>
-          <p className="mt-2 text-gray-500">
-            {getProcessingMessage()}
-          </p>
-          <div className={`mt-4 p-4 rounded-lg ${planningTypeColor === 'text-blue-500' ? 'bg-blue-50' : planningTypeColor === 'text-orange-500' ? 'bg-orange-50' : planningTypeColor === 'text-green-500' ? 'bg-green-50' : 'bg-purple-50'}`}>
-            <p className={`text-sm ${planningTypeColor === 'text-blue-500' ? 'text-blue-600' : planningTypeColor === 'text-orange-500' ? 'text-orange-600' : planningTypeColor === 'text-green-500' ? 'text-green-600' : 'text-purple-600'}`}>
+          <Loader2
+            className={`w-16 h-16 animate-spin mx-auto ${planningTypeColor}`}
+          />
+          <h2 className="text-2xl font-bold mt-4">
+            正在生成{planningTypeDisplayName}
+          </h2>
+          <p className="mt-2 text-gray-500">{getProcessingMessage()}</p>
+          <div
+            className={`mt-4 p-4 rounded-lg ${planningTypeColor === 'text-blue-500' ? 'bg-blue-50' : planningTypeColor === 'text-orange-500' ? 'bg-orange-50' : planningTypeColor === 'text-green-500' ? 'bg-green-50' : 'bg-purple-50'}`}
+          >
+            <p
+              className={`text-sm ${planningTypeColor === 'text-blue-500' ? 'text-blue-600' : planningTypeColor === 'text-orange-500' ? 'text-orange-600' : planningTypeColor === 'text-green-500' ? 'text-green-600' : 'text-purple-600'}`}
+            >
               💡 AI正在分析最优方案，处理完成后会自动显示结果
             </p>
           </div>
           <div className="mt-6 space-y-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate('/planning-history')}
             >
               查看规划历史
@@ -151,7 +155,7 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
   }
 
   // 任务失败
-  if (taskStatus?.status === "failed") {
+  if (taskStatus?.status === 'failed') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -161,15 +165,10 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
             很抱歉，生成{planningTypeDisplayName}时出现了问题，请稍后重试。
           </p>
           <div className="mt-6 space-x-3">
-            <Button 
-              onClick={() => navigate(createNewPlanRoute)}
-            >
+            <Button onClick={() => navigate(createNewPlanRoute)}>
               重新规划
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(-1)}
-            >
+            <Button variant="outline" onClick={() => navigate(-1)}>
               返回上一页
             </Button>
           </div>
@@ -183,7 +182,9 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className={`w-10 h-10 animate-spin mx-auto ${planningTypeColor}`} />
+          <Loader2
+            className={`w-10 h-10 animate-spin mx-auto ${planningTypeColor}`}
+          />
           <p className="mt-4 text-lg">正在加载规划结果...</p>
         </div>
       </div>
@@ -198,12 +199,9 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <AlertCircle className="w-16 h-16 mx-auto text-red-500" />
           <h2 className="text-2xl font-bold mt-4">获取规划结果失败</h2>
           <p className="mt-2 text-gray-500">
-            {resultError?.message || "无法获取旅行计划，请稍后重试。"}
+            {resultError?.message || '无法获取旅行计划，请稍后重试。'}
           </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => window.location.reload()}
-          >
+          <Button className="mt-6" onClick={() => window.location.reload()}>
             重新加载
           </Button>
         </div>
@@ -220,10 +218,7 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <p className="mt-2 text-gray-500">
             该旅行计划可能仍在生成中或已被删除。
           </p>
-          <Button 
-            className="mt-6" 
-            onClick={() => navigate(-1)}
-          >
+          <Button className="mt-6" onClick={() => navigate(-1)}>
             返回上一页
           </Button>
         </div>

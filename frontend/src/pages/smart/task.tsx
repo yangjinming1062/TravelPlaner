@@ -1,58 +1,80 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Send, Sparkles, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import PreferencesSection, { type TravelPreferences } from "@/components/shared/PreferencesSection";
-import CommonPlanningFields, { type CommonPlanningData } from "@/components/shared/CommonPlanningFields";
-import NavigationHeader from "@/components/shared/NavigationHeader";
-import { useCreateSmartPlan } from "@/hooks/use-api";
-import { format } from "date-fns";
-import { ENVIRONMENT_PREFERENCES, AVOID_REGIONS, DEFAULT_TRAVEL_PREFERENCES, DEFAULT_COMMON_PLANNING_DATA } from "@/constants/planning";
-import type { EnvironmentPreference, AvoidRegion, AccommodationLevel } from "@/constants/planning";
-import { useGroupSize } from "@/hooks/use-group-size";
+} from '@/components/ui/select';
+import { Send, Sparkles, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import PreferencesSection, {
+  type TravelPreferences,
+} from '@/components/shared/PreferencesSection';
+import CommonPlanningFields, {
+  type CommonPlanningData,
+} from '@/components/shared/CommonPlanningFields';
+import NavigationHeader from '@/components/shared/NavigationHeader';
+import { useCreateSmartPlan } from '@/hooks/use-api';
+import { format } from 'date-fns';
+import {
+  ENVIRONMENT_PREFERENCES,
+  AVOID_REGIONS,
+  DEFAULT_TRAVEL_PREFERENCES,
+  DEFAULT_COMMON_PLANNING_DATA,
+} from '@/constants/planning';
+import type {
+  EnvironmentPreference,
+  AvoidRegion,
+  AccommodationLevel,
+} from '@/constants/planning';
+import { useGroupSize } from '@/hooks/use-group-size';
 
 const SmartTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { mutate: createPlan, isPending } = useCreateSmartPlan();
-  
+
   // 确保页面加载时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
   // 基础规划信息
-  const [commonData, setCommonData] = useState<CommonPlanningData>(DEFAULT_COMMON_PLANNING_DATA);
+  const [commonData, setCommonData] = useState<CommonPlanningData>(
+    DEFAULT_COMMON_PLANNING_DATA,
+  );
 
   // 智能推荐特有信息
-  const [startPoint, setStartPoint] = useState("");
+  const [startPoint, setStartPoint] = useState('');
   const [maxTravelDistance, setMaxTravelDistance] = useState(1000);
-  const [preferredEnvironment, setPreferredEnvironment] = useState<EnvironmentPreference | "">("");
+  const [preferredEnvironment, setPreferredEnvironment] = useState<
+    EnvironmentPreference | ''
+  >('');
   const [avoidRegions, setAvoidRegions] = useState<AvoidRegion[]>([]);
 
   // 偏好设置
-  const [preferences, setPreferences] = useState<TravelPreferences>(DEFAULT_TRAVEL_PREFERENCES);
+  const [preferences, setPreferences] = useState<TravelPreferences>(
+    DEFAULT_TRAVEL_PREFERENCES,
+  );
 
   // 使用自定义Hook管理出行人数
-  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(commonData, setCommonData);
+  const { handleTravelTypeChange, handleGroupSizeChange } = useGroupSize(
+    commonData,
+    setCommonData,
+  );
 
   const toggleAvoidRegion = (region: AvoidRegion) => {
     if (avoidRegions.includes(region)) {
-      setAvoidRegions(avoidRegions.filter(r => r !== region));
+      setAvoidRegions(avoidRegions.filter((r) => r !== region));
     } else {
       setAvoidRegions([...avoidRegions, region]);
     }
@@ -62,9 +84,9 @@ const SmartTaskPage: React.FC = () => {
     // 验证必填字段
     if (!startPoint || !commonData.departureDate || !commonData.returnDate) {
       toast({
-        title: "信息不完整",
-        description: "请填写所有必填字段。",
-        variant: "destructive",
+        title: '信息不完整',
+        description: '请填写所有必填字段。',
+        variant: 'destructive',
       });
       return;
     }
@@ -78,7 +100,7 @@ const SmartTaskPage: React.FC = () => {
       group_size: commonData.groupSize,
       transport_mode: commonData.primaryTransport,
       max_travel_distance: maxTravelDistance,
-      preferred_environment: preferredEnvironment || "海边",
+      preferred_environment: preferredEnvironment || '海边',
       avoid_regions: avoidRegions,
       preferred_transport_modes: preferences.transportMethods,
       accommodation_level: preferences.accommodationLevels,
@@ -86,7 +108,9 @@ const SmartTaskPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions ? [preferences.dietaryRestrictions as any] : [], // eslint-disable-line @typescript-eslint/no-explicit-any
+      dietary_restrictions: preferences.dietaryRestrictions
+        ? [preferences.dietaryRestrictions as any]
+        : [], // eslint-disable-line @typescript-eslint/no-explicit-any
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
     };
@@ -95,25 +119,26 @@ const SmartTaskPage: React.FC = () => {
     createPlan(requestData, {
       onSuccess: (taskId) => {
         toast({
-          title: "规划任务已提交",
-          description: "AI正在为您生成智能推荐方案，请稍候查看结果。",
+          title: '规划任务已提交',
+          description: 'AI正在为您生成智能推荐方案，请稍候查看结果。',
         });
         navigate(`/smart/result/${taskId}`);
       },
-      onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      onError: (error: any) => {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         toast({
-          title: "提交失败",
-          description: error.message || "无法提交规划请求，请稍后重试。",
-          variant: "destructive",
+          title: '提交失败',
+          description: error.message || '无法提交规划请求，请稍后重试。',
+          variant: 'destructive',
         });
-      }
+      },
     });
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <NavigationHeader 
+      <NavigationHeader
         title="智能推荐规划"
         description="让AI为您发现最适合的旅游目的地"
         className="bg-gradient-to-r from-green-500 to-teal-500"
@@ -121,11 +146,10 @@ const SmartTaskPage: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          
           {/* Left Column: Forms */}
           <div className="xl:col-span-2 space-y-6">
             {/* 基本信息 */}
-            <CommonPlanningFields 
+            <CommonPlanningFields
               data={commonData}
               onDataChange={setCommonData}
               onGroupSizeChange={handleGroupSizeChange}
@@ -163,14 +187,21 @@ const SmartTaskPage: React.FC = () => {
                       step={100}
                     />
                     <div className="text-center mt-1">
-                      <span className="text-sm font-medium">{maxTravelDistance} km</span>
+                      <span className="text-sm font-medium">
+                        {maxTravelDistance} km
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="preferred-environment">环境偏好</Label>
-                  <Select value={preferredEnvironment} onValueChange={(value) => setPreferredEnvironment(value as EnvironmentPreference)}>
+                  <Select
+                    value={preferredEnvironment}
+                    onValueChange={(value) =>
+                      setPreferredEnvironment(value as EnvironmentPreference)
+                    }
+                  >
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="选择环境偏好" />
                     </SelectTrigger>
@@ -185,16 +216,26 @@ const SmartTaskPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label className="text-base font-medium">避免的地区类型（多选）</Label>
+                  <Label className="text-base font-medium">
+                    避免的地区类型（多选）
+                  </Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     {AVOID_REGIONS.map((region) => (
-                      <div key={region.value} className="flex items-center space-x-2">
+                      <div
+                        key={region.value}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={`avoid-${region.value}`}
                           checked={avoidRegions.includes(region.value)}
-                          onCheckedChange={() => toggleAvoidRegion(region.value)}
+                          onCheckedChange={() =>
+                            toggleAvoidRegion(region.value)
+                          }
                         />
-                        <Label htmlFor={`avoid-${region.value}`} className="text-sm">
+                        <Label
+                          htmlFor={`avoid-${region.value}`}
+                          className="text-sm"
+                        >
                           {region.label}
                         </Label>
                       </div>
@@ -205,21 +246,26 @@ const SmartTaskPage: React.FC = () => {
             </Card>
 
             {/* 偏好设置 */}
-            <PreferencesSection 
+            <PreferencesSection
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onTravelTypeChange={handleTravelTypeChange}
             />
 
             {/* 生成按钮 */}
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               size="lg"
               onClick={handlePlanGenerate}
-              disabled={!startPoint || !commonData.departureDate || !commonData.returnDate || isPending}
+              disabled={
+                !startPoint ||
+                !commonData.departureDate ||
+                !commonData.returnDate ||
+                isPending
+              }
             >
               <Send className="w-4 h-4 mr-2" />
-              {isPending ? "AI分析中..." : "获取智能推荐"}
+              {isPending ? 'AI分析中...' : '获取智能推荐'}
             </Button>
           </div>
 
@@ -234,23 +280,29 @@ const SmartTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">个性化匹配</h4>
-                    <p className="text-sm text-gray-600">基于您的偏好智能匹配最适合的目的地</p>
+                    <p className="text-sm text-gray-600">
+                      基于您的偏好智能匹配最适合的目的地
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">重新分析</h4>
-                    <p className="text-sm text-gray-600">对推荐不满意可重新分析，直到满意为止</p>
+                    <p className="text-sm text-gray-600">
+                      对推荐不满意可重新分析，直到满意为止
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">惊喜发现</h4>
-                    <p className="text-sm text-gray-600">推荐您可能从未考虑过的绝佳目的地</p>
+                    <p className="text-sm text-gray-600">
+                      推荐您可能从未考虑过的绝佳目的地
+                    </p>
                   </div>
                 </div>
 
@@ -258,7 +310,9 @@ const SmartTaskPage: React.FC = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">完整规划</h4>
-                    <p className="text-sm text-gray-600">不仅推荐目的地，还提供完整的行程规划</p>
+                    <p className="text-sm text-gray-600">
+                      不仅推荐目的地，还提供完整的行程规划
+                    </p>
                   </div>
                 </div>
               </CardContent>

@@ -163,16 +163,19 @@ export const DEFAULT_COMMON_PLANNING_DATA = {
 };
 
 // 类型定义
-export type TransportMode = typeof TRANSPORT_MODES[number]['value'];
-export type AccommodationLevel = typeof ACCOMMODATION_LEVELS[number]['value'];
-export type ActivityPreference = typeof ACTIVITY_PREFERENCES[number]['value'];
-export type AttractionCategory = typeof ATTRACTION_CATEGORIES[number]['value'];
-export type TravelStyle = typeof TRAVEL_STYLES[number]['value'];
-export type BudgetPreference = typeof BUDGET_PREFERENCES[number]['value'];
-export type GroupTravelPreference = typeof GROUP_TRAVEL_PREFERENCES[number]['value'];
-export type RoutePreference = typeof ROUTE_PREFERENCES[number]['value'];
-export type PreferredStopType = typeof PREFERRED_STOP_TYPES[number]['value'];
-export type EnvironmentPreference = typeof ENVIRONMENT_PREFERENCES[number]['value'];
-export type AvoidRegion = typeof AVOID_REGIONS[number]['value'];
-export type DietaryRestriction = typeof DIETARY_RESTRICTIONS[number]['value'];
-export type PlanningStatus = typeof PLANNING_STATUS[number]['value'];
+export type TransportMode = (typeof TRANSPORT_MODES)[number]['value'];
+export type AccommodationLevel = (typeof ACCOMMODATION_LEVELS)[number]['value'];
+export type ActivityPreference = (typeof ACTIVITY_PREFERENCES)[number]['value'];
+export type AttractionCategory =
+  (typeof ATTRACTION_CATEGORIES)[number]['value'];
+export type TravelStyle = (typeof TRAVEL_STYLES)[number]['value'];
+export type BudgetPreference = (typeof BUDGET_PREFERENCES)[number]['value'];
+export type GroupTravelPreference =
+  (typeof GROUP_TRAVEL_PREFERENCES)[number]['value'];
+export type RoutePreference = (typeof ROUTE_PREFERENCES)[number]['value'];
+export type PreferredStopType = (typeof PREFERRED_STOP_TYPES)[number]['value'];
+export type EnvironmentPreference =
+  (typeof ENVIRONMENT_PREFERENCES)[number]['value'];
+export type AvoidRegion = (typeof AVOID_REGIONS)[number]['value'];
+export type DietaryRestriction = (typeof DIETARY_RESTRICTIONS)[number]['value'];
+export type PlanningStatus = (typeof PLANNING_STATUS)[number]['value'];

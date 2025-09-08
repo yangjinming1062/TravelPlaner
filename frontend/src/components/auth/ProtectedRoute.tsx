@@ -6,9 +6,9 @@ interface ProtectedRouteProps {
   requireAuth?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requireAuth = true 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireAuth = true,
 }) => {
   const location = useLocation();
   const isLoggedIn = !!localStorage.getItem('token');
@@ -16,10 +16,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireAuth && !isLoggedIn) {
     // 保存用户想要访问的页面，登录后可以重定向回去
     return (
-      <Navigate 
-        to="/login" 
-        state={{ from: location.pathname + location.search }} 
-        replace 
+      <Navigate
+        to="/login"
+        state={{ from: location.pathname + location.search }}
+        replace
       />
     );
   }

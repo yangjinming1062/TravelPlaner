@@ -1,29 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import PreferencesSection, { TravelPreferences } from "@/components/shared/PreferencesSection";
-import { CheckCircle, ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useUserPreferences, useUpdateUserPreferences } from "@/hooks/use-api";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PreferencesSection, {
+  TravelPreferences,
+} from '@/components/shared/PreferencesSection';
+import { CheckCircle, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useUserPreferences, useUpdateUserPreferences } from '@/hooks/use-api';
 
 const PreferencesSetupPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: existingPreferences } = useUserPreferences();
   const { mutate: updatePreferences, isPending } = useUpdateUserPreferences();
-  
+
   const [preferences, setPreferences] = useState<TravelPreferences>({
     transportMethods: [],
     accommodationLevels: [4],
     activityTypes: [],
     scenicTypes: [],
-    travelStyle: "平衡型",
-    budgetType: "性价比优先",
-    budgetRange: "",
-    dietaryRestrictions: "",
-    travelType: "独行",
-    specialRequirements: ""
+    travelStyle: '平衡型',
+    budgetType: '性价比优先',
+    budgetRange: '',
+    dietaryRestrictions: '',
+    travelType: '独行',
+    specialRequirements: '',
   });
 
   // 如果用户已有偏好设置，则初始化表单
@@ -34,14 +36,16 @@ const PreferencesSetupPage: React.FC = () => {
         accommodationLevels: existingPreferences.accommodation_level || [4],
         activityTypes: existingPreferences.activity_preferences || [],
         scenicTypes: existingPreferences.attraction_categories || [],
-        travelStyle: existingPreferences.travel_style || "平衡型",
-        budgetType: existingPreferences.budget_flexibility || "性价比优先",
-        budgetRange: existingPreferences.budget_min && existingPreferences.budget_max 
-          ? `${existingPreferences.budget_min}-${existingPreferences.budget_max}` 
-          : "",
-        dietaryRestrictions: existingPreferences.dietary_restrictions?.join(", ") || "",
-        travelType: existingPreferences.group_travel_preference || "独行",
-        specialRequirements: existingPreferences.custom_preferences || ""
+        travelStyle: existingPreferences.travel_style || '平衡型',
+        budgetType: existingPreferences.budget_flexibility || '性价比优先',
+        budgetRange:
+          existingPreferences.budget_min && existingPreferences.budget_max
+            ? `${existingPreferences.budget_min}-${existingPreferences.budget_max}`
+            : '',
+        dietaryRestrictions:
+          existingPreferences.dietary_restrictions?.join(', ') || '',
+        travelType: existingPreferences.group_travel_preference || '独行',
+        specialRequirements: existingPreferences.custom_preferences || '',
       });
     }
   }, [existingPreferences]);
@@ -55,8 +59,11 @@ const PreferencesSetupPage: React.FC = () => {
       attraction_categories: preferences.scenicTypes,
       travel_style: preferences.travelStyle,
       budget_flexibility: preferences.budgetType,
-      dietary_restrictions: preferences.dietaryRestrictions 
-        ? preferences.dietaryRestrictions.split(",").map(s => s.trim()).filter(s => s)
+      dietary_restrictions: preferences.dietaryRestrictions
+        ? preferences.dietaryRestrictions
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s)
         : [],
       group_travel_preference: preferences.travelType,
       custom_preferences: preferences.specialRequirements,
@@ -64,7 +71,9 @@ const PreferencesSetupPage: React.FC = () => {
 
     // 处理预算范围
     if (preferences.budgetRange) {
-      const [min, max] = preferences.budgetRange.split("-").map(s => parseInt(s.trim()));
+      const [min, max] = preferences.budgetRange
+        .split('-')
+        .map((s) => parseInt(s.trim()));
       if (!isNaN(min)) backendPreferences.budget_min = min;
       if (!isNaN(max)) backendPreferences.budget_max = max;
     }
@@ -72,23 +81,23 @@ const PreferencesSetupPage: React.FC = () => {
     updatePreferences(backendPreferences, {
       onSuccess: () => {
         toast({
-          title: "偏好设置已保存",
-          description: "我们将为您提供更精准的推荐方案",
+          title: '偏好设置已保存',
+          description: '我们将为您提供更精准的推荐方案',
         });
-        navigate("/");
+        navigate('/');
       },
       onError: (error: any) => {
         toast({
-          title: "保存失败",
-          description: error.message || "无法保存偏好设置，请稍后重试",
-          variant: "destructive",
+          title: '保存失败',
+          description: error.message || '无法保存偏好设置，请稍后重试',
+          variant: 'destructive',
         });
-      }
+      },
     });
   };
 
   const handleSkip = () => {
-    navigate("/");
+    navigate('/');
   };
 
   return (
@@ -116,13 +125,13 @@ const PreferencesSetupPage: React.FC = () => {
             <Button onClick={handleSkip} variant="outline" className="flex-1">
               暂时跳过
             </Button>
-            <Button 
-              onClick={handleSavePreferences} 
+            <Button
+              onClick={handleSavePreferences}
               className="flex-1"
               disabled={isPending}
             >
               <ArrowRight className="w-4 h-4 mr-2" />
-              {isPending ? "保存中..." : "保存并继续"}
+              {isPending ? '保存中...' : '保存并继续'}
             </Button>
           </div>
         </div>

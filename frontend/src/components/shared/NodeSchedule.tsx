@@ -11,9 +11,9 @@ interface NodeScheduleListProps {
   className?: string;
 }
 
-export const NodeScheduleList: React.FC<NodeScheduleListProps> = ({ 
-  nodesDetails, 
-  className = "" 
+export const NodeScheduleList: React.FC<NodeScheduleListProps> = ({
+  nodesDetails,
+  className = '',
 }) => {
   if (!nodesDetails || nodesDetails.length === 0) {
     return null;
@@ -28,9 +28,9 @@ export const NodeScheduleList: React.FC<NodeScheduleListProps> = ({
       </h3>
       <div className="space-y-6">
         {nodesDetails.map((node, index) => (
-          <NodeScheduleCard 
-            key={index} 
-            node={node} 
+          <NodeScheduleCard
+            key={index}
+            node={node}
             nodeIndex={index + 1}
             isLast={index === nodesDetails.length - 1}
           />
@@ -47,10 +47,10 @@ interface NodeScheduleCardProps {
   isLast?: boolean;
 }
 
-export const NodeScheduleCard: React.FC<NodeScheduleCardProps> = ({ 
-  node, 
+export const NodeScheduleCard: React.FC<NodeScheduleCardProps> = ({
+  node,
   nodeIndex,
-  isLast = false 
+  isLast = false,
 }) => (
   <div className="relative">
     <Card className="relative overflow-hidden">
@@ -72,8 +72,8 @@ export const NodeScheduleCard: React.FC<NodeScheduleCardProps> = ({
         {node.daily_plan.length > 0 ? (
           <div className="space-y-4">
             {node.daily_plan.map((dailyPlan, dayIndex) => (
-              <DailyPlanCard 
-                key={dayIndex} 
+              <DailyPlanCard
+                key={dayIndex}
                 dailyPlan={dailyPlan}
                 showRouteInfo={false}
               />
@@ -87,7 +87,7 @@ export const NodeScheduleCard: React.FC<NodeScheduleCardProps> = ({
         )}
       </CardContent>
     </Card>
-    
+
     {/* 节点间连接线和箭头 */}
     {!isLast && (
       <div className="flex justify-center py-4">
@@ -107,10 +107,10 @@ interface NodeScheduleInputProps {
   readonly?: boolean;
 }
 
-export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({ 
-  nodes, 
+export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
+  nodes,
   onNodesChange,
-  readonly = false 
+  readonly = false,
 }) => {
   const handleNodeChange = (index: number, updatedNode: NodeScheduleSchema) => {
     if (onNodesChange) {
@@ -125,7 +125,7 @@ export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
       const newNode: NodeScheduleSchema = {
         location: '',
         arrival_date: '',
-        departure_date: ''
+        departure_date: '',
       };
       onNodesChange([...nodes, newNode]);
     }
@@ -188,13 +188,18 @@ export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
                 <input
                   type="text"
                   value={node.location}
-                  onChange={(e) => handleNodeChange(index, { ...node, location: e.target.value })}
+                  onChange={(e) =>
+                    handleNodeChange(index, {
+                      ...node,
+                      location: e.target.value,
+                    })
+                  }
                   placeholder="请输入地点名称"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               )}
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -209,12 +214,17 @@ export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
                   <input
                     type="date"
                     value={node.arrival_date}
-                    onChange={(e) => handleNodeChange(index, { ...node, arrival_date: e.target.value })}
+                    onChange={(e) =>
+                      handleNodeChange(index, {
+                        ...node,
+                        arrival_date: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   离开日期
@@ -228,7 +238,12 @@ export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
                   <input
                     type="date"
                     value={node.departure_date}
-                    onChange={(e) => handleNodeChange(index, { ...node, departure_date: e.target.value })}
+                    onChange={(e) =>
+                      handleNodeChange(index, {
+                        ...node,
+                        departure_date: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 )}
@@ -238,15 +253,16 @@ export const NodeScheduleInput: React.FC<NodeScheduleInputProps> = ({
             {readonly && (
               <div className="text-xs text-gray-500 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                停留时间: {
-                  (() => {
-                    const arrival = new Date(node.arrival_date);
-                    const departure = new Date(node.departure_date);
-                    const diffTime = Math.abs(departure.getTime() - arrival.getTime());
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    return `${diffDays} 天`;
-                  })()
-                }
+                停留时间:{' '}
+                {(() => {
+                  const arrival = new Date(node.arrival_date);
+                  const departure = new Date(node.departure_date);
+                  const diffTime = Math.abs(
+                    departure.getTime() - arrival.getTime(),
+                  );
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return `${diffDays} 天`;
+                })()}
               </div>
             )}
           </CardContent>
