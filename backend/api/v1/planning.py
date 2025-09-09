@@ -7,43 +7,64 @@ from modules.user import User
 router = get_router()
 
 
-# 通用状态检查函数
-def check_task_status(task, task_id: int):
-    """检查任务状态，如果状态不是completed则抛出相应异常"""
-    if not task:
-        raise APIException(APICode.NOT_FOUND, "任务不存在")
+# region 通用任务处理函数
 
-    if task.status == "pending":
-        raise APIException(APICode.QUERY, "任务尚未开始处理")
-    elif task.status == "processing":
-        raise APIException(APICode.QUERY, "任务正在处理中，请稍后再试")
-    elif task.status == "failed":
-        raise APIException(APICode.QUERY, "任务处理失败")
 
+def create_task_handler(bg_task, task_model, planning_type: PlanningTypeEnum, request, user_id):
+    """创建任务的通用处理函数"""
+    with DatabaseManager() as db:
+        item = task_model(**request.model_dump(), user_id=user_id)
+        db.add(item)
+        db.commit()
+        item_id = item.id
+    add_planning_tasks(bg_task, planning_type, item_id)
+    return item_id
+
+
+def delete_tasks_handler(task_model, result_model, task_ids):
+    """删除任务的通用处理函数"""
+    with DatabaseManager() as db:
+        db.query(result_model).filter(result_model.task_id.in_(task_ids)).delete(synchronize_session=False)
+        db.query(task_model).filter(task_model.id.in_(task_ids)).delete(synchronize_session=False)
+
+
+def get_task_result_handler(task_model, result_model, result_schema, task_id):
+    """获取任务结果的通用处理函数"""
+    with DatabaseManager() as db:
+        # 检查任务状态
+        task = db.query(task_model).filter(task_model.id == task_id).first()
+        if not task:
+            raise APIException(APICode.NOT_FOUND, "任务不存在")
+
+        if task.status == "pending":
+            raise APIException(APICode.QUERY, "任务尚未开始处理")
+        elif task.status == "processing":
+            raise APIException(APICode.QUERY, "任务正在处理中，请稍后再试")
+        elif task.status == "failed":
+            raise APIException(APICode.QUERY, "任务处理失败")
+
+        result = db.query(result_model).filter(result_model.task_id == task_id).first()
+        if not result:
+            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
+        db.expunge(result)
+    return result_schema.model_validate(result)
+
+
+# endregion
 
 # region API: 单一目的地规划
 
 
 @router.post("/single-tasks", status_code=201, summary="新增单一目的地规划")
 async def create_single_plan(
-    request: PlanningSingleTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
+    request: PlanningSingleTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
 ) -> int:
-    with DatabaseManager() as db:
-        item = PlanningSingleTask(**request.model_dump(), user_id=user.id)
-        db.add(item)
-        db.commit()
-        item_id = item.id
-    add_planning_tasks(background_tasks, PlanningTypeEnum.SINGLE, item_id)
-    return item_id
+    return create_task_handler(bg_task, PlanningSingleTask, PlanningTypeEnum.SINGLE, request, user.id)
 
 
 @router.delete("/single-tasks", status_code=204, summary="删除单一目的地规划")
 async def delete_single_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    with DatabaseManager() as db:
-        db.query(PlanningSingleResult).filter(PlanningSingleResult.task_id.in_(request)).delete(
-            synchronize_session=False
-        )
-        db.query(PlanningSingleTask).filter(PlanningSingleTask.id.in_(request)).delete(synchronize_session=False)
+    delete_tasks_handler(PlanningSingleTask, PlanningSingleResult, request)
 
 
 @router.post("/single-tasks/list", summary="获取单一目的地规划列表")
@@ -77,16 +98,7 @@ async def get_single_plans(
 
 @router.get("/single-tasks/{task_id}/result", summary="获取单一目的地规划结果")
 async def get_single_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSingleResultSchema:
-    with DatabaseManager() as db:
-        # 检查任务状态
-        task = db.query(PlanningSingleTask).filter(PlanningSingleTask.id == task_id).first()
-        check_task_status(task, task_id)
-
-        result = db.query(PlanningSingleResult).filter(PlanningSingleResult.task_id == task_id).first()
-        if not result:
-            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
-        db.expunge(result)
-    return PlanningSingleResultSchema.model_validate(result)
+    return get_task_result_handler(PlanningSingleTask, PlanningSingleResult, PlanningSingleResultSchema, task_id)
 
 
 # endregion
@@ -96,22 +108,14 @@ async def get_single_plan_result(task_id: int, _user: User = Depends(get_user)) 
 
 @router.post("/route-tasks", status_code=201, summary="新增沿途游玩规划")
 async def create_route_plan(
-    request: PlanningRouteTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
+    request: PlanningRouteTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
 ) -> int:
-    with DatabaseManager() as db:
-        item = PlanningRouteTask(**request.model_dump(), user_id=user.id)
-        db.add(item)
-        db.commit()
-        item_id = item.id
-    add_planning_tasks(background_tasks, PlanningTypeEnum.ROUTE, item_id)
-    return item_id
+    return create_task_handler(bg_task, PlanningRouteTask, PlanningTypeEnum.ROUTE, request, user.id)
 
 
 @router.delete("/route-tasks", status_code=204, summary="删除沿途游玩规划")
 async def delete_route_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    with DatabaseManager() as db:
-        db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id.in_(request)).delete(synchronize_session=False)
-        db.query(PlanningRouteTask).filter(PlanningRouteTask.id.in_(request)).delete(synchronize_session=False)
+    delete_tasks_handler(PlanningRouteTask, PlanningRouteResult, request)
 
 
 @router.post("/route-tasks/list", summary="获取沿途游玩规划列表")
@@ -145,25 +149,7 @@ async def get_route_plans(
 
 @router.get("/route-tasks/{task_id}/result", summary="获取沿途游玩规划结果")
 async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
-    try:
-        with DatabaseManager() as db:
-            # 检查任务状态
-            task = db.query(PlanningRouteTask).filter(PlanningRouteTask.id == task_id).first()
-            check_task_status(task, task_id)
-
-            result = db.query(PlanningRouteResult).filter(PlanningRouteResult.task_id == task_id).first()
-            if not result:
-                raise APIException(APICode.NOT_FOUND, "规划结果不存在")
-            db.expunge(result)
-        return PlanningRouteResultSchema.model_validate(result)
-    except APIException:
-        # 重新抛出已知的API异常
-        raise
-    except Exception as e:
-        logger.error(f"获取沿途游玩规划结果时发生错误 (task_id: {task_id}): {e}")
-        if "connection" in str(e).lower() or "operational" in str(e).lower():
-            raise APIException(APICode.EXCEPTION, "数据库连接失败，请稍后重试")
-        raise APIException(APICode.EXCEPTION, f"获取规划结果失败: {str(e)}")
+    return get_task_result_handler(PlanningRouteTask, PlanningRouteResult, PlanningRouteResultSchema, task_id)
 
 
 # endregion
@@ -173,22 +159,14 @@ async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -
 
 @router.post("/multi-tasks", status_code=201, summary="新增多节点规划")
 async def create_multi_plan(
-    request: PlanningMultiTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
+    request: PlanningMultiTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
 ) -> int:
-    with DatabaseManager() as db:
-        item = PlanningMultiTask(**request.model_dump(), user_id=user.id)
-        db.add(item)
-        db.commit()
-        item_id = item.id
-    add_planning_tasks(background_tasks, PlanningTypeEnum.MULTI, item_id)
-    return item_id
+    return create_task_handler(bg_task, PlanningMultiTask, PlanningTypeEnum.MULTI, request, user.id)
 
 
 @router.delete("/multi-tasks", status_code=204, summary="删除多节点规划")
 async def delete_multi_node_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    with DatabaseManager() as db:
-        db.query(PlanningMultiResult).filter(PlanningMultiResult.task_id.in_(request)).delete(synchronize_session=False)
-        db.query(PlanningMultiTask).filter(PlanningMultiTask.id.in_(request)).delete(synchronize_session=False)
+    delete_tasks_handler(PlanningMultiTask, PlanningMultiResult, request)
 
 
 @router.post("/multi-tasks/list", summary="获取多节点规划列表")
@@ -220,16 +198,7 @@ async def get_multi_plans(
 
 @router.get("/multi-tasks/{task_id}/result", summary="获取多节点规划结果")
 async def get_multi_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningMultiResultSchema:
-    with DatabaseManager() as db:
-        # 检查任务状态
-        task = db.query(PlanningMultiTask).filter(PlanningMultiTask.id == task_id).first()
-        check_task_status(task, task_id)
-
-        result = db.query(PlanningMultiResult).filter(PlanningMultiResult.task_id == task_id).first()
-        if not result:
-            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
-        db.expunge(result)
-    return PlanningMultiResultSchema.model_validate(result)
+    return get_task_result_handler(PlanningMultiTask, PlanningMultiResult, PlanningMultiResultSchema, task_id)
 
 
 # endregion
@@ -239,22 +208,14 @@ async def get_multi_plan_result(task_id: int, _user: User = Depends(get_user)) -
 
 @router.post("/smart-tasks", status_code=201, summary="新增智能推荐规划")
 async def create_smart_plan(
-    request: PlanningSmartTaskSchema, background_tasks: BackgroundTasks, user: User = Depends(get_user)
+    request: PlanningSmartTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
 ) -> int:
-    with DatabaseManager() as db:
-        item = PlanningSmartTask(**request.model_dump(), user_id=user.id)
-        db.add(item)
-        db.commit()
-        item_id = item.id
-    add_planning_tasks(background_tasks, PlanningTypeEnum.SMART, item_id)
-    return item_id
+    return create_task_handler(bg_task, PlanningSmartTask, PlanningTypeEnum.SMART, request, user.id)
 
 
 @router.delete("/smart-tasks", status_code=204, summary="删除智能推荐规划")
 async def delete_smart_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    with DatabaseManager() as db:
-        db.query(PlanningSmartResult).filter(PlanningSmartResult.task_id.in_(request)).delete(synchronize_session=False)
-        db.query(PlanningSmartTask).filter(PlanningSmartTask.id.in_(request)).delete(synchronize_session=False)
+    delete_tasks_handler(PlanningSmartTask, PlanningSmartResult, request)
 
 
 @router.post("/smart-tasks/list", summary="获取智能推荐规划列表")
@@ -286,16 +247,7 @@ async def get_smart_plans(
 
 @router.get("/smart-tasks/{task_id}/result", summary="获取智能推荐规划结果")
 async def get_smart_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSmartResultSchema:
-    with DatabaseManager() as db:
-        # 检查任务状态
-        task = db.query(PlanningSmartTask).filter(PlanningSmartTask.id == task_id).first()
-        check_task_status(task, task_id)
-
-        result = db.query(PlanningSmartResult).filter(PlanningSmartResult.task_id == task_id).first()
-        if not result:
-            raise APIException(APICode.NOT_FOUND, "规划结果不存在")
-        db.expunge(result)
-    return PlanningSmartResultSchema.model_validate(result)
+    return get_task_result_handler(PlanningSmartTask, PlanningSmartResult, PlanningSmartResultSchema, task_id)
 
 
 # endregion
