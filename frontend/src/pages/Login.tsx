@@ -39,13 +39,20 @@ const LoginPage: React.FC = () => {
         password: formData.password,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast({
             title: '登录成功',
             description: '欢迎回来！',
           });
-          // 重定向到用户原本想要访问的页面
-          navigate(from, { replace: true });
+          // 根据用户是否配置过偏好设置决定跳转
+          const loginData = data as any;
+          if (!loginData.user.preferences_configured) {
+            // 如果未配置偏好设置，跳转到偏好设置页面
+            navigate('/preferences-setup', { replace: true });
+          } else {
+            // 已配置偏好设置，重定向到用户原本想要访问的页面
+            navigate(from, { replace: true });
+          }
         },
         onError: (error: any) => {
           toast({

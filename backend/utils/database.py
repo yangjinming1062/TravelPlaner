@@ -128,7 +128,7 @@ class DatabaseManager:
     def _commit_with_retry(self, max_retries=2):
         """
         带重试机制的提交操作
-        
+
         Args:
             max_retries (int): 最大重试次数
         """

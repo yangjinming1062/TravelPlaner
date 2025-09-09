@@ -17,6 +17,7 @@ class UserSchema(SchemaBase):
     nickname: str
     gender: str
     status: UserStatusEnum
+    preferences_configured: bool
 
 
 class UserProfileSchema(UserSchema, PlanningPreferencesSchema):

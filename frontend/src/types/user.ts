@@ -20,6 +20,7 @@ export interface UserSchema {
   gender: string;
   avatar: string;
   created_at: string;
+  preferences_configured: boolean;
 }
 
 export interface UserProfileSchema extends UserSchema {

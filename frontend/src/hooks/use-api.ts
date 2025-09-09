@@ -90,6 +90,13 @@ export const useUpdateUserPreferences = () => {
     onSuccess: (data) => {
       // 更新用户偏好缓存
       queryClient.setQueryData(['user-preferences'], data);
+      // 更新用户信息缓存中的preferences_configured字段
+      queryClient.setQueryData(['user'], (oldData: any) => {
+        if (oldData) {
+          return { ...oldData, preferences_configured: true };
+        }
+        return oldData;
+      });
     },
   });
 };

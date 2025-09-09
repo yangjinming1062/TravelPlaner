@@ -197,6 +197,8 @@ def update_user_preferences(request: UserPreferencesSchema, user: User = Depends
             user.display_language = request.display_language
         if request.custom_preferences is not None:
             user.custom_preferences = request.custom_preferences
+        # 标记用户已配置过偏好设置
+        user.preferences_configured = True
         return UserPreferencesSchema.model_validate(user)
 
 

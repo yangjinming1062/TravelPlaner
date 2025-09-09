@@ -1,5 +1,5 @@
 from common.model import *
-from sqlalchemy import JSON
+from sqlalchemy import Boolean
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from utils import generate_key
@@ -25,3 +25,4 @@ class User(ModelBase, ModelTimeColumns, PlanningPreferenceColumns):
     gender: Mapped[str] = mapped_column(String(16), default="unknown", comment="性别：male, female, unknown")
     # 用户特有的偏好设置
     display_language: Mapped[str] = mapped_column(String(16), default="chinese", comment="规划结果展示语言")
+    preferences_configured: Mapped[bool] = mapped_column(Boolean, default=False, comment="是否已配置过偏好设置")

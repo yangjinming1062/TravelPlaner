@@ -91,7 +91,23 @@ const PreferencesSetupPage: React.FC = () => {
   };
 
   const handleSkip = () => {
-    navigate('/');
+    // 直接调用更新偏好设置接口，传入空对象即可标记为已配置
+    updatePreferences({}, {
+      onSuccess: () => {
+        toast({
+          title: '已跳过偏好设置',
+          description: '您可以随时在个人中心修改偏好设置',
+        });
+        navigate('/');
+      },
+      onError: (error: any) => {
+        toast({
+          title: '操作失败',
+          description: error.message || '跳过操作失败，请稍后重试',
+          variant: 'destructive',
+        });
+      },
+    });
   };
 
   return (
@@ -116,7 +132,12 @@ const PreferencesSetupPage: React.FC = () => {
           />
 
           <div className="flex gap-4 mt-6">
-            <Button onClick={handleSkip} variant="outline" className="flex-1">
+            <Button 
+              onClick={handleSkip} 
+              variant="outline" 
+              className="flex-1"
+              disabled={isPending}
+            >
               暂时跳过
             </Button>
             <Button
