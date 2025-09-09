@@ -5,15 +5,14 @@ pydantic==2.10.6
 python-multipart==0.0.20
 # endregion
 
-# region 组用到的库
+
 python-jose>=3.3.0
 cryptography==42.0.5
 alembic==1.13.1
 SQLAlchemy==2.0.39
 psycopg[binary]==3.2.9
-# endregion
+langchain==0.3.27
+langchain_openai
 
-# region 其他
 requests
 pyyaml
-# endregion

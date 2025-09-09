@@ -1,2 +1,4 @@
-# LLM智能代理模块 - 内部服务
-# 该模块不对外暴露API，仅为旅游规划模块提供智能化支持
+from .model import LLMClient
+from .utils import validate_response
+
+__all__ = ["LLMClient", "validate_response"]

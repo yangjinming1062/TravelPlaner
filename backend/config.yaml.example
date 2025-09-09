@@ -16,10 +16,18 @@ log_date_format: "%Y-%m-%d %H:%M:%S.%f"
 
 # Database configuration
 db_pool_size: 150
-db_pool_recycle: 60
+db_pool_recycle: 300
 db_echo: false
 # Database URI format: postgresql+psycopg://user:password@host:port/database
 db_uri: "postgresql+psycopg://admin:password@db:5432/app"
+
+# LLM configuration
+llm_model: "gpt-4o-mini"
+llm_api_key: ""
+llm_base_url: "https://api.openai.com/v1"
+llm_retry_count: 3
+llm_timeout: 10
+llm_temperature: 0.5
 
 # JWT configuration
 jwt_token_expire_days: 30

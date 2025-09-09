@@ -87,13 +87,40 @@ class Config(BaseModel):
     )
     # endregion
 
+    # region LLM
+    llm_model: str = Field(
+        default=get_env("LLM_MODEL", "gpt-4o-mini"),
+        description="模型",
+    )
+    llm_api_key: str = Field(
+        default=get_env("LLM_API_KEY", ""),
+        description="API密钥",
+    )
+    llm_base_url: str = Field(
+        default=get_env("LLM_BASE_URL", "https://api.openai.com/v1"),
+        description="基础URL",
+    )
+    llm_retry_count: int = Field(
+        default=int(get_env("LLM_RETRY_COUNT", 3)),
+        description="重试次数",
+    )
+    llm_timeout: int = Field(
+        default=int(get_env("LLM_TIMEOUT", 10)),
+        description="超时时间",
+    )
+    llm_temperature: float = Field(
+        default=float(get_env("LLM_TEMPERATURE", 0.5)),
+        description="默认温度",
+    )
+    # endregion
+
     # region 其他参数
     jwt_token_expire_days: int = Field(
-        default=int(get_env("JWT_TOKEN_EXPIRE_DAYS", 7)),
+        default=int(get_env("JWT_TOKEN_EXPIRE_DAYS", 30)),
         description="JWT令牌过期时间",
     )
     jwt_secret: str = Field(
-        default=get_env("JWT_SECRET", "DEMO-SECRET-KEY"),
+        default=get_env("JWT_SECRET", "TravelPlanner-Secret-Key"),
         description="JWT密钥",
     )
     # Secret ※注意：请不要在生产环境中使用默认的随机密钥
