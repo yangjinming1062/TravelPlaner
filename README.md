@@ -139,8 +139,3 @@ npm run dev
 ## 常见问题
 - **数据库如何配置？** 若使用外部数据库，直接在 `backend/config.yaml` 中设置 `db_uri`；若使用 Docker，请启用 compose 中的数据库服务并保持 `db_uri` 指向容器服务名。
 - **无法访问接口文档？** 仅在 `debug: true` 时提供 `/openapi.json`。
-
-## 作者
-- 作者：Jinming.Yang
-- 邮箱：yjm1062@126.com
-- 反馈与交流：欢迎提交 Issue 或 PR，共建更好用的旅行规划工具。
