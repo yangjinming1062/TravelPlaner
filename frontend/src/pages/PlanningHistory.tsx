@@ -23,28 +23,10 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  useSinglePlansList,
-  useRoutePlansList,
-  useMultiPlansList,
-  useSmartPlansList,
-  useUpdatePlanFavorite,
-} from '@/hooks/use-api';
+import { useAllPlansList, useUpdatePlanFavorite } from '@/hooks/use-api';
+import { PlanningTaskUnifiedItem } from '@/types/planning';
 
-interface PlanRecord {
-  id: string;
-  title: string;
-  type: 'single' | 'route' | 'multi' | 'smart';
-  destination: string;
-  source: string;
-  departure_date: string;
-  return_date: string;
-  status: 'completed' | 'processing' | 'pending' | 'failed';
-  is_favorite?: boolean;
-  created_at: string;
-  group_size: number;
-  transport_mode: string;
-}
+// 现在直接使用 PlanningTaskUnifiedItem 类型
 
 const PlanningHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -56,15 +38,25 @@ const PlanningHistoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState(initialType);
   const [filterStatus, setFilterStatus] = useState('all');
-  const [allPlans, setAllPlans] = useState<PlanRecord[]>([]);
 
   const { mutate: updateFavorite } = useUpdatePlanFavorite();
 
-  // 查询各种类型的规划列表
-  const singlePlansQuery = useSinglePlansList({ page: 0, size: 100 });
-  const routePlansQuery = useRoutePlansList({ page: 0, size: 100 });
-  const multiPlansQuery = useMultiPlansList({ page: 0, size: 100 });
-  const smartPlansQuery = useSmartPlansList({ page: 0, size: 100 });
+  // 构建查询参数
+  const queryParams = {
+    page: 0,
+    size: 1000, // 获取足够多的数据
+    query: {
+      ...(filterType !== 'all' && {
+        planning_type: filterType as 'single' | 'route' | 'multi' | 'smart',
+      }),
+      ...(filterStatus !== 'all' && { status: filterStatus }),
+      ...(searchTerm && { title: searchTerm }),
+    },
+    sort: ['-created_at'],
+  };
+
+  // 使用统一查询接口
+  const allPlansQuery = useAllPlansList(queryParams);
 
   // 监听URL参数变化
   useEffect(() => {
@@ -72,72 +64,7 @@ const PlanningHistoryPage: React.FC = () => {
     if (typeParam !== filterType) {
       setFilterType(typeParam);
     }
-  }, [searchParams]);
-
-  // 合并所有规划数据
-  useEffect(() => {
-    const plans: PlanRecord[] = [];
-
-    // 单一目的地规划
-    if (singlePlansQuery.data?.data) {
-      const singleData = singlePlansQuery.data as any;
-      plans.push(
-        ...singleData.data.map((plan: any) => ({
-          ...plan,
-          type: 'single' as const,
-          destination: plan.target || '未知目的地',
-        })),
-      );
-    }
-
-    // 沿途游玩规划
-    if (routePlansQuery.data?.data) {
-      const routeData = routePlansQuery.data as any;
-      plans.push(
-        ...routeData.data.map((plan: any) => ({
-          ...plan,
-          type: 'route' as const,
-          destination: plan.target || '未知目的地',
-        })),
-      );
-    }
-
-    // 多节点规划
-    if (multiPlansQuery.data?.data) {
-      const multiData = multiPlansQuery.data as any;
-      plans.push(
-        ...multiData.data.map((plan: any) => ({
-          ...plan,
-          type: 'multi' as const,
-          destination: '多个节点',
-        })),
-      );
-    }
-
-    // 智能推荐规划
-    if (smartPlansQuery.data?.data) {
-      const smartData = smartPlansQuery.data as any;
-      plans.push(
-        ...smartData.data.map((plan: any) => ({
-          ...plan,
-          type: 'smart' as const,
-          destination: plan.destination || 'AI推荐目的地',
-        })),
-      );
-    }
-
-    // 按创建时间排序
-    plans.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-    setAllPlans(plans);
-  }, [
-    singlePlansQuery.data,
-    routePlansQuery.data,
-    multiPlansQuery.data,
-    smartPlansQuery.data,
-  ]);
+  }, [searchParams, filterType]);
 
   const getTypeText = (type: string) => {
     const typeMap = {
@@ -174,15 +101,15 @@ const PlanningHistoryPage: React.FC = () => {
     return variantMap[status] || 'outline';
   };
 
-  const handleViewDetails = (plan: PlanRecord) => {
-    const path = `/${plan.type}/result/${plan.id}`;
+  const handleViewDetails = (plan: PlanningTaskUnifiedItem) => {
+    const path = `/${plan.planning_type}/result/${plan.id}`;
     navigate(path);
   };
 
-  const handleToggleFavorite = (plan: PlanRecord) => {
+  const handleToggleFavorite = (plan: PlanningTaskUnifiedItem) => {
     updateFavorite(
       {
-        taskType: plan.type,
+        taskType: plan.planning_type,
         taskId: plan.id,
         data: { is_favorite: !plan.is_favorite },
       },
@@ -192,15 +119,12 @@ const PlanningHistoryPage: React.FC = () => {
             title: plan.is_favorite ? '已取消收藏' : '已添加收藏',
           });
           // 重新获取数据
-          singlePlansQuery.refetch();
-          routePlansQuery.refetch();
-          multiPlansQuery.refetch();
-          smartPlansQuery.refetch();
+          allPlansQuery.refetch();
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
           toast({
             title: '操作失败',
-            description: error.message || '无法更新收藏状态',
+            description: (error as Error)?.message || '无法更新收藏状态',
             variant: 'destructive',
           });
         },
@@ -208,22 +132,22 @@ const PlanningHistoryPage: React.FC = () => {
     );
   };
 
+  // 获取所有规划数据
+  const allPlans = (allPlansQuery.data?.data ||
+    []) as PlanningTaskUnifiedItem[];
+
+  // 进行客户端过滤（搜索目的地和出发地）
   const filteredRecords = allPlans.filter((record) => {
-    const matchesSearch =
-      record.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.source.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || record.type === filterType;
-    const matchesStatus =
-      filterStatus === 'all' || record.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      record.title.toLowerCase().includes(searchLower) ||
+      record.target.toLowerCase().includes(searchLower) ||
+      record.source.toLowerCase().includes(searchLower)
+    );
   });
 
-  const isLoading =
-    singlePlansQuery.isLoading ||
-    routePlansQuery.isLoading ||
-    multiPlansQuery.isLoading ||
-    smartPlansQuery.isLoading;
+  const isLoading = allPlansQuery.isLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -325,7 +249,7 @@ const PlanningHistoryPage: React.FC = () => {
             <div className="grid gap-4">
               {filteredRecords.map((record) => (
                 <Card
-                  key={`${record.type}-${record.id}`}
+                  key={`${record.planning_type}-${record.id}`}
                   className="hover:shadow-md transition-shadow"
                 >
                   <CardContent className="pt-6">
@@ -333,13 +257,14 @@ const PlanningHistoryPage: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-start gap-3 mb-2">
                           <h3 className="text-lg font-semibold">
-                            {record.title || `${getTypeText(record.type)}规划`}
+                            {record.title ||
+                              `${getTypeText(record.planning_type)}规划`}
                           </h3>
                           <Badge variant={getStatusVariant(record.status)}>
                             {getStatusText(record.status)}
                           </Badge>
                           <Badge variant="outline">
-                            {getTypeText(record.type)}
+                            {getTypeText(record.planning_type)}
                           </Badge>
                           {record.is_favorite && (
                             <Badge variant="secondary" className="text-red-600">
@@ -352,7 +277,7 @@ const PlanningHistoryPage: React.FC = () => {
                         <div className="flex flex-col md:flex-row md:items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
-                            {record.source} → {record.destination}
+                            {record.source} → {record.target || '多个节点'}
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />

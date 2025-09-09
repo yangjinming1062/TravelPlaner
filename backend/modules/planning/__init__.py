@@ -35,28 +35,23 @@ __all__ = [
     # 单一目的地规划
     "PlanningSingleResultSchema",
     "PlanningSingleTaskSchema",
-    "PlanningSingleListRequest",
-    "PlanningSingleListResponse",
     # 沿途游玩规划
     "WaypointSchema",
     "PlanningRouteResultSchema",
     "PlanningRouteTaskSchema",
-    "PlanningRouteListRequest",
-    "PlanningRouteListResponse",
     # 多节点规划
     "NodeScheduleDetailSchema",
     "PlanningMultiResultSchema",
     "NodeScheduleSchema",
     "PlanningMultiTaskSchema",
-    "PlanningMultiListRequest",
-    "PlanningMultiListResponse",
     # 智能推荐规划
     "PlanningSmartResultSchema",
     "PlanningSmartTaskSchema",
-    "PlanningSmartListRequest",
-    "PlanningSmartListResponse",
     # 通用规划操作
     "PlanningResultFavoriteRequest",
     "FeedbackRequest",
     "PlanningStatsResponse",
+    "PlanTaskStatusResponse",
+    "PlanningTaskUnifiedListRequest",
+    "PlanningTaskUnifiedListResponse",
 ]

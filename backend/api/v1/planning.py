@@ -3,6 +3,9 @@ from fastapi import BackgroundTasks
 from fastapi import Query
 from modules.planning import *
 from modules.user import User
+from sqlalchemy import func
+from sqlalchemy import literal
+from sqlalchemy import union_all
 
 router = get_router()
 
@@ -21,18 +24,20 @@ def create_task_handler(bg_task, task_model, planning_type: PlanningTypeEnum, re
     return item_id
 
 
-def delete_tasks_handler(task_model, result_model, task_ids):
+def delete_tasks_handler(task_model, result_model, task_ids, user_id):
     """删除任务的通用处理函数"""
     with DatabaseManager() as db:
         db.query(result_model).filter(result_model.task_id.in_(task_ids)).delete(synchronize_session=False)
-        db.query(task_model).filter(task_model.id.in_(task_ids)).delete(synchronize_session=False)
+        db.query(task_model).filter(task_model.id.in_(task_ids), task_model.user_id == user_id).delete(
+            synchronize_session=False
+        )
 
 
-def get_task_result_handler(task_model, result_model, result_schema, task_id):
+def get_task_result_handler(task_model, result_model, result_schema, task_id, user_id):
     """获取任务结果的通用处理函数"""
     with DatabaseManager() as db:
         # 检查任务状态
-        task = db.query(task_model).filter(task_model.id == task_id).first()
+        task = db.query(task_model).filter(task_model.id == task_id, task_model.user_id == user_id).first()
         if not task:
             raise APIException(APICode.NOT_FOUND, "任务不存在")
 
@@ -63,42 +68,15 @@ async def create_single_plan(
 
 
 @router.delete("/single-tasks", status_code=204, summary="删除单一目的地规划")
-async def delete_single_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    delete_tasks_handler(PlanningSingleTask, PlanningSingleResult, request)
-
-
-@router.post("/single-tasks/list", summary="获取单一目的地规划列表")
-async def get_single_plans(
-    request: PlanningSingleListRequest, _user: User = Depends(get_user)
-) -> PlanningSingleListResponse:
-    stmt = add_filters(
-        select(
-            PlanningSingleTask.id,
-            PlanningSingleTask.title,
-            PlanningSingleTask.source,
-            PlanningSingleTask.target,
-            PlanningSingleTask.departure_date,
-            PlanningSingleTask.return_date,
-            PlanningSingleTask.group_size,
-            PlanningSingleTask.transport_mode,
-            PlanningSingleTask.status,
-            PlanningSingleTask.created_at,
-        ),
-        request.query,
-        {
-            PlanningSingleTask.title: FilterTypeEnum.Like,
-            PlanningSingleTask.source: FilterTypeEnum.Like,
-            PlanningSingleTask.target: FilterTypeEnum.Like,
-            PlanningSingleTask.status: FilterTypeEnum.In,
-            PlanningSingleTask.created_at: FilterTypeEnum.Datetime,
-        },
-    )
-    return paginate_query(stmt, request, PlanningSingleListResponse, PlanningSingleTask.id)
+async def delete_single_plans(request: list[int] = Query(), user: User = Depends(get_user)):
+    delete_tasks_handler(PlanningSingleTask, PlanningSingleResult, request, user.id)
 
 
 @router.get("/single-tasks/{task_id}/result", summary="获取单一目的地规划结果")
-async def get_single_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSingleResultSchema:
-    return get_task_result_handler(PlanningSingleTask, PlanningSingleResult, PlanningSingleResultSchema, task_id)
+async def get_single_plan_result(task_id: int, user: User = Depends(get_user)) -> PlanningSingleResultSchema:
+    return get_task_result_handler(
+        PlanningSingleTask, PlanningSingleResult, PlanningSingleResultSchema, task_id, user.id
+    )
 
 
 # endregion
@@ -114,42 +92,13 @@ async def create_route_plan(
 
 
 @router.delete("/route-tasks", status_code=204, summary="删除沿途游玩规划")
-async def delete_route_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    delete_tasks_handler(PlanningRouteTask, PlanningRouteResult, request)
-
-
-@router.post("/route-tasks/list", summary="获取沿途游玩规划列表")
-async def get_route_plans(
-    request: PlanningRouteListRequest, _user: User = Depends(get_user)
-) -> PlanningRouteListResponse:
-    stmt = add_filters(
-        select(
-            PlanningRouteTask.id,
-            PlanningRouteTask.title,
-            PlanningRouteTask.source,
-            PlanningRouteTask.target,
-            PlanningRouteTask.departure_date,
-            PlanningRouteTask.return_date,
-            PlanningRouteTask.group_size,
-            PlanningRouteTask.transport_mode,
-            PlanningRouteTask.status,
-            PlanningRouteTask.created_at,
-        ),
-        request.query,
-        {
-            PlanningRouteTask.title: FilterTypeEnum.Like,
-            PlanningRouteTask.source: FilterTypeEnum.Like,
-            PlanningRouteTask.target: FilterTypeEnum.Like,
-            PlanningRouteTask.status: FilterTypeEnum.In,
-            PlanningRouteTask.created_at: FilterTypeEnum.Datetime,
-        },
-    )
-    return paginate_query(stmt, request, PlanningRouteListResponse, PlanningRouteTask.id)
+async def delete_route_plans(request: list[int] = Query(), user: User = Depends(get_user)):
+    delete_tasks_handler(PlanningRouteTask, PlanningRouteResult, request, user.id)
 
 
 @router.get("/route-tasks/{task_id}/result", summary="获取沿途游玩规划结果")
-async def get_route_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningRouteResultSchema:
-    return get_task_result_handler(PlanningRouteTask, PlanningRouteResult, PlanningRouteResultSchema, task_id)
+async def get_route_plan_result(task_id: int, user: User = Depends(get_user)) -> PlanningRouteResultSchema:
+    return get_task_result_handler(PlanningRouteTask, PlanningRouteResult, PlanningRouteResultSchema, task_id, user.id)
 
 
 # endregion
@@ -165,40 +114,13 @@ async def create_multi_plan(
 
 
 @router.delete("/multi-tasks", status_code=204, summary="删除多节点规划")
-async def delete_multi_node_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    delete_tasks_handler(PlanningMultiTask, PlanningMultiResult, request)
-
-
-@router.post("/multi-tasks/list", summary="获取多节点规划列表")
-async def get_multi_plans(
-    request: PlanningMultiListRequest, _user: User = Depends(get_user)
-) -> PlanningMultiListResponse:
-    stmt = add_filters(
-        select(
-            PlanningMultiTask.id,
-            PlanningMultiTask.title,
-            PlanningMultiTask.source,
-            PlanningMultiTask.departure_date,
-            PlanningMultiTask.return_date,
-            PlanningMultiTask.group_size,
-            PlanningMultiTask.transport_mode,
-            PlanningMultiTask.status,
-            PlanningMultiTask.created_at,
-        ),
-        request.query,
-        {
-            PlanningMultiTask.title: FilterTypeEnum.Like,
-            PlanningMultiTask.source: FilterTypeEnum.Like,
-            PlanningMultiTask.status: FilterTypeEnum.In,
-            PlanningMultiTask.created_at: FilterTypeEnum.Datetime,
-        },
-    )
-    return paginate_query(stmt, request, PlanningMultiListResponse, PlanningMultiTask.id)
+async def delete_multi_node_plans(request: list[int] = Query(), user: User = Depends(get_user)):
+    delete_tasks_handler(PlanningMultiTask, PlanningMultiResult, request, user.id)
 
 
 @router.get("/multi-tasks/{task_id}/result", summary="获取多节点规划结果")
-async def get_multi_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningMultiResultSchema:
-    return get_task_result_handler(PlanningMultiTask, PlanningMultiResult, PlanningMultiResultSchema, task_id)
+async def get_multi_plan_result(task_id: int, user: User = Depends(get_user)) -> PlanningMultiResultSchema:
+    return get_task_result_handler(PlanningMultiTask, PlanningMultiResult, PlanningMultiResultSchema, task_id, user.id)
 
 
 # endregion
@@ -214,67 +136,41 @@ async def create_smart_plan(
 
 
 @router.delete("/smart-tasks", status_code=204, summary="删除智能推荐规划")
-async def delete_smart_plans(request: list[int] = Query(), _user: User = Depends(get_user)):
-    delete_tasks_handler(PlanningSmartTask, PlanningSmartResult, request)
-
-
-@router.post("/smart-tasks/list", summary="获取智能推荐规划列表")
-async def get_smart_plans(
-    request: PlanningSmartListRequest, _user: User = Depends(get_user)
-) -> PlanningSmartListResponse:
-    stmt = add_filters(
-        select(
-            PlanningSmartTask.id,
-            PlanningSmartTask.title,
-            PlanningSmartTask.source,
-            PlanningSmartTask.departure_date,
-            PlanningSmartTask.return_date,
-            PlanningSmartTask.group_size,
-            PlanningSmartTask.transport_mode,
-            PlanningSmartTask.status,
-            PlanningSmartTask.created_at,
-        ),
-        request.query,
-        {
-            PlanningSmartTask.title: FilterTypeEnum.Like,
-            PlanningSmartTask.source: FilterTypeEnum.Like,
-            PlanningSmartTask.status: FilterTypeEnum.In,
-            PlanningSmartTask.created_at: FilterTypeEnum.Datetime,
-        },
-    )
-    return paginate_query(stmt, request, PlanningSmartListResponse, PlanningSmartTask.id)
+async def delete_smart_plans(request: list[int] = Query(), user: User = Depends(get_user)):
+    delete_tasks_handler(PlanningSmartTask, PlanningSmartResult, request, user.id)
 
 
 @router.get("/smart-tasks/{task_id}/result", summary="获取智能推荐规划结果")
-async def get_smart_plan_result(task_id: int, _user: User = Depends(get_user)) -> PlanningSmartResultSchema:
-    return get_task_result_handler(PlanningSmartTask, PlanningSmartResult, PlanningSmartResultSchema, task_id)
+async def get_smart_plan_result(task_id: int, user: User = Depends(get_user)) -> PlanningSmartResultSchema:
+    return get_task_result_handler(PlanningSmartTask, PlanningSmartResult, PlanningSmartResultSchema, task_id, user.id)
 
 
 # endregion
-
 
 # region API: 通用规划操作
 
 
 @router.get("/tasks/{task_type}/{task_id}/status", summary="获取规划任务状态")
-async def get_plan_task_status(task_type: str, task_id: int, _user: User = Depends(get_user)) -> dict:
+async def get_plan_task_status(
+    task_type: PlanningTypeEnum, task_id: int, user: User = Depends(get_user)
+) -> PlanTaskStatusResponse:
     # 定义任务类型与任务模型、结果模型的映射关系
     task_model_map = {
-        "single": (PlanningSingleTask, PlanningSingleResult),
-        "route": (PlanningRouteTask, PlanningRouteResult),
-        "multi": (PlanningMultiTask, PlanningMultiResult),
-        "smart": (PlanningSmartTask, PlanningSmartResult),
+        PlanningTypeEnum.SINGLE: (PlanningSingleTask, PlanningSingleResult),
+        PlanningTypeEnum.ROUTE: (PlanningRouteTask, PlanningRouteResult),
+        PlanningTypeEnum.MULTI: (PlanningMultiTask, PlanningMultiResult),
+        PlanningTypeEnum.SMART: (PlanningSmartTask, PlanningSmartResult),
     }
 
     # 获取对应的模型
     models = task_model_map.get(task_type)
     if not models:
-        raise APIException(APICode.UN_SUPPORT, "不支持的规划类型")
+        raise APIException(APICode.UN_SUPPORT, f"不支持的规划类型: {task_type}")
 
     task_model, result_model = models
 
     with DatabaseManager() as db:
-        task = db.query(task_model).filter(task_model.id == task_id).first()
+        task = db.query(task_model).filter(task_model.id == task_id, task_model.user_id == user.id).first()
         if not task:
             raise APIException(APICode.NOT_FOUND, "任务不存在")
 
@@ -282,47 +178,36 @@ async def get_plan_task_status(task_type: str, task_id: int, _user: User = Depen
         result = db.query(result_model).filter(result_model.task_id == task_id).first()
         has_result = result is not None
 
-        # 构建基础返回信息
-        response = {
-            "task_id": task_id,
-            "task_type": task_type,
-            "status": task.status,
-            "has_result": has_result,
-            "title": task.title,
-            "created_at": task.created_at.isoformat(),
-        }
-
-        # 根据任务类型添加特定字段
-        if task_type in ["single", "route"]:
-            response["target"] = task.target
-        elif task_type == "smart":
-            response["max_travel_distance"] = task.max_travel_distance
-            response["preferred_environment"] = task.preferred_environment
-        # multi类型没有特定的target字段，使用通用信息
-
-        return response
+        return PlanTaskStatusResponse(
+            task_id=task_id,
+            task_type=task_type.value,
+            status=task.status,
+            has_result=has_result,
+            title=task.title,
+            created_at=task.created_at.isoformat(),
+        )
 
 
 @router.patch("/tasks/{task_type}/{task_id}/favorite", status_code=204, summary="更新规划收藏状态")
 async def update_plan_favorite(
-    task_type: str, task_id: int, request: PlanningResultFavoriteRequest, _user: User = Depends(get_user)
+    task_type: PlanningTypeEnum, task_id: int, request: PlanningResultFavoriteRequest, user: User = Depends(get_user)
 ):
     # 定义任务类型与结果模型的映射关系
     result_model_map = {
-        "single": PlanningSingleResult,
-        "route": PlanningRouteResult,
-        "multi": PlanningMultiResult,
-        "smart": PlanningSmartResult,
+        PlanningTypeEnum.SINGLE: PlanningSingleResult,
+        PlanningTypeEnum.ROUTE: PlanningRouteResult,
+        PlanningTypeEnum.MULTI: PlanningMultiResult,
+        PlanningTypeEnum.SMART: PlanningSmartResult,
     }
 
     # 获取对应的结果模型
     result_model = result_model_map.get(task_type)
     if not result_model:
-        raise APIException(APICode.UN_SUPPORT, "不支持的规划类型")
+        raise APIException(APICode.UN_SUPPORT, f"不支持的规划类型: {task_type}")
 
     # 更新收藏状态
     with DatabaseManager() as db:
-        result = db.query(result_model).filter(result_model.task_id == task_id).first()
+        result = db.query(result_model).filter(result_model.task_id == task_id, result_model.user_id == user.id).first()
         if not result:
             raise APIException(APICode.NOT_FOUND)
         if request.is_favorite is not None:
@@ -331,13 +216,13 @@ async def update_plan_favorite(
 
 
 @router.get("/stats", summary="获取用户规划统计")
-async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsResponse:
+async def get_planning_stats(user: User = Depends(get_user)) -> PlanningStatsResponse:
     with DatabaseManager() as db:
         # 统计各类规划的总数
-        single_count = db.query(PlanningSingleTask).filter(PlanningSingleTask.user_id == _user.id).count()
-        route_count = db.query(PlanningRouteTask).filter(PlanningRouteTask.user_id == _user.id).count()
-        multi_count = db.query(PlanningMultiTask).filter(PlanningMultiTask.user_id == _user.id).count()
-        smart_count = db.query(PlanningSmartTask).filter(PlanningSmartTask.user_id == _user.id).count()
+        single_count = db.query(PlanningSingleTask).filter(PlanningSingleTask.user_id == user.id).count()
+        route_count = db.query(PlanningRouteTask).filter(PlanningRouteTask.user_id == user.id).count()
+        multi_count = db.query(PlanningMultiTask).filter(PlanningMultiTask.user_id == user.id).count()
+        smart_count = db.query(PlanningSmartTask).filter(PlanningSmartTask.user_id == user.id).count()
 
         # 统计收藏的规划数
         single_fav_count = (
@@ -345,7 +230,7 @@ async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsRe
             .filter(
                 PlanningSingleResult.is_favorite == True,
                 PlanningSingleResult.task_id.in_(
-                    db.query(PlanningSingleTask.id).filter(PlanningSingleTask.user_id == _user.id)
+                    db.query(PlanningSingleTask.id).filter(PlanningSingleTask.user_id == user.id)
                 ),
             )
             .count()
@@ -356,7 +241,7 @@ async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsRe
             .filter(
                 PlanningRouteResult.is_favorite == True,
                 PlanningRouteResult.task_id.in_(
-                    db.query(PlanningRouteTask.id).filter(PlanningRouteTask.user_id == _user.id)
+                    db.query(PlanningRouteTask.id).filter(PlanningRouteTask.user_id == user.id)
                 ),
             )
             .count()
@@ -367,7 +252,7 @@ async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsRe
             .filter(
                 PlanningMultiResult.is_favorite == True,
                 PlanningMultiResult.task_id.in_(
-                    db.query(PlanningMultiTask.id).filter(PlanningMultiTask.user_id == _user.id)
+                    db.query(PlanningMultiTask.id).filter(PlanningMultiTask.user_id == user.id)
                 ),
             )
             .count()
@@ -378,7 +263,7 @@ async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsRe
             .filter(
                 PlanningSmartResult.is_favorite == True,
                 PlanningSmartResult.task_id.in_(
-                    db.query(PlanningSmartTask.id).filter(PlanningSmartTask.user_id == _user.id)
+                    db.query(PlanningSmartTask.id).filter(PlanningSmartTask.user_id == user.id)
                 ),
             )
             .count()
@@ -394,6 +279,216 @@ async def get_planning_stats(_user: User = Depends(get_user)) -> PlanningStatsRe
                 "smart": smart_count,
             },
         )
+
+
+def _build_single_plan_query(user_id: str):
+    """构建单一目的地规划查询"""
+    return (
+        select(
+            PlanningSingleTask.id,
+            PlanningSingleTask.title,
+            PlanningSingleTask.source,
+            PlanningSingleTask.target.label("target"),
+            PlanningSingleTask.departure_date,
+            PlanningSingleTask.return_date,
+            PlanningSingleTask.group_size,
+            PlanningSingleTask.transport_mode,
+            PlanningSingleTask.status,
+            PlanningSingleTask.created_at,
+            literal("single").label("planning_type"),
+            func.coalesce(PlanningSingleResult.is_favorite, False).label("is_favorite"),
+        )
+        .outerjoin(PlanningSingleResult, PlanningSingleTask.id == PlanningSingleResult.task_id)
+        .where(PlanningSingleTask.user_id == user_id)
+    )
+
+
+def _build_route_plan_query(user_id: str):
+    """构建沿途游玩规划查询"""
+    return (
+        select(
+            PlanningRouteTask.id,
+            PlanningRouteTask.title,
+            PlanningRouteTask.source,
+            PlanningRouteTask.target.label("target"),
+            PlanningRouteTask.departure_date,
+            PlanningRouteTask.return_date,
+            PlanningRouteTask.group_size,
+            PlanningRouteTask.transport_mode,
+            PlanningRouteTask.status,
+            PlanningRouteTask.created_at,
+            literal("route").label("planning_type"),
+            func.coalesce(PlanningRouteResult.is_favorite, False).label("is_favorite"),
+        )
+        .outerjoin(PlanningRouteResult, PlanningRouteTask.id == PlanningRouteResult.task_id)
+        .where(PlanningRouteTask.user_id == user_id)
+    )
+
+
+def _build_multi_plan_query(user_id: str):
+    """构建多节点规划查询"""
+    return (
+        select(
+            PlanningMultiTask.id,
+            PlanningMultiTask.title,
+            PlanningMultiTask.source,
+            literal("").label("target"),  # 多节点没有单一目标
+            PlanningMultiTask.departure_date,
+            PlanningMultiTask.return_date,
+            PlanningMultiTask.group_size,
+            PlanningMultiTask.transport_mode,
+            PlanningMultiTask.status,
+            PlanningMultiTask.created_at,
+            literal("multi").label("planning_type"),
+            func.coalesce(PlanningMultiResult.is_favorite, False).label("is_favorite"),
+        )
+        .outerjoin(PlanningMultiResult, PlanningMultiTask.id == PlanningMultiResult.task_id)
+        .where(PlanningMultiTask.user_id == user_id)
+    )
+
+
+def _build_smart_plan_query(user_id: str):
+    """构建智能推荐规划查询"""
+    return (
+        select(
+            PlanningSmartTask.id,
+            PlanningSmartTask.title,
+            PlanningSmartTask.source,
+            func.coalesce(PlanningSmartResult.destination, "AI推荐").label("target"),
+            PlanningSmartTask.departure_date,
+            PlanningSmartTask.return_date,
+            PlanningSmartTask.group_size,
+            PlanningSmartTask.transport_mode,
+            PlanningSmartTask.status,
+            PlanningSmartTask.created_at,
+            literal("smart").label("planning_type"),
+            func.coalesce(PlanningSmartResult.is_favorite, False).label("is_favorite"),
+        )
+        .outerjoin(PlanningSmartResult, PlanningSmartTask.id == PlanningSmartResult.task_id)
+        .where(PlanningSmartTask.user_id == user_id)
+    )
+
+
+def _apply_query_filters(stmt, subquery_or_columns, query_params):
+    """应用查询过滤条件"""
+    if not query_params:
+        return stmt
+
+    query_dict = query_params.model_dump(exclude_none=True)
+    if not query_dict:
+        return stmt
+
+    filter_conditions = []
+
+    # 根据传入的是subquery还是直接的columns来选择访问方式
+    if hasattr(subquery_or_columns, "c"):
+        # 这是一个subquery
+        columns = subquery_or_columns.c
+    else:
+        # 这是一个直接的column集合（用于单表查询）
+        columns = subquery_or_columns
+
+    for field, value in query_dict.items():
+        if field == "title" and value:
+            filter_conditions.append(columns.title.like(f"%{value}%"))
+        elif field == "source" and value:
+            filter_conditions.append(columns.source.like(f"%{value}%"))
+        elif field == "target" and value:
+            filter_conditions.append(columns.target.like(f"%{value}%"))
+        elif field == "planning_type" and value:
+            # 对于单表查询，planning_type过滤会在查询选择阶段处理
+            if hasattr(columns, "planning_type"):
+                filter_conditions.append(columns.planning_type == value.value)
+        elif field == "status" and value:
+            if isinstance(value, list):
+                filter_conditions.append(columns.status.in_(value))
+            else:
+                filter_conditions.append(columns.status == value)
+
+    if filter_conditions:
+        stmt = stmt.where(*filter_conditions)
+
+    return stmt
+
+
+def _apply_sorting(stmt, subquery_or_columns, sort_fields):
+    """应用排序"""
+    # 根据传入的是subquery还是直接的columns来选择访问方式
+    if hasattr(subquery_or_columns, "c"):
+        columns = subquery_or_columns.c
+    else:
+        columns = subquery_or_columns
+
+    if sort_fields:
+        for sort_field in sort_fields:
+            if sort_field.startswith("-"):
+                field_name = sort_field[1:]
+                if hasattr(columns, field_name):
+                    stmt = stmt.order_by(getattr(columns, field_name).desc())
+            else:
+                if hasattr(columns, sort_field):
+                    stmt = stmt.order_by(getattr(columns, sort_field))
+    else:
+        # 默认按创建时间倒序
+        stmt = stmt.order_by(columns.created_at.desc())
+
+    return stmt
+
+
+@router.post("/tasks/list", summary="获取所有类型规划的统一列表")
+async def get_all_plans(
+    request: PlanningTaskUnifiedListRequest, user: User = Depends(get_user)
+) -> PlanningTaskUnifiedListResponse:
+    """
+    智能查询规划列表：
+    - 如果指定了planning_type，只查询对应类型的表（高效）
+    - 如果未指定planning_type，使用UNION查询所有类型
+    """
+    # 检查是否指定了具体的规划类型
+    planning_type = request.query.planning_type if request.query else None
+
+    if planning_type:
+        # 单表查询优化：只查询指定类型的数据
+        if planning_type == PlanningTypeEnum.SINGLE:
+            base_query = _build_single_plan_query(user.id)
+        elif planning_type == PlanningTypeEnum.ROUTE:
+            base_query = _build_route_plan_query(user.id)
+        elif planning_type == PlanningTypeEnum.MULTI:
+            base_query = _build_multi_plan_query(user.id)
+        elif planning_type == PlanningTypeEnum.SMART:
+            base_query = _build_smart_plan_query(user.id)
+        else:
+            raise APIException(APICode.UN_SUPPORT, f"不支持的规划类型: {planning_type}")
+
+        # 应用过滤条件（除了planning_type，因为已经通过表选择处理了）
+        final_stmt = _apply_query_filters(base_query, base_query.selected_columns, request.query)
+        final_stmt = _apply_sorting(final_stmt, base_query.selected_columns, request.sort)
+
+        # 执行分页查询
+        return paginate_query(final_stmt, request, PlanningTaskUnifiedListResponse, base_query.selected_columns[0])
+
+    else:
+        # UNION查询：查询所有类型的数据
+        single_subquery = _build_single_plan_query(user.id)
+        route_subquery = _build_route_plan_query(user.id)
+        multi_subquery = _build_multi_plan_query(user.id)
+        smart_subquery = _build_smart_plan_query(user.id)
+
+        # 使用UNION ALL合并所有查询
+        union_query = union_all(single_subquery, route_subquery, multi_subquery, smart_subquery)
+
+        # 创建子查询
+        subquery = union_query.subquery("unified_plans")
+
+        # 创建最终查询语句
+        final_stmt = select(subquery)
+
+        # 应用过滤条件
+        final_stmt = _apply_query_filters(final_stmt, subquery, request.query)
+        final_stmt = _apply_sorting(final_stmt, subquery, request.sort)
+
+        # 执行分页查询
+        return paginate_query(final_stmt, request, PlanningTaskUnifiedListResponse, subquery.c.id)
 
 
 # endregion

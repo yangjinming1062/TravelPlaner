@@ -4,6 +4,8 @@ from typing import Optional
 
 from common.schema import *
 
+from .enums import PlanningTypeEnum
+
 
 # region Schema: 通用规划参数
 
@@ -108,25 +110,6 @@ class PlanningSingleTaskSchema(PlanningTaskBase, PlanningPreferencesSchema):
     target: str = Field(description="目的地")
 
 
-class PlanningSingleListRequest(PaginateRequest):
-    """单一目的地规划列表查询请求"""
-
-    class Query(PlanningTaskItemBase):
-        target: str = None
-
-    query: Query = None
-    sort: list[str] = Field(["-created_at"], description="排序字段")
-
-
-class PlanningSingleListResponse(PaginateResponse):
-    """单一目的地规划列表"""
-
-    class Item(PlanningTaskItemBase):
-        target: str
-
-    data: list[Item]
-
-
 # endregion
 
 
@@ -164,25 +147,6 @@ class PlanningRouteTaskSchema(PlanningTaskBase, PlanningPreferencesSchema):
     preferred_stop_types: list[str] = Field(default=[], description="偏好停留类型")
 
 
-class PlanningRouteListRequest(PaginateRequest):
-    """沿途游玩规划列表查询请求"""
-
-    class Query(PlanningTaskItemBase):
-        target: str = None
-
-    query: Query = None
-    sort: list[str] = Field(["-created_at"], description="排序字段")
-
-
-class PlanningRouteListResponse(PaginateResponse):
-    """沿途游玩规划列表"""
-
-    class Item(PlanningTaskItemBase):
-        target: str
-
-    data: list[Item]
-
-
 # endregion
 
 
@@ -218,19 +182,6 @@ class PlanningMultiTaskSchema(PlanningTaskBase, PlanningPreferencesSchema):
     nodes_schedule: list[NodeScheduleSchema] = Field(description="节点信息 - 详细的时间和地点安排")
 
 
-class PlanningMultiListRequest(PaginateRequest):
-    """多节点规划列表查询请求"""
-
-    query: PlanningTaskItemBase = None
-    sort: list[str] = Field(["-created_at"], description="排序字段")
-
-
-class PlanningMultiListResponse(PaginateResponse):
-    """多节点规划列表"""
-
-    data: list[PlanningTaskItemBase]
-
-
 # endregion
 
 
@@ -254,30 +205,40 @@ class PlanningSmartTaskSchema(PlanningTaskBase, PlanningPreferencesSchema):
     avoid_regions: list[str] = Field(default=[], description="避免的地区")
 
 
-class PlanningSmartListRequest(PaginateRequest):
-    """智能推荐规划列表查询请求"""
-
-    class Query(PlanningTaskItemBase):
-        title: str = None
-        destination: str = None
-
-    query: Query = None
-    sort: list[str] = Field(["-created_at"], description="排序字段")
-
-
-class PlanningSmartListResponse(PaginateResponse):
-    """智能推荐规划列表"""
-
-    class Item(PlanningTaskItemBase):
-        destination: str = Field(description="推荐的目的地")
-
-    data: list[Item]
-
-
 # endregion
 
 
 # region Schema: 通用规划操作
+
+
+class PlanningTaskUnifiedListRequest(PaginateRequest):
+    """统一规划列表查询请求"""
+
+    class Query(SchemaBase):
+        title: Optional[str] = Field(None, description="规划标题")
+        source: Optional[str] = Field(None, description="出发地")
+        target: Optional[str] = Field(None, description="目的地")
+        planning_type: Optional[PlanningTypeEnum] = Field(None, description="规划类型")
+        status: Optional[str] = Field(None, description="规划状态")
+        departure_date: Optional[datetime] = Field(None, description="出发日期")
+        return_date: Optional[datetime] = Field(None, description="返程日期")
+        group_size: Optional[int] = Field(None, description="出行人数")
+        transport_mode: Optional[str] = Field(None, description="主要交通方式")
+        created_at: Optional[datetime] = Field(None, description="创建时间")
+
+    query: Optional[Query] = Field(None)
+    sort: list[str] = Field(["-created_at"], description="排序字段")
+
+
+class PlanningTaskUnifiedListResponse(PaginateResponse):
+    """统一规划列表响应"""
+
+    class Item(PlanningTaskItemBase):
+        planning_type: PlanningTypeEnum = Field(description="规划类型")
+        target: str = Field(description="目的地（smart类型为推荐目的地，multi类型为空或第一个节点）")
+        is_favorite: bool = Field(default=False, description="是否收藏")
+
+    data: list[Item]
 
 
 class PlanningResultFavoriteRequest(SchemaBase):
@@ -299,6 +260,17 @@ class PlanningStatsResponse(SchemaBase):
     total_plans: int = Field(description="总规划数")
     favorited_plans: int = Field(description="收藏的规划数")
     mode_distribution: dict[str, int] = Field(description="各模式分布情况")
+
+
+class PlanTaskStatusResponse(SchemaBase):
+    """规划任务状态响应"""
+
+    task_id: int = Field(description="任务ID")
+    task_type: str = Field(description="任务类型")
+    status: str = Field(description="任务状态")
+    has_result: bool = Field(description="是否有结果")
+    title: str = Field(description="任务标题")
+    created_at: str = Field(description="创建时间")
 
 
 # endregion

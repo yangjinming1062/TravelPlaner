@@ -9,9 +9,6 @@ interface TaskStatus {
   status: string;
   has_result: boolean;
   title: string;
-  target?: string;
-  max_travel_distance?: number;
-  preferred_environment?: string;
   created_at: string;
 }
 
@@ -114,21 +111,6 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
 
   // 任务处理中
   if (taskStatus?.status === 'processing') {
-    const getProcessingMessage = () => {
-      switch (taskStatus.task_type) {
-        case 'single':
-          return `AI正在为您精心规划${taskStatus.target}的旅行方案...`;
-        case 'route':
-          return `AI正在为您精心规划到${taskStatus.target}的沿途游玩路线...`;
-        case 'multi':
-          return `AI正在为您精心规划多节点旅行方案...`;
-        case 'smart':
-          return `AI正在基于您的偏好智能推荐最适合的旅行目的地...`;
-        default:
-          return `AI正在为您精心规划旅行方案...`;
-      }
-    };
-
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -138,7 +120,7 @@ const PlanningStatusDisplay: React.FC<PlanningStatusDisplayProps> = ({
           <h2 className="text-2xl font-bold mt-4">
             正在生成{planningTypeDisplayName}
           </h2>
-          <p className="mt-2 text-gray-500">{getProcessingMessage()}</p>
+          <p className="mt-2 text-gray-500">AI正在为您精心规划旅行方案...</p>
           <div
             className={`mt-4 p-4 rounded-lg ${planningTypeColor === 'text-blue-500' ? 'bg-blue-50' : planningTypeColor === 'text-orange-500' ? 'bg-orange-50' : planningTypeColor === 'text-green-500' ? 'bg-green-50' : 'bg-purple-50'}`}
           >

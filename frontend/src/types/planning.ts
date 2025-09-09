@@ -128,22 +128,6 @@ export interface PlanningSingleTaskSchema
   target: string;
 }
 
-export interface PlanningSingleListRequest extends PaginateRequest {
-  query?: {
-    id?: number;
-    title?: string;
-    source?: string;
-    target?: string;
-    status?: string;
-    created_at?: DateFilterSchema;
-  };
-  sort?: string[];
-}
-
-export interface PlanningSingleListResponse extends PaginateResponse {
-  data: Array<PlanningTaskItemBase & { target: string }>;
-}
-
 // 沿途游玩规划
 export interface WaypointSchema {
   name: string;
@@ -172,22 +156,6 @@ export interface PlanningRouteTaskSchema
   preferred_stop_types: PreferredStopType[];
 }
 
-export interface PlanningRouteListRequest extends PaginateRequest {
-  query?: {
-    id?: number;
-    title?: string;
-    source?: string;
-    target?: string;
-    status?: string;
-    created_at?: DateFilterSchema;
-  };
-  sort?: string[];
-}
-
-export interface PlanningRouteListResponse extends PaginateResponse {
-  data: Array<PlanningTaskItemBase & { target: string }>;
-}
-
 // 多节点规划
 export interface NodeScheduleDetailSchema {
   location: string;
@@ -212,17 +180,6 @@ export interface PlanningMultiTaskSchema
   nodes_schedule: NodeScheduleSchema[];
 }
 
-export interface PlanningMultiListRequest extends PaginateRequest {
-  query?: PlanningTaskItemBase & {
-    created_at?: DateFilterSchema;
-  };
-  sort?: string[];
-}
-
-export interface PlanningMultiListResponse extends PaginateResponse {
-  data: PlanningTaskItemBase[];
-}
-
 // 智能推荐规划
 export interface PlanningSmartResultSchema extends PlanningResultBase {
   destination: string;
@@ -239,18 +196,31 @@ export interface PlanningSmartTaskSchema
   avoid_regions: AvoidRegion[];
 }
 
-export interface PlanningSmartListRequest extends PaginateRequest {
+// 统一规划查询
+export interface PlanningTaskUnifiedListRequest extends PaginateRequest {
   query?: {
-    id?: number;
     title?: string;
-    destination?: string;
-    created_at?: DateFilterSchema;
+    source?: string;
+    target?: string;
+    planning_type?: 'single' | 'route' | 'multi' | 'smart';
+    status?: string;
+    departure_date?: string;
+    return_date?: string;
+    group_size?: number;
+    transport_mode?: string;
+    created_at?: string;
   };
   sort?: string[];
 }
 
-export interface PlanningSmartListResponse extends PaginateResponse {
-  data: Array<PlanningTaskItemBase & { destination: string }>;
+export interface PlanningTaskUnifiedItem extends PlanningTaskItemBase {
+  planning_type: 'single' | 'route' | 'multi' | 'smart';
+  target: string;
+  is_favorite: boolean;
+}
+
+export interface PlanningTaskUnifiedListResponse extends PaginateResponse {
+  data: PlanningTaskUnifiedItem[];
 }
 
 // 通用规划操作
@@ -261,6 +231,15 @@ export interface PlanningResultFavoriteRequest {
 export interface FeedbackRequest {
   user_rating?: number;
   user_feedback?: string;
+}
+
+export interface PlanTaskStatusResponse {
+  task_id: number;
+  task_type: string;
+  status: string;
+  has_result: boolean;
+  title: string;
+  created_at: string;
 }
 
 export interface PlanningStatsResponse {

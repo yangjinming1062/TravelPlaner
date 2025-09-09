@@ -35,7 +35,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
-    
+
     // 提取后端返回的错误信息
     if (error.response?.data?.message) {
       // 创建一个新的错误对象，将后端的错误信息作为 message
@@ -47,7 +47,7 @@ apiClient.interceptors.response.use(
       (customError as any).details = error.response.data.details;
       return Promise.reject(customError);
     }
-    
+
     return Promise.reject(error);
   },
 );

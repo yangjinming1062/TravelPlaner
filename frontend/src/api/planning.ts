@@ -9,16 +9,11 @@ import {
   PlanningRouteResultSchema,
   PlanningMultiResultSchema,
   PlanningSmartResultSchema,
-  PlanningSingleListResponse,
-  PlanningRouteListResponse,
-  PlanningMultiListResponse,
-  PlanningSmartListResponse,
-  PlanningSingleListRequest,
-  PlanningRouteListRequest,
-  PlanningMultiListRequest,
-  PlanningSmartListRequest,
   PlanningResultFavoriteRequest,
   PlanningStatsResponse,
+  PlanTaskStatusResponse,
+  PlanningTaskUnifiedListRequest,
+  PlanningTaskUnifiedListResponse,
 } from '../types/planning';
 
 // 单一目的地规划
@@ -26,26 +21,11 @@ export const createSinglePlan = (data: PlanningSingleTaskSchema) => {
   return apiClient.post<number>('/planning/single-tasks', data);
 };
 
-export const getSinglePlans = (params: PlanningSingleListRequest) => {
-  return apiClient.post<PlanningSingleListResponse>(
-    '/planning/single-tasks/list',
-    params,
-  );
-};
-
 // 通用任务状态检查
 export const getPlanTaskStatus = (taskType: string, taskId: number) => {
-  return apiClient.get<{
-    task_id: number;
-    task_type: string;
-    status: string;
-    has_result: boolean;
-    title: string;
-    target?: string;
-    max_travel_distance?: number;
-    preferred_environment?: string;
-    created_at: string;
-  }>(`/planning/tasks/${taskType}/${taskId}/status`);
+  return apiClient.get<PlanTaskStatusResponse>(
+    `/planning/tasks/${taskType}/${taskId}/status`,
+  );
 };
 
 export const getSinglePlanResult = (taskId: number) => {
@@ -63,13 +43,6 @@ export const createRoutePlan = (data: PlanningRouteTaskSchema) => {
   return apiClient.post<number>('/planning/route-tasks', data);
 };
 
-export const getRoutePlans = (params: PlanningRouteListRequest) => {
-  return apiClient.post<PlanningRouteListResponse>(
-    '/planning/route-tasks/list',
-    params,
-  );
-};
-
 export const getRoutePlanResult = (taskId: number) => {
   return apiClient.get<PlanningRouteResultSchema>(
     `/planning/route-tasks/${taskId}/result`,
@@ -85,13 +58,6 @@ export const createMultiPlan = (data: PlanningMultiTaskSchema) => {
   return apiClient.post<number>('/planning/multi-tasks', data);
 };
 
-export const getMultiPlans = (params: PlanningMultiListRequest) => {
-  return apiClient.post<PlanningMultiListResponse>(
-    '/planning/multi-tasks/list',
-    params,
-  );
-};
-
 export const getMultiPlanResult = (taskId: number) => {
   return apiClient.get<PlanningMultiResultSchema>(
     `/planning/multi-tasks/${taskId}/result`,
@@ -105,13 +71,6 @@ export const deleteMultiPlans = (taskIds: number[]) => {
 // 智能推荐规划
 export const createSmartPlan = (data: PlanningSmartTaskSchema) => {
   return apiClient.post<number>('/planning/smart-tasks', data);
-};
-
-export const getSmartPlans = (params: PlanningSmartListRequest) => {
-  return apiClient.post<PlanningSmartListResponse>(
-    '/planning/smart-tasks/list',
-    params,
-  );
 };
 
 export const getSmartPlanResult = (taskId: number) => {
@@ -138,4 +97,12 @@ export const updatePlanFavorite = (
 
 export const getPlanningStats = () => {
   return apiClient.get<PlanningStatsResponse>('/planning/stats');
+};
+
+// 统一规划查询
+export const getAllPlans = (params: PlanningTaskUnifiedListRequest) => {
+  return apiClient.post<PlanningTaskUnifiedListResponse>(
+    '/planning/tasks/list',
+    params,
+  );
 };

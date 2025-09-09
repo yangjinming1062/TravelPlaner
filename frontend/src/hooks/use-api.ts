@@ -15,10 +15,7 @@ import {
   PlanningMultiTaskSchema,
   PlanningSmartTaskSchema,
   PlanningResultFavoriteRequest,
-  PlanningSingleListRequest,
-  PlanningRouteListRequest,
-  PlanningMultiListRequest,
-  PlanningSmartListRequest,
+  PlanningTaskUnifiedListRequest,
 } from '../types/planning';
 
 // 用户相关 Hooks
@@ -110,17 +107,6 @@ export const useCreateSinglePlan = () => {
   });
 };
 
-export const useSinglePlansList = (params: PlanningSingleListRequest) => {
-  return useQuery({
-    queryKey: ['single-plans', params],
-    queryFn: () => planningApi.getSinglePlans(params),
-  });
-};
-
-export const useSinglePlans = (params: PlanningSingleListRequest) => {
-  return useSinglePlansList(params);
-};
-
 // 通用规划任务状态查询
 export const usePlanTaskStatus = (taskType: string, taskId: number) => {
   return useQuery({
@@ -169,17 +155,6 @@ export const useCreateRoutePlan = () => {
   });
 };
 
-export const useRoutePlansList = (params: PlanningRouteListRequest) => {
-  return useQuery({
-    queryKey: ['route-plans', params],
-    queryFn: () => planningApi.getRoutePlans(params),
-  });
-};
-
-export const useRoutePlans = (params: PlanningRouteListRequest) => {
-  return useRoutePlansList(params);
-};
-
 export const useRoutePlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['route-plan-result', taskId],
@@ -203,17 +178,6 @@ export const useCreateMultiPlan = () => {
   });
 };
 
-export const useMultiPlansList = (params: PlanningMultiListRequest) => {
-  return useQuery({
-    queryKey: ['multi-plans', params],
-    queryFn: () => planningApi.getMultiPlans(params),
-  });
-};
-
-export const useMultiPlans = (params: PlanningMultiListRequest) => {
-  return useMultiPlansList(params);
-};
-
 export const useMultiPlanResult = (taskId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['multi-plan-result', taskId],
@@ -235,17 +199,6 @@ export const useCreateSmartPlan = () => {
     mutationFn: (data: PlanningSmartTaskSchema) =>
       planningApi.createSmartPlan(data),
   });
-};
-
-export const useSmartPlansList = (params: PlanningSmartListRequest) => {
-  return useQuery({
-    queryKey: ['smart-plans', params],
-    queryFn: () => planningApi.getSmartPlans(params),
-  });
-};
-
-export const useSmartPlans = (params: PlanningSmartListRequest) => {
-  return useSmartPlansList(params);
 };
 
 export const useSmartPlanResult = (taskId: number, enabled: boolean = true) => {
@@ -283,6 +236,7 @@ export const useUpdatePlanFavorite = () => {
       queryClient.invalidateQueries({ queryKey: ['route-plans'] });
       queryClient.invalidateQueries({ queryKey: ['multi-plans'] });
       queryClient.invalidateQueries({ queryKey: ['smart-plans'] });
+      queryClient.invalidateQueries({ queryKey: ['all-plans'] });
     },
   });
 };
@@ -292,4 +246,16 @@ export const usePlanningStats = () => {
     queryKey: ['planning-stats'],
     queryFn: planningApi.getPlanningStats,
   });
+};
+
+// 统一规划查询
+export const useAllPlansList = (params: PlanningTaskUnifiedListRequest) => {
+  return useQuery({
+    queryKey: ['all-plans', params],
+    queryFn: () => planningApi.getAllPlans(params),
+  });
+};
+
+export const useAllPlans = (params: PlanningTaskUnifiedListRequest) => {
+  return useAllPlansList(params);
 };
