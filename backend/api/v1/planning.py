@@ -38,9 +38,7 @@ def delete_tasks_handler(planning_type: PlanningTypeEnum, task_ids, user_id):
     task_model, result_model = PLANNING_TYPE_MODEL_MAP[planning_type]
     with DatabaseManager() as db:
         db.query(result_model).filter(result_model.task_id.in_(task_ids)).delete(synchronize_session=False)
-        db.query(task_model).filter(task_model.id.in_(task_ids), task_model.user_id == user_id).delete(
-            synchronize_session=False
-        )
+        db.query(task_model).filter(task_model.id.in_(task_ids), task_model.user_id == user_id).delete(synchronize_session=False)
 
 
 def get_task_result_handler(planning_type: PlanningTypeEnum, result_schema, task_id, user_id):
@@ -72,9 +70,7 @@ def get_task_result_handler(planning_type: PlanningTypeEnum, result_schema, task
 
 
 @router.post("/single-tasks", status_code=201, summary="新增单一目的地规划")
-async def create_single_plan(
-    request: PlanningSingleTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
-) -> int:
+async def create_single_plan(request: PlanningSingleTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)) -> int:
     return create_task_handler(bg_task, PlanningTypeEnum.SINGLE, request, user.id)
 
 
@@ -94,9 +90,7 @@ async def get_single_plan_result(task_id: int, user: User = Depends(get_user)) -
 
 
 @router.post("/route-tasks", status_code=201, summary="新增沿途游玩规划")
-async def create_route_plan(
-    request: PlanningRouteTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
-) -> int:
+async def create_route_plan(request: PlanningRouteTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)) -> int:
     return create_task_handler(bg_task, PlanningTypeEnum.ROUTE, request, user.id)
 
 
@@ -116,9 +110,7 @@ async def get_route_plan_result(task_id: int, user: User = Depends(get_user)) ->
 
 
 @router.post("/multi-tasks", status_code=201, summary="新增多节点规划")
-async def create_multi_plan(
-    request: PlanningMultiTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
-) -> int:
+async def create_multi_plan(request: PlanningMultiTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)) -> int:
     return create_task_handler(bg_task, PlanningTypeEnum.MULTI, request, user.id)
 
 
@@ -138,9 +130,7 @@ async def get_multi_plan_result(task_id: int, user: User = Depends(get_user)) ->
 
 
 @router.post("/smart-tasks", status_code=201, summary="新增智能推荐规划")
-async def create_smart_plan(
-    request: PlanningSmartTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)
-) -> int:
+async def create_smart_plan(request: PlanningSmartTaskSchema, bg_task: BackgroundTasks, user: User = Depends(get_user)) -> int:
     return create_task_handler(bg_task, PlanningTypeEnum.SMART, request, user.id)
 
 
@@ -160,9 +150,7 @@ async def get_smart_plan_result(task_id: int, user: User = Depends(get_user)) ->
 
 
 @router.get("/tasks/{task_type}/{task_id}/status", summary="获取规划任务状态")
-async def get_plan_task_status(
-    task_type: PlanningTypeEnum, task_id: int, user: User = Depends(get_user)
-) -> PlanTaskStatusResponse:
+async def get_plan_task_status(task_type: PlanningTypeEnum, task_id: int, user: User = Depends(get_user)) -> PlanTaskStatusResponse:
     task_model, result_model = PLANNING_TYPE_MODEL_MAP.get(task_type)
     with DatabaseManager() as db:
         task = db.query(task_model).filter(task_model.id == task_id, task_model.user_id == user.id).first()
@@ -181,9 +169,7 @@ async def get_plan_task_status(
 
 
 @router.patch("/tasks/{task_type}/{task_id}/favorite", status_code=204, summary="更新规划收藏状态")
-async def update_plan_favorite(
-    task_type: PlanningTypeEnum, task_id: int, request: PlanningResultFavoriteRequest, user: User = Depends(get_user)
-):
+async def update_plan_favorite(task_type: PlanningTypeEnum, task_id: int, request: PlanningResultFavoriteRequest, user: User = Depends(get_user)):
     task_model, result_model = PLANNING_TYPE_MODEL_MAP.get(task_type)
     with DatabaseManager() as db:
         # 首先验证任务是否属于当前用户
@@ -382,9 +368,7 @@ def _apply_sorting(stmt, subquery_or_columns, sort_fields):
 
 
 @router.post("/tasks/list", summary="获取所有类型规划的统一列表")
-async def get_all_plans(
-    request: PlanningTaskUnifiedListRequest, user: User = Depends(get_user)
-) -> PlanningTaskUnifiedListResponse:
+async def get_all_plans(request: PlanningTaskUnifiedListRequest, user: User = Depends(get_user)) -> PlanningTaskUnifiedListResponse:
     """
     智能查询规划列表：
     - 如果指定了planning_type，只查询对应类型的表（高效）

@@ -121,9 +121,7 @@ Field descriptions:
     if nested_types:
         for model_name in nested_types:
             # 跳过空字典或已经内嵌在主模型中的模型
-            if not nested_types[model_name] or any(
-                isinstance(v, dict) and model_name in str(v) for v in main_types.values()
-            ):
+            if not nested_types[model_name] or any(isinstance(v, dict) and model_name in str(v) for v in main_types.values()):
                 continue
 
             result += f"""

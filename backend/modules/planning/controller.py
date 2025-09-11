@@ -55,9 +55,7 @@ class PlanningController:
                     daily_plan=[
                         {
                             "day": i,
-                            "date": (
-                                task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)
-                            ).isoformat(),
+                            "date": (task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)).isoformat(),
                             "title": f"第{i}天 - {task.target}探索之旅",
                             "activities": [
                                 {
@@ -171,9 +169,7 @@ class PlanningController:
                     daily_plan=[
                         {
                             "day": i,
-                            "date": (
-                                task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)
-                            ).isoformat(),
+                            "date": (task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)).isoformat(),
                             "title": f"第{i}天 - 沿途探索",
                             "route": f"从{task.source}向{task.target}前进" if i == 1 else f"继续向{task.target}行进",
                             "activities": [
@@ -213,9 +209,7 @@ class PlanningController:
                     waypoints=[
                         {
                             "name": f"沿途精彩点{i}",
-                            "type": (
-                                random.choice(task.preferred_stop_types) if task.preferred_stop_types else "自然景观"
-                            ),
+                            "type": (random.choice(task.preferred_stop_types) if task.preferred_stop_types else "自然景观"),
                             "stay_duration": f"{task.max_stopover_duration}小时",
                             "description": "值得停留的精彩地点",
                         }
@@ -285,12 +279,8 @@ class PlanningController:
                         {
                             "node_id": i,
                             "destination": f"目的地{i}",
-                            "arrival_date": (
-                                task.departure_date.date() + __import__("datetime").timedelta(days=i * 2)
-                            ).isoformat(),
-                            "departure_date": (
-                                task.departure_date.date() + __import__("datetime").timedelta(days=i * 2 + 1)
-                            ).isoformat(),
+                            "arrival_date": (task.departure_date.date() + __import__("datetime").timedelta(days=i * 2)).isoformat(),
+                            "departure_date": (task.departure_date.date() + __import__("datetime").timedelta(days=i * 2 + 1)).isoformat(),
                             "activities": [f"探索{i}号目的地的特色景点", "体验当地文化和美食", "购买特色纪念品"],
                             "accommodation": f"目的地{i}推荐酒店",
                             "estimated_cost": random.randint(800, 1500),
@@ -389,9 +379,7 @@ class PlanningController:
                     daily_plan=[
                         {
                             "day": i,
-                            "date": (
-                                task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)
-                            ).isoformat(),
+                            "date": (task.departure_date.date() + __import__("datetime").timedelta(days=i - 1)).isoformat(),
                             "title": f"第{i}天 - {recommended_dest}探索",
                             "activities": [
                                 {

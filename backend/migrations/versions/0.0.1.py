@@ -55,9 +55,7 @@ def upgrade() -> None:
         sa.Column("return_date", sa.DateTime(timezone=True), nullable=False, comment="返程日期"),
         sa.Column("group_size", sa.Integer(), nullable=False, comment="出行人数"),
         sa.Column("transport_mode", sa.String(length=16), nullable=False, comment="主要交通方式"),
-        sa.Column(
-            "status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"
-        ),
+        sa.Column("status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"),
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -93,9 +91,7 @@ def upgrade() -> None:
             nullable=False,
             comment="计划停留时长：每个途径点最多游玩多久（小时）",
         ),
-        sa.Column(
-            "route_preference", sa.String(), nullable=False, comment="路线偏好：速度优先, 风景优先, 经济优先, 平衡"
-        ),
+        sa.Column("route_preference", sa.String(), nullable=False, comment="路线偏好：速度优先, 风景优先, 经济优先, 平衡"),
         sa.Column("max_detour_distance", sa.Integer(), nullable=False, comment="最大绕行距离(km)"),
         sa.Column("preferred_stop_types", sa.JSON(), nullable=False, comment="偏好停留类型"),
         sa.Column("user_id", sa.String(), nullable=False),
@@ -105,9 +101,7 @@ def upgrade() -> None:
         sa.Column("return_date", sa.DateTime(timezone=True), nullable=False, comment="返程日期"),
         sa.Column("group_size", sa.Integer(), nullable=False, comment="出行人数"),
         sa.Column("transport_mode", sa.String(length=16), nullable=False, comment="主要交通方式"),
-        sa.Column(
-            "status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"
-        ),
+        sa.Column("status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"),
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -143,9 +137,7 @@ def upgrade() -> None:
         sa.Column("return_date", sa.DateTime(timezone=True), nullable=False, comment="返程日期"),
         sa.Column("group_size", sa.Integer(), nullable=False, comment="出行人数"),
         sa.Column("transport_mode", sa.String(length=16), nullable=False, comment="主要交通方式"),
-        sa.Column(
-            "status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"
-        ),
+        sa.Column("status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"),
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -183,9 +175,7 @@ def upgrade() -> None:
         sa.Column("return_date", sa.DateTime(timezone=True), nullable=False, comment="返程日期"),
         sa.Column("group_size", sa.Integer(), nullable=False, comment="出行人数"),
         sa.Column("transport_mode", sa.String(length=16), nullable=False, comment="主要交通方式"),
-        sa.Column(
-            "status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"
-        ),
+        sa.Column("status", sa.String(length=16), nullable=False, comment="规划状态: pending, processing, completed, failed"),
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),

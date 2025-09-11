@@ -36,13 +36,7 @@ def get_env(name, default=None):
         return tmp
 
     def _get_env():
-        return (
-            os.getenv(name)
-            or _ENV_FILE_CONFIG.get(name)
-            or _YAML_FILE_CONFIG.get(name)
-            or _YAML_FILE_CONFIG.get(name.lower())
-            or default
-        )
+        return os.getenv(name) or _ENV_FILE_CONFIG.get(name) or _YAML_FILE_CONFIG.get(name) or _YAML_FILE_CONFIG.get(name.lower()) or default
 
     _ENV_FILE_CONFIG = {}
     _YAML_FILE_CONFIG = {}
@@ -82,9 +76,7 @@ class Config(BaseModel):
         default=bool(get_env("DB_ECHO", False)),
         description="是否打印SQL语句",
     )
-    db_uri: str = Field(
-        default=get_env("DB_URI", "postgresql+psycopg://admin:IDoNotKnow@db:5432/app"), description="数据库URI"
-    )
+    db_uri: str = Field(default=get_env("DB_URI", "postgresql+psycopg://admin:IDoNotKnow@db:5432/app"), description="数据库URI")
     # endregion
 
     # region LLM

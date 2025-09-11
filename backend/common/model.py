@@ -68,13 +68,9 @@ class PlanningPreferenceColumns:
     # 预算偏好
     budget_min: Mapped[int] = mapped_column(default=0, comment="最低预算")
     budget_max: Mapped[int] = mapped_column(default=0, comment="最高预算")
-    budget_flexibility: Mapped[str] = mapped_column(
-        String(32), default="性价比优先", comment="预算灵活性：节俭为主、性价比优先、舒适为主"
-    )
+    budget_flexibility: Mapped[str] = mapped_column(String(32), default="性价比优先", comment="预算灵活性：节俭为主、性价比优先、舒适为主")
 
     # 特殊需求
     dietary_restrictions: Mapped[str] = mapped_column(TEXT, default="", comment="饮食限制")
-    group_travel_preference: Mapped[str] = mapped_column(
-        TEXT, default="家庭", comment="出行类型：独行、情侣、家庭、朋友"
-    )
+    group_travel_preference: Mapped[str] = mapped_column(TEXT, default="家庭", comment="出行类型：独行、情侣、家庭、朋友")
     custom_preferences: Mapped[str] = mapped_column(TEXT, default="", comment="附加的需求")
