@@ -104,3 +104,22 @@ secret_key: ""                        # Description: A secret key used for encry
                                       # How to configure: CRITICAL - Generate a new key by running the following command in your terminal:
                                       # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
                                       # Then, paste the generated key here. For production, set this via an environment variable (`SECRET_KEY`).
+
+# ===================================================================
+# [Amap (Gaode Maps) Configuration]
+# ===================================================================
+amap_key: ""                          # Description: The API key for Amap (Gaode Maps).
+                                      # How to configure: Paste your secret API key here. For security, it's best to set this as an environment variable.
+amap_sig: ""                          # Description: The digital signature for Amap API (optional).
+                                      # How to configure: If your API key requires digital signature verification, paste the signature here.
+                                      # Leave empty if signature is not required. Check your Amap console for signature settings.
+amap_timeout: 30                      # Description: Request timeout in seconds for Amap API calls.
+                                      # How to configure: 30 seconds is usually sufficient. Increase if you experience timeout issues.
+amap_retry_count: 3                   # Description: Number of retry attempts for failed Amap API requests.
+                                      # How to configure: 2-3 retries handle most intermittent network issues.
+amap_retry_delay: 1                   # Description: Initial delay in seconds between retry attempts.
+                                      # How to configure: Uses exponential backoff, so this is the base delay.
+amap_base_url: "https://restapi.amap.com" # Description: Base URL for Amap API endpoints.
+                                      # How to configure: Only change if using a proxy or alternative endpoint.
+amap_max_requests_per_second: 2       # Description: Maximum requests per second to avoid quota limits.
+                                      # How to configure: Set based on your API quota limits. Lower values are safer.

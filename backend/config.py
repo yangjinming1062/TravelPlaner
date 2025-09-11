@@ -101,6 +101,16 @@ class Config(BaseModel):
 
     # endregion
 
+    # region 高德地图配置
+    amap_key: str  # 高德地图APIKey
+    amap_sig: str | None = None  # 高德地图数字签名（可选，若有则必须提供）
+    amap_timeout: int = 30  # 请求超时时间（秒）
+    amap_retry_count: int = 3  # 重试次数
+    amap_retry_delay: int = 1  # 重试延迟（秒）
+    amap_base_url: str = "https://restapi.amap.com"  # API基础URL
+    amap_max_requests_per_second: int = 2  # 每秒最大请求数（避免配额限制）
+    # endregion
+
     class Config:
         extra = "ignore"
 
