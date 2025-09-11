@@ -52,5 +52,4 @@ class RequestStatus(Enum):
     EXECUTING = "executing"  # 执行中
     COMPLETED = "completed"  # 已完成
     FAILED = "failed"  # 失败
-    CANCELLED = "cancelled"  # 已取消
     TIMEOUT = "timeout"  # 超时

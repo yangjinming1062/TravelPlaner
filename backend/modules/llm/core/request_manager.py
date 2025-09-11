@@ -1,6 +1,5 @@
 import asyncio
 import heapq
-import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -11,6 +10,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic import Field
+from utils import RateLimiter
 
 from ..enums import RequestPriority
 from ..enums import RequestStatus
@@ -51,49 +51,6 @@ class RequestInfo(BaseModel):
         if self.started_at:
             return self.started_at - self.created_at
         return None
-
-
-class RateLimiter:
-    """速率限制器"""
-
-    def __init__(self, max_requests_per_minute: int):
-        """
-        初始化速率限制器
-
-        Args:
-            max_requests_per_minute: 每分钟最大请求数
-        """
-        self.max_requests_per_minute = max_requests_per_minute
-        self.request_times: list[float] = []
-        self._lock = threading.Lock()
-
-    def can_proceed(self) -> bool:
-        """检查是否可以继续请求"""
-        with self._lock:
-            now = time.time()
-
-            # 清理超过1分钟的请求记录
-            cutoff_time = now - 60.0
-            self.request_times = [t for t in self.request_times if t > cutoff_time]
-
-            # 检查是否超过限制
-            if len(self.request_times) >= self.max_requests_per_minute:
-                return False
-
-            # 记录当前请求时间
-            self.request_times.append(now)
-            return True
-
-    def wait_time(self) -> float:
-        """获取需要等待的时间"""
-        with self._lock:
-            if len(self.request_times) < self.max_requests_per_minute:
-                return 0.0
-
-            # 计算最早请求的时间
-            earliest_request = min(self.request_times)
-            wait_time = 60.0 - (time.time() - earliest_request)
-            return max(0.0, wait_time)
 
 
 class AsyncPriorityQueue(Generic[T]):
@@ -186,7 +143,7 @@ class RequestManager:
         self.request_queue = AsyncPriorityQueue[RequestInfo]()
         self._semaphore = asyncio.Semaphore(self.config.max_concurrent_requests)
         self._lock = asyncio.Lock()
-        self.rate_limiter = RateLimiter(self.config.max_requests_per_minute)
+        self.rate_limiter = RateLimiter(self.config.max_requests_per_minute, 60.0)
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.max_concurrent_requests)
         self._worker_task: asyncio.Task | None = None
         self._monitoring_task: asyncio.Task | None = None
@@ -443,8 +400,6 @@ class RequestManager:
                 self.metrics.update_metric("request_manager", "average_queue_wait_time", new_avg_wait)
         elif request_info.status == RequestStatus.FAILED:
             self.metrics.increment_metric("request_manager", "failed_requests")
-        elif request_info.status == RequestStatus.CANCELLED:
-            self.metrics.increment_metric("request_manager", "cancelled_requests")
         elif request_info.status == RequestStatus.TIMEOUT:
             self.metrics.increment_metric("request_manager", "timeout_requests")
         if request_info.retry_count > 0:
@@ -495,7 +450,6 @@ class RequestManager:
             if request_info.status in [
                 RequestStatus.COMPLETED,
                 RequestStatus.FAILED,
-                RequestStatus.CANCELLED,
                 RequestStatus.TIMEOUT,
             ]:
                 if request_info.status == RequestStatus.COMPLETED:

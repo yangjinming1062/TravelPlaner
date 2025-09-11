@@ -1,3 +1,4 @@
+from .classes import RateLimiter
 from .classes import Singleton
 from .database import DatabaseManager
 from .functions import bytes_to_str
@@ -16,4 +17,5 @@ __all__ = [
     "generate_key",
     "str_to_bytes",
     "SecretManager",
+    "RateLimiter",
 ]
