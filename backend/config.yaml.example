@@ -1,38 +1,106 @@
-# Configuration example for TravelPlanner backend
-# Copy this file to config.yaml and adjust values as needed
+# ===================================================================
+# TravelPlanner Backend Configuration Example
+# ===================================================================
+#
+# INSTRUCTIONS:
+# 1. Copy this file to `config.yaml` in the same directory.
+# 2. Edit the values in `config.yaml` to match your environment.
+#
+# CONFIGURATION HIERARCHY (from highest to lowest priority):
+# 1. Environment Variables (e.g., `export DEBUG=true`)
+# 2. `dev.env` file (for development-specific overrides)
+# 3. `.env` file (for local environment variables)
+# 4. `config.yaml` file (this file)
+#
+# ===================================================================
 
-# Debug mode
-debug: false
+# [General Settings]
+# ------------------
+debug: true
 
-# Logging configuration
-log_dir: "logs"
-log_level: "INFO"
-log_info_name: "info.log"
-log_error_name: "error.log"
-log_stdout: false
-# Log format follows Python's logging format specification
-log_format: "%(asctime)s|%(levelname)-8s|%(funcName)s:%(lineno)d - %(message)s"
-log_date_format: "%Y-%m-%d %H:%M:%S.%f"
+# ===================================================================
+# [Logging Configuration]
+# ===================================================================
+log_dir: "logs"                       # Description: Directory to store log files.
+log_level: "INFO"                     # Description: Logging level. Options: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+log_info_name: "info.log"             # Description: File name for informational logs.
+log_error_name: "error.log"           # Description: File name for error logs.
+log_stdout: true                      # Description: If true, logs will be output to the console. Recommended to set `true` for Docker/containerized environments, `false` for local development.
 
-# Database configuration
-db_pool_size: 150
-db_pool_recycle: 300
-db_echo: false
-# Database URI format: postgresql+psycopg://user:password@host:port/database
-db_uri: "postgresql+psycopg://admin:password@db:5432/app"
+# ===================================================================
+# [Database Configuration]
+# ===================================================================
+db_pool_size: 20                      # Description: The number of connections to keep persistently in the pool.
+                                      # How to configure: A good starting point for most web applications is between 10 and 20. Adjust based on expected concurrent requests.
+db_pool_recycle: 300                  # Description: The number of seconds after which a connection is automatically recycled.
+                                      # How to configure: This value should be less than the database's connection timeout (e.g., PostgreSQL's default is idle_in_transaction_session_timeout).
+db_echo: false                        # Description: If true, SQLAlchemy will log all SQL statements.
+                                      # How to configure: Useful for debugging, but should always be `false` in production to avoid excessive log noise.
+db_uri: "postgresql+psycopg://admin:IDoNotKnow@db:5432/app" # Description: The database connection URI.
+                                      # Format: "postgresql+psycopg://<user>:<password>@<host>:<port>/<database>"
 
-# LLM configuration
-llm_model: "gpt-4o-mini"
-llm_api_key: ""
-llm_base_url: "https://api.openai.com/v1"
-llm_retry_count: 3
-llm_timeout: 10
-llm_temperature: 0.5
+# ===================================================================
+# [Large Language Model (LLM) Configuration]
+# ===================================================================
+llm_model: "gemini-2.5-pro"           # Description: The default model name to use for LLM-based generation.
+                                      # How to configure: Specify the model identifier from your provider (e.g., "gpt-4o", "claude-3-5-sonnet-20240620").
+llm_api_key: ""                       # Description: The API key for your LLM provider.
+                                      # How to configure: Paste your secret API key here. For better security, set this as an environment variable (`LLM_API_KEY`).
+llm_base_url: "https://api.openai.com/v1" # Description: The base URL for the LLM API.
+                                      # How to configure: Change this if you are using a proxy or a different provider (e.g., Azure, a self-hosted model).
+llm_retry_count: 3                    # Description: The number of times to retry a failed API request.
+                                      # How to configure: 2-3 is usually sufficient for handling intermittent network issues.
+llm_timeout: 180                      # Description: The timeout in seconds for waiting for a response from the LLM API.
+                                      # How to configure: LLM responses can take time. 180 seconds (3 minutes) is a safe default to avoid premature timeouts for complex queries.
+llm_temperature: 0.7                  # Description: The default sampling temperature for the model, controlling creativity.
+                                      # How to configure: Ranges from 0.0 (deterministic) to 2.0 (highly creative). 0.7 provides a good balance for creative tasks like travel planning.
 
-# JWT configuration
-jwt_token_expire_days: 30
-jwt_secret: "TravelPlanner-Secret-Key"
+# ===================================================================
+# [Chat History Compression Configuration]
+# ===================================================================
+# When a conversation gets long, this feature automatically compresses
+# the history to prevent exceeding the model's context limit.
 
-# Secret key for encryption (base64 encoded)
-# Generate a new key with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-secret_key: "YcHywfpqbIOLJlTIzanUTzaLhUqYxX-6q2FZ8JqTPPs="
+# --- Token & Sizing --- #
+compression_token_threshold_ratio: 0.85 # Description: The token usage ratio that triggers compression (e.g., 0.85 means 85% of the model's limit).
+                                        # How to configure: 0.8-0.9 is recommended. A lower value compresses more often; a higher value risks context overflow.
+compression_preserve_ratio: 0.3         # Description: The ratio of recent messages to keep uncompressed.
+                                        # How to configure: 0.2-0.4 is a good balance. It ensures recent context is fully preserved while summarizing the older parts.
+compression_min_messages: 10            # Description: The minimum number of messages required before compression is allowed.
+                                        # How to configure: Prevents premature compression of short conversations.
+compression_model_token_limit: 200000   # Description: The maximum context window size (in tokens) of the default LLM.
+                                        # How to configure: This value MUST match the `llm_model` you are using. Default is 128000 for `gpt-4o-mini`.
+                                        # Common values: gpt-4o (128k), gemini-2.5-pro (200k), claude-3.5-sonnet (200k).
+
+# --- Strategy & Behavior --- #
+compression_enable_auto: true           # Description: Enables automatic compression when the token threshold is reached.
+                                        # How to configure: Recommended to keep this `true` to prevent context overflow errors.
+compression_max_attempts: 3             # Description: The maximum number of retry attempts if the compression process fails.
+                                        # How to configure: Balances success rate against performance.
+
+# --- Quality Control --- #
+compression_min_ratio: 0.3              # Description: The minimum required compression ratio (compressed_tokens / original_tokens).
+                                        # How to configure: If compression results in a token count greater than this ratio, it's considered a failure. Ensures compression is effective.
+compression_max_inflation: 1.2          # Description: The maximum allowed token inflation ratio.
+                                        # How to configure: Sometimes a summary can be longer than the original text. This prevents such cases from being accepted.
+
+# --- Advanced Options --- #
+compression_preserve_system: true       # Description: If true, system messages (e.g., role-playing instructions) are always preserved during compression.
+                                        # How to configure: Recommended to keep `true` to maintain the AI's persona.
+compression_preserve_tools: true        # Description: If true, messages related to tool calls and their results are preserved.
+                                        # How to configure: Recommended to keep `true` to maintain the context of tool interactions.
+compression_semantic_preservation: false # Description: (Experimental) Uses a more advanced algorithm to preserve semantic meaning during compression.
+                                         # How to configure: Keep `false` unless you need higher fidelity summaries and can accept longer processing times.
+
+# ===================================================================
+# [Security & Other Parameters]
+# ===================================================================
+jwt_token_expire_days: 30             # Description: The number of days until a user's login session (JWT token) expires.
+                                      # How to configure: Adjust based on your security requirements.
+jwt_secret: "CHANGEME_A_VERY_LONG_RANDOM_SECRET_STRING" # Description: The secret key used to sign JWT tokens.
+                                      # How to configure: CRITICAL - Change this to a long, random, and secret string. Use a password generator.
+
+secret_key: ""                        # Description: A secret key used for encrypting sensitive data within the application.
+                                      # How to configure: CRITICAL - Generate a new key by running the following command in your terminal:
+                                      # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+                                      # Then, paste the generated key here. For production, set this via an environment variable (`SECRET_KEY`).
